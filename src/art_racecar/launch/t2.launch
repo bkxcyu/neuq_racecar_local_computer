@@ -70,7 +70,7 @@
     </node>
 
     <!-- L1 controller -->  
-    <node pkg="art_racecar" type="art_car_controller" respawn="false" name="art_car_controller" output="screen">       
+    <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
         <!-- L1 -->
         <param name="Vcmd" value="0.5" /> <!-- speed of car m/s -->        
         <!-- ESC -->
