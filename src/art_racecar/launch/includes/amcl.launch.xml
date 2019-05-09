@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="init_x" default="0" />
+    <arg name="init_y" default="0" />
+    <arg name="init_a" default="0" />
+
+    <node pkg="amcl" type="amcl" name="amcl" output="screen">
+        <!-- Publish scans from best pose at a max of 10 Hz -->
+        <param name="transform_tolerance" value="0.2" />
+        <param name="gui_publish_rate" value="30.0"/>
+        <param name="laser_max_beams" value="30"/> <!--更新滤波器时，每次扫描使用多少均匀间距的光束 建议值：50-->
+        <param name="min_particles" value="1000"/><!-- 粒子的最小数目 建议值：500 default 100 -->
+        <param name="max_particles" value="10000"/><!-- 最大粒子数目  -->
+        <param name="kld_err" value="0.01"/> <!-- 误差 建议值：0.05  default 0.01-->
+        <param name="kld_z" value="0.99"/>
+        <!-- translation std dev, m -->
+        <param name="odom_alpha1" value="0.2"/><!--机器人的转角分量运动噪声  增大该值 在小车旋转时会出现扇形粒子云 -->
+        <param name="odom_alpha2" value="0.2"/><!-- 横向运动噪声 -->
+        <param name="odom_alpha3" value="0.8"/><!-- 纵向分量噪声 -->
+        <param name="odom_alpha4" value="0.2"/><!-- 斜向分量噪声 -->
+        <param name="laser_z_hit" value="0.5"/>
+        <param name="laser_z_short" value="0.05"/>
+        <param name="laser_z_max" value="0.05"/>
+        <param name="laser_z_rand" value="0.5"/>
+        <param name="laser_sigma_hit" value="0.2"/>
+        <param name="laser_lambda_short" value="0.1"/>
+        <param name="laser_lambda_short" value="0.1"/>
+        <param name="laser_model_type" value="likelihood_field"/>
+
+        <!-- <param name="laser_model_type" value="beam"/> -->
+        <param name="laser_likelihood_max_dist" value="2.0"/>
+        <param name="update_min_d" value="0.01"/><!--向前运动0.1m就更新粒子 建议值：0.01  default 0.1-->
+        <param name="update_min_a" value="0.01"/><!--转动0.1弧度就更新粒子 建议值：0.01  default 0.1 -->
+        <param name="resample_interval" value="1"/><!-- 对粒子样本重采样间隔 建议值：1-->
+        <param name="transform_tolerance" value="0.1"/><!--坐标变换的容忍度 由于坐标的变换必然存在延迟 此参数表示对多久之前的坐标转换接受 -->
+        <param name="recovery_alpha_slow" value="0.001"/><!-- 当随机摆放小车时 amil会尝试对其进行重新定位 这个参数表示恢复定位的时间   Exponential decay rate for the slow average weight filter, used in deciding when to recover by adding random poses. A good value might be 0.001. -->
+        <param name="recovery_alpha_fast" value="0.1"/><!-- Exponential decay rate for the fast average weight filter, used in deciding when to recover by adding random poses. A good value might be 0.1. -->
+
+        <!--use_map_topic  When set to true, AMCL will subscribe to the map topic rather than making a service call to receive its map. -->
+        <param name="use_map_topic" value="true"/>
+        <param name="first_map_only" value="true"/>
+        <param name="tf_broadcast" value="true"/>
+
+        <param name="odom_frame_id" value="odom"/>
+        <param name="global_frame_id" value="map"/>
+        <param name="base_frame_id" value="base_footprint"/>
+        <param name="odom_model_type" value="diff-corrected"/><!-- 里程记模型！！！！！！！diff：2轮差分    omni：全向轮   y方向有速度！！！diff-corrected可用！！！！这里可能要改-->
+
+        <param name="initial_pose_x" value="$(arg init_x)"/><!-- 粒子初始位置-->
+        <param name="initial_pose_y" value="$(arg init_y)"/>
+        <param name="initial_pose_a" value="$(arg init_a)"/>
+        <param name="initial_cov_xx" value="0.25" />
+        <param name="initial_cov_yy" value="0.25" />
+        <param name="initial_cov_aa" value="0.2" />
+    </node>
+</launch>
+
+
+    <!--调试日志：
+    4月18日
+        1,将recovery_alpha_slow从0改为0.001
+        效果：在人为挪动后 可自行恢复地图 数值表示恢复的速度 增大该值可能会增大数据处理量
+        2,将update_min_d从0.1改为0.05 
+        效果：可通过挪动更快地恢复地图-->
