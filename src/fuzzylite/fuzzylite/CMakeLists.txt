@@ -74,7 +74,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 if(NOT MSVC)
 #TODO: Remove -Werror before release.
 #Add Unix compilation flags
-    set(CMAKE_CXX_FLAGS "-pedantic -Wall -Wextra ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-pedantic -Wall -Wextra -Werror ${CMAKE_CXX_FLAGS}")
 
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
@@ -87,10 +87,6 @@ endif()
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 #Address fl::null errors of literal null conversion
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-literal-null-conversion")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.9)
-#TEMPORAL: flag removal to avoid warnings of `float` variadic in Operation::join
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-varargs")
-    endif()
 endif()
 
 
@@ -124,9 +120,6 @@ if(MSVC)
     endif()
 endif()
 
-if(${CMAKE_SYSTEM_NAME} MATCHES FreeBSD AND FL_BACKTRACE)
-    set(FL_LIBS execinfo)
-endif()
 
 if(APPLE)
 #Fix ld: symbol(s) not found for architecture x86_64 on mac
