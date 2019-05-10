@@ -83,7 +83,7 @@
         <param name="GasGain" value="1.0"/>
 
         <!-- remap from="/odometry/filtered" to="odom" / --> 
-        <remap from="/move_base_node/NavfnROS/plan" to="/move_base/TebLocalPlannerROS/global_plan" /> 
+        <remap from="/move_base_node/NavfnROS/plan" to="/move_base/TebLocalPlannerROS/local_plan" /> 
     </node>
 
     <!-- Rviz -->

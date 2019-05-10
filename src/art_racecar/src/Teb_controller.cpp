@@ -13,13 +13,35 @@ class Teb_controller
 public:
     Teb_controller();
 
+
 private:
     /* data */
+    ros::NodeHandle n_;
+    ros::Subscriber odom_sub, path_sub, goal_sub;
+    nav_msgs::Odometry odom;
+    nav_msgs::Path path;
+
+    void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
+    void pathCB(const nav_msgs::Path::ConstPtr& pathMsg);
+
 };
 
 Teb_controller::Teb_controller()
 {
-    
+    ros::NodeHandle p("~");
+
+    odom_sub=n_.subscribe("/odometry/filtered",1,&Teb_controller::odomCB,this);
+    path_sub=n_.subscribe("/planed_path",1,&Teb_controller::pathCB,this);
+}
+
+void Teb_controller::odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg)
+{
+    odom = *odomMsg;
+}
+
+void Teb_controller::pathCB(const nav_msgs::Path::ConstPtr& pathMsg)
+{
+    path = *pathMsg;
 }
 
 int main(int argc, char **argv)
