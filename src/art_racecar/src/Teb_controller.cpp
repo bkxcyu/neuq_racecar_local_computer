@@ -19,11 +19,12 @@ private:
     ros::NodeHandle n_;
     ros::Subscriber odom_sub, path_sub, goal_sub;
     nav_msgs::Odometry odom;
-    nav_msgs::Path path;
+    nav_msgs::Path map_path;
+
 
     void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
     void pathCB(const nav_msgs::Path::ConstPtr& pathMsg);
-
+    void goalCB(const geometry_msgs::PoseStamped::ConstPtr& goalMsg);
 };
 
 Teb_controller::Teb_controller()
@@ -32,6 +33,8 @@ Teb_controller::Teb_controller()
 
     odom_sub=n_.subscribe("/odometry/filtered",1,&Teb_controller::odomCB,this);
     path_sub=n_.subscribe("/planed_path",1,&Teb_controller::pathCB,this);
+    goal_sub=n_.subscribe("move_base_simple/goal",1,&Teb_controller::goalCB,this);
+
 }
 
 void Teb_controller::odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg)
@@ -41,7 +44,12 @@ void Teb_controller::odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg)
 
 void Teb_controller::pathCB(const nav_msgs::Path::ConstPtr& pathMsg)
 {
-    path = *pathMsg;
+    map_path = *pathMsg;
+}
+
+void Teb_controller::goalCB(const geometry_msgs::PoseStamped::ConstPtr& goalMsg)
+{
+
 }
 
 int main(int argc, char **argv)
