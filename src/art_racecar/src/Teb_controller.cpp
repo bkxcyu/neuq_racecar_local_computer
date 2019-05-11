@@ -24,8 +24,6 @@ class Teb_controller
 public:
     Teb_controller();
     
-
-
 private:
     /* data */
     ros::NodeHandle n_;
