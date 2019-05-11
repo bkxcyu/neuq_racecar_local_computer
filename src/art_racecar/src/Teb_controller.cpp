@@ -10,6 +10,10 @@
 #include <teb_local_planner/FeedbackMsg.h>
 #include <teb_local_planner/teb_local_planner_ros.h>
 #include "rsband_local_planner/rsband_local_planner_ros.h"
+#include "rsband_local_planner/fuzzy_ptc.h"
+
+
+
 
 class Teb_controller
 {
@@ -26,6 +30,7 @@ private:
     nav_msgs::Odometry odom;
     nav_msgs::Path map_path;
     geometry_msgs::Point odom_goal_pos;
+    geometry_msgs::Twist cmd_vel;
     bool goal_received;
     bool goal_reached;
     tf::TransformListener tf_listener;
@@ -75,7 +80,9 @@ void Teb_controller::goalCB(const geometry_msgs::PoseStamped::ConstPtr& goalMsg)
 
 void Teb_controller::controlLoopCB(const ros::TimerEvent&)
 {
-
+    geometry_msgs::PoseStamped map_path_pose;
+    // bool is_goal_reached=rs_fuzzy.isGoalReached(map_path_pose);
+    
 }
 
 void Teb_controller::goalReachingCB(const ros::TimerEvent&)
@@ -88,6 +95,7 @@ int main(int argc, char **argv)
     /* code for main function */
     ros::init(argc, argv, "Teb_Controller");
     Teb_controller controller;
+    rsband_local_planner::FuzzyPTC rs_fuzzy("fuzzy_controller");
     ros::spin();
     return 0;
 }
