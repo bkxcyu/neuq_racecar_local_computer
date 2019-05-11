@@ -1,3 +1,7 @@
+
+// wrote by bxy
+// use fuzzy control method 
+
 #include <iostream>
 #include "ros/ros.h"
 #include <geometry_msgs/PoseStamped.h>
@@ -13,12 +17,13 @@
 #include "rsband_local_planner/fuzzy_ptc.h"
 
 
-
+rsband_local_planner::FuzzyPTC rs_fuzzy("fuzzy_controller");
 
 class Teb_controller
 {
 public:
     Teb_controller();
+    
 
 
 private:
@@ -80,9 +85,17 @@ void Teb_controller::goalCB(const geometry_msgs::PoseStamped::ConstPtr& goalMsg)
 
 void Teb_controller::controlLoopCB(const ros::TimerEvent&)
 {
-    geometry_msgs::PoseStamped map_path_pose;
-    // bool is_goal_reached=rs_fuzzy.isGoalReached(map_path_pose);
-    
+    std::vector<geometry_msgs::PoseStamped> map_path_stdv;
+    for (int i = 0; i < map_path.poses.size(); i++)
+    {
+        map_path_stdv[i]=map_path.poses[i];
+    }
+    bool _is_goal_reached=rs_fuzzy.isGoalReached(map_path_stdv);
+    if(!_is_goal_reached)
+    {
+        rs_fuzzy.computeVelocityCommands(map_path_stdv,cmd_vel);
+    }
+    pub_.publish(cmd_vel);
 }
 
 void Teb_controller::goalReachingCB(const ros::TimerEvent&)
@@ -94,8 +107,9 @@ int main(int argc, char **argv)
 {
     /* code for main function */
     ros::init(argc, argv, "Teb_Controller");
+    
     Teb_controller controller;
-    rsband_local_planner::FuzzyPTC rs_fuzzy("fuzzy_controller");
+
     ros::spin();
     return 0;
 }
