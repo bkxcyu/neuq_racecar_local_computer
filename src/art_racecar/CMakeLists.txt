@@ -18,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   visualization_msgs
   dynamic_reconfigure
+  rsband_local_planner
+  teb_local_planner
 )
 
 generate_dynamic_reconfigure_options(cfg/imu.cfg)
@@ -246,3 +248,5 @@ add_dependencies(Teb_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXP
 target_link_libraries(Teb_controller
   ${catkin_LIBRARIES}
 )
+
+SET( CMAKE_CXX_FLAGS "-std=c++11 -O3")
