@@ -18,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   visualization_msgs
   dynamic_reconfigure
+  rsband_local_planner
+  teb_local_planner
 )
 
 generate_dynamic_reconfigure_options(cfg/imu.cfg)
@@ -228,8 +230,8 @@ install(DIRECTORY src
 # 	${PROJECT_SOURCE_DIR}/src/lib/libart_controller.a
 # )
 #add_dependencies(art_car_controller art_car_generate_messages_cpp)
-add_executable(L1_controller_v2 src/L1_controller_v2.cpp)
-target_link_libraries(L1_controller_v2 ${catkin_LIBRARIES})
+# add_executable(L1_controller_v2 src/L1_controller_v2.cpp)
+# target_link_libraries(L1_controller_v2 ${catkin_LIBRARIES})
 
 
 
@@ -237,3 +239,14 @@ target_link_libraries(L1_controller_v2 ${catkin_LIBRARIES})
 
 
 
+
+
+add_executable(Teb_controller
+  src/Teb_controller.cpp
+)
+add_dependencies(Teb_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Teb_controller
+  ${catkin_LIBRARIES}
+)
+
+SET( CMAKE_CXX_FLAGS "-std=c++11 -O3")

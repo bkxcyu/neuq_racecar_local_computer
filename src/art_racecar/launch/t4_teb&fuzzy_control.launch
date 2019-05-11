@@ -70,18 +70,7 @@
     </node>
 
     <!-- L1 controller -->  
-    <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
-        <!-- L1 -->
-        <param name="Vcmd" value="0.3" /> <!-- speed of car m/s -->        
-        <!-- ESC -->
-        <param name="baseSpeed" value="1575"/> <!-- pwm for motor constant speed, 1500: stop --> 
- 
-
-        <!-- Servo -->
-        <param name="baseAngle" value="90.0"/> <!-- the middle pos of servo, for tt02: 87, for hsp: ? -->
-        <param name="AngleGain" value="-3.0"/> <!-- for tt02: >0, for hsp: <0 -->	
-        <param name="GasGain" value="1.0"/>
-
+    <node pkg="art_racecar" type="Teb_controller" respawn="false" name="Teb_controller" output="screen">              
         <!-- remap from="/odometry/filtered" to="odom" / --> 
         <remap from="/move_base_node/NavfnROS/plan" to="/move_base/TebLocalPlannerROS/local_plan" /> 
     </node>
