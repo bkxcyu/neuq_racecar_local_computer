@@ -89,5 +89,6 @@
     <!-- Rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find art_racecar)/rviz/amcl.rviz" if="$(arg use_rviz)" />
 
+    <node name="cmd_vel_to_ackermann_drive" pkg="art_racecar" type="cmd_vel_to_ackermann_drive.py" output="screen" />
 
 </launch>
