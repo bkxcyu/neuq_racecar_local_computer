@@ -1,6 +1,15 @@
  
 
-需要安装相关依赖才可成功编译 安装步骤见群文件
+编译步骤：
+  安装依赖
+	1.ompl
+	2.eband_local_planner
+  编译fuzzylite库
+    1.cd src/fuzzylite/fuzzylite
+	2.mkdir build && cd build
+	3.cmake ..
+	4.make
+	5.sudo make install
 	
 
 底盘驱动相关：
