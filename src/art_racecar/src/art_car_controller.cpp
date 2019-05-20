@@ -42,7 +42,7 @@ L1Controller::L1Controller()
     ros::NodeHandle pn("~");
 
     //Car parameter
-    pn.param("L", L, 0.33);
+    pn.param("L", L, 0.26);
     pn.param("Lrv", Lrv, 10.0);
     pn.param("Vcmd", Vcmd, 1.0);
     pn.param("lfw", lfw, 0.13);
@@ -196,7 +196,3 @@ int main(int argc, char **argv)
     ros::spin();
     return 0;
 }
-
-//调试日志
-//     4月18日
-//         将45行0.26改为0.33 0.33为实际尺寸

@@ -4,7 +4,7 @@
 #Steven.Zhang
 #2018.03.09
 
-ssh create@192.168.5.52
+ssh sz@192.168.5.101
 
 
 

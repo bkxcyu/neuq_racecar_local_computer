@@ -1,17 +1,18 @@
 <?xml version="1.0"?>
 
 <launch>
+    <!-- 启动roscore -->
     <master auto="start"/>
 
-    <!-- TF setting -->
+    <!-- TF setting 坐标变换-->
     <include file="$(find art_racecar)/launch/includes/art_car_tf.launch.xml" />
 
     <!-- SENSOR DEVICE -->
-    <!-- second startup ls01g lidar -->
+    <!-- second startup ls01g lidar激光雷达 -->
     <include file="$(find art_racecar)/launch/ls01g_lidar.launch"/>
-    <!-- IMU -->
+    <!-- IMU 陀螺仪-->
     <include file="$(find art_imu)/launch/imu.launch" />
-    <!-- Car -->
+    <!-- Car 底盘驱动-->
     <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
 
 	
@@ -19,4 +20,3 @@
     <!--node pkg="rviz" type="rviz" name="rviz" args="-d $(find art_racecar)/launch/rviz/gmapping.rviz" if="$(arg use_rviz)"/-->
 
 </launch>
-

@@ -33,7 +33,7 @@
     <!-- gmapping -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
         <remap from="scan" to="scan"/>
-        <param name="map_update_interval" value="2.5"/> <!-- 更新到地图之间的时间(以秒为单位)。降低这个数字会更频繁地更新占用网格，代价是计算负载增加 -->
+        <param name="map_update_interval" value="0.5"/> <!-- 更新到地图之间的时间(以秒为单位)。降低这个数字会更频繁地更新占用网格，代价是计算负载增加 -->
         <param name="maxUrange" value="16.0"/><!-- 激光器的最大可用范围。光束裁剪到这个值 -->
         <param name="sigma" value="0.05"/><!-- 端点匹配度？？？ -->
         <param name="kernelSize" value="1"/><!--  寻找对应关系的内核？？？  -->
