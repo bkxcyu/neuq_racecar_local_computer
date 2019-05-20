@@ -2,8 +2,8 @@ global_costmap:
     footprint: [[-0.305, -0.18], [-0.305, 0.18], [0.305, 0.18], [0.305, -0.18]]   #机器人形状  左上角开始 顺时针方向 原始值：[[-0.305, -0.18], [-0.305, 0.18], [0.305, 0.18], [0.305, -0.18]] 实测值（0.56 0.34 0.23 0.13）：[[-0.28, -0.17], [-0.28, 0.17], [0.28, 0.17], [0.28, -0.17]] 
     footprint_padding: 0.01
     transform_tolerance: 0.5 #坐标系间的转换可以忍受的最大延时;
-    update_frequency: 10.0  #可尝试改大
-    publish_frequency: 10.0 #可尝试改大
+    update_frequency: 15.0  #可尝试改大
+    publish_frequency: 15.0 #可尝试改大
 
     global_frame: /map
     robot_base_frame: /base_footprint
@@ -31,8 +31,8 @@ global_costmap:
 
     #膨胀层  需要反复调整
     inflation:
-        inflation_radius: 0.3  #default:0.1  #膨胀半径  The radius in meters to which the map inflates obstacle cost values.
-        cost_scaling_factor: 5  #default:8.0 #这个值越大 表示膨胀层的值下降得越快 A scaling factor to apply to cost values during inflation. The cost function is computed as follows for all cells in the costmap further than the inscribed radius distance and closer than the inflation radius distance away from an actual obstacle: 
+        inflation_radius: 0.8  #default:0.1  #膨胀半径  The radius in meters to which the map inflates obstacle cost values.
+        cost_scaling_factor: 4  #default:8.0 #这个值越大 表示膨胀层的值下降得越快 A scaling factor to apply to cost values during inflation. The cost function is computed as follows for all cells in the costmap further than the inscribed radius distance and closer than the inflation radius distance away from an actual obstacle: 
         # exp(-1.0 * cost_scaling_factor * (distance_from_obstacle - inscribed_radius)) * (costmap_2d::INSCRIBED_INFLATED_OBSTACLE - 1)
         # where costmap_2d::INSCRIBED_INFLATED_OBSTACLE is currently 254. NOTE: since the cost_scaling_factor is multiplied by a negative in the formula, increasing the factor will decrease the resulting cost values.
 

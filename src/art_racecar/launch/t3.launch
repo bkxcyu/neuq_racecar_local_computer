@@ -72,9 +72,9 @@
     <!-- L1 controller -->  
     <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
         <!-- L1 -->
-        <param name="Vcmd" value="0.3" /> <!-- speed of car m/s -->        
+        <param name="Vcmd" value="0.5" /> <!-- speed of car m/s -->        
         <!-- ESC -->
-        <param name="baseSpeed" value="1575"/> <!-- pwm for motor constant speed, 1500: stop --> 
+        <param name="baseSpeed" value="1595"/> <!-- pwm for motor constant speed, 1500: stop --> 
  
 
         <!-- Servo -->
@@ -83,7 +83,7 @@
         <param name="GasGain" value="1.0"/>
 
         <!-- remap from="/odometry/filtered" to="odom" / --> 
-        <remap from="/move_base_node/NavfnROS/plan" to="/move_base/TebLocalPlannerROS/global_plan" /> 
+        <remap from="/move_base_node/NavfnROS/plan" to="/move_base/TebLocalPlannerROS/local_plan" /> 
     </node>
 
     <!-- Rviz -->
