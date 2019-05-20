@@ -3,7 +3,7 @@
 <launch>
     <arg name="use_rviz" default="false" />
 
-    <!-- for amcl -->    
+    <!-- for amcl 初始坐标-->    
     <arg name="init_x" default="0.0" />
     <arg name="init_y" default="0.0" />
     <arg name="init_a" default="0.0" />
@@ -14,22 +14,22 @@
    
 
     <!-- ODOMETRY -->
-    <!--rf2o_Laser_Odometry-->
+    <!--rf2o_Laser_Odometry 激光雷达信息估计小车运动状态-->
     <include file="$(find art_racecar)/launch/includes/rf2o.launch.xml" />
-    <!-- Robot_Localization -->
+    <!-- Robot_Localization 使用imu和激光雷达的数据共同完成定位-->
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
         <rosparam command="load" file="$(find art_racecar)/param/ekf_params.yaml" />
     </node>
 
     <!-- Localization -->
-    <!-- AMCL -->
+    <!-- AMCL 概率定位-->
     <include file="$(find art_racecar)/launch/includes/amcl.launch.xml">
         <arg name="init_x" value="$(arg init_x)"/>
         <arg name="init_y" value="$(arg init_y)"/>
         <arg name="init_a" value="$(arg init_a)"/>
     </include>
 
-    <!-- Navstack -->
+    <!-- Navstack 导航堆栈-->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base">
         <!-- local planner -->
          <!--
@@ -41,7 +41,7 @@
 
         <rosparam file="$(find art_racecar)/param/dwa_local_planner_params.yaml" command="load"/>
         <!-- costmap layers -->    
-        <rosparam file="$(find art_racecar)/param/local_costmap_params.yaml" command="load"/>
+        <rosparam                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ile="$(find art_racecar)/param/local_costmap_params.yaml" command="load"/>
         <rosparam file="$(find art_racecar)/param/global_costmap_params.yaml" command="load"/> 
         <!-- move_base params -->
         <rosparam file="$(find art_racecar)/param/base_global_planner_params.yaml" command="load"/>
@@ -54,9 +54,9 @@
     <!-- L1 controller -->  
     <node pkg="art_racecar" type="art_car_controller" respawn="false" name="art_car_controller" output="screen">       
         <!-- L1 -->
-        <param name="Vcmd" value="1.5" /> <!-- speed of car m/s -->        
+        <param name="Vcmd" value="1" /> <!-- speed of car m/s -->        
         <!-- ESC -->
-        <param name="baseSpeed" value="1565"/> <!-- pwm for motor constant speed, 1500: stop --> 
+        <param name="baseSpeed" value="1560"/> <!-- pwm for motor constant speed, 1500: stop --> 
  
 
         <!-- Servo -->

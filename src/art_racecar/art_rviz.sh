@@ -8,7 +8,7 @@ function get_ip_address { ifconfig | fgrep -v 127.0.0.1 | fgrep 'Mask:255.255.25
 
 #export ROS_IP=$(get_ip_address) 
 export ROS_IP=`hostname -I`
-export ROS_MASTER_URI=http://192.168.5.52:11311
+export ROS_MASTER_URI=http://192.168.5.101:11311
 
 ##source ../devel/setup.bash
 #rosrun rviz rviz 

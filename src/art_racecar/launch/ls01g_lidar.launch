@@ -3,7 +3,7 @@
 <launch>
     <arg name="inverted" default="false" />
     <node name="ls01g" pkg="ls01g" type="ls01g" output="screen">
-        <param name="scan_topic" value="scan"/>         #设置激光数据topic名称
+        <param name="scan_topic" value="scan"/>         #设置激光数据topic名称 param的作用是设置参数
         <param name="laser_link" value="laser"/>     #激光坐标
         <param name="serial_port" value="/dev/laser"/>  #雷达连接的串口
         <param name="zero_as_max" value="false"/>        # 设置为true探测不到区域会变成最大值

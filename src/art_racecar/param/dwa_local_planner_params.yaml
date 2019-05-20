@@ -1,44 +1,62 @@
 DWAPlannerROS: 
 
+  #  旋转加速度阈值 The rotational acceleration limit of the robot in radians/sec^2
   acc_lim_th: 0.1
-  acc_lim_x: 10 #default 0.5
-  acc_lim_y: 5  #default 0
+  # x方向加速度阈值 The x acceleration limit of the robot in meters/sec^2
+  acc_lim_x: 0.5 #加速度的阈值可能与定位（里程记）的性能有关  应该在保证定位（里程记）漂移不严重的情况下，尽可能增大加速度阈值 建议值：1 原始值：0.5
 
+  acc_lim_y: 0.0 
 
-  max_vel_x: 6
-  min_vel_x: 0
-
-  max_vel_y: 3 
+  # x方向最大速度  负值表示后退  The maximum x velocity for the robot in m/s.  这里可能需要改  这里的速度与底盘控制的速度有何联系？？？ 建议值：1 原始值：0.5
+  max_vel_x: 0.5
+  min_vel_x: 0.0 
+  # y方向最大速度
+  max_vel_y: 0.0 
   min_vel_y: 0.0
-
-  max_trans_vel: 0.5
-  min_trans_vel: 0.1
+  # ？？？
+  # The absolute value of the maximum translational velocity for the robot in m/s
+  max_trans_vel: 0.5 #建议值：2 原始值：0.5
+  min_trans_vel: 0.1 #建议值：0 原始值：0.1
+  # The absolute value of the maximum rotational velocity for the robot in rad/s
   max_rot_vel: 0.2
   min_rot_vel: 0.0
+  # 预测的时间 The amount of time to forward-simulate trajectories in seconds
+  sim_time: 1.5
+  # 预测的步长 The step size, in meters, to take between points on a given trajectory
+  sim_granularity: 0.025 #建议值：0。05 原始值：0.025
 
-  sim_time: 5 #default 1.5
+  # 这里是关于路径评估的参数
+  # 代价函数：
+  # cost =
+  # path_distance_bias * (distance to path from the endpoint of the trajectory in meters)
+  # + goal_distance_bias * (distance to local goal from the endpoint of the trajectory in meters)
+  # + occdist_scale * (maximum obstacle cost along the trajectory in obstacle cost (0-254))
 
-  sim_granularity: 0.025
-
-  goal_distance_bias: 30.0
-  path_distance_bias: 20.0 
-  occdist_scale: 0.01
-  forward_point_distance: 1 #default：0.5
+  # 目标距离的权重？？？ 可能此值越大 离目标点越大 代价越大The weighting for how much the controller should attempt to reach its local goal, also controls speed
+  goal_distance_bias: 30.0 #建议值：32 原始值：30
+  # 循迹的权重 ？？？ 可能此值越大 离（全局）轨迹越远 代价越大 The weighting for how much the controller should stay close to the path it was given
+  path_distance_bias: 20.0 #建议值：24 原始值：20
+  # 避障的权重？？？  可能此值越大 离障碍物越近 代价越大 The weighting for how much the controller should attempt to avoid obstacles
+  occdist_scale: 0.01  
+  # 记分点距离？？？ The distance from the center point of the robot to place an additional scoring point, in meters
+  forward_point_distance: 0.5
+  # 在碰撞前多少秒制动 The amount of time that the robot must stop before a collision in order for a trajectory to be considered valid in seconds
   stop_time_buffer: 0.2 
-#######
+  #开始缩放缩放足迹的速度？？？ The absolute value of the velocity at which to start scaling the robot's footprint, in m/s
   scaling_speed: 0.5
-#######
+  #？？？ The maximum factor to scale the robot's footprint by
   max_scaling_factor: 0.2 
   oscillation_reset_dist: 0.05 
    
-  #
+  #用到的速度样本数量 The number of samples to use when exploring the x velocity space
   vx_samples: 20
   vy_samples: 0 
   vtheta_samples: 10
   
   rot_stopped_vel: 0.01 
   trans_stopped_vel: 0.01
-  #
+  #The tolerance in meters for the controller in the x & y distance when achieving a goal
   xy_goal_tolerance: 0.2 
+  # The tolerance in radians for the controller in yaw/rotation when achieving its goal
   yaw_goal_tolerance: 0.1 
-  latch_xy_goal_tolerance: true #如果目标误差被锁定，若机器人达到目标XY位置，它将旋转到位，即使误差没有达到，也会做旋转 
+  latch_xy_goal_tolerance: true #如果目标误差被锁定，若机器人达到目标XY位置，它将旋转到位，即使误差没有达到，也会做旋转   可能需要更改
