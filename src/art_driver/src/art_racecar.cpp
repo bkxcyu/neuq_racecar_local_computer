@@ -12,7 +12,7 @@ void TwistCallback(const geometry_msgs::Twist& twist)
 {
     double angle;
 
-    double slow_down_weight=0.3;
+    double slow_down_weight=0.00015;
     double vel;
     double abs;
     //ROS_INFO("x= %f", twist.linear.x);
@@ -22,7 +22,7 @@ void TwistCallback(const geometry_msgs::Twist& twist)
         abs=angle-1500;
     if(angle-1500<0)
         abs=-angle+1500;
-    vel = twist.linear.x-slow_down_weight*abs;
+    vel = twist.linear.x-slow_down_weight*abs*abs;
     if(vel>2500)
         vel=2500;
     if(vel<500)
