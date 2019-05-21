@@ -54,7 +54,7 @@
         <param name="base_global_planner" value="global_planner/GlobalPlanner"/>  
          -->
         <param name="base_global_planner" value="navfn/NavfnROS"/>  
-        <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>  
+        <param name="base_local_planner" value="teb_local_planner/RsbandLocalPlannerROS"/>  
         
         <!--  teb方法 -->
         <rosparam file="$(find art_racecar)/param/teb_local_planner_params.yaml" command="load"/>
@@ -70,10 +70,10 @@
     </node>
 
     <!-- L1 controller -->  
-    <node pkg="art_racecar" type="Teb_controller" respawn="false" name="Teb_controller" output="screen">              
+    <!--<node pkg="art_racecar" type="Teb_controller" respawn="false" name="Teb_controller" output="screen">              -->
         <!-- remap from="/odometry/filtered" to="odom" / --> 
-        <remap from="/move_base_node/NavfnROS/plan" to="/move_base/TebLocalPlannerROS/local_plan" /> 
-    </node>
+        <!--<remap from="/move_base_node/NavfnROS/plan" to="/move_base/TebLocalPlannerROS/local_plan" /> -->
+    <!--</node>-->
 
     <!-- Rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find art_racecar)/rviz/amcl.rviz" if="$(arg use_rviz)" />
