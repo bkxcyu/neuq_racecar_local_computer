@@ -11,9 +11,11 @@
 void TwistCallback(const geometry_msgs::Twist& twist)
 {
     double angle;
+    double vel;
     //ROS_INFO("x= %f", twist.linear.x);
     //ROS_INFO("z= %f", twist.angular.z);
     angle = 2500.0 - twist.angular.z * 2000.0 / 180.0;
+    vel = twist.linear.x*800;
     //ROS_INFO("angle= %d",uint16_t(angle));
     send_cmd(uint16_t(twist.linear.x),uint16_t(angle));
 }
