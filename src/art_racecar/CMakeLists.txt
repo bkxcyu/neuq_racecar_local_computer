@@ -241,12 +241,12 @@ install(DIRECTORY src
 
 
 
-add_executable(Teb_controller
-  src/Teb_controller.cpp
-)
-add_dependencies(Teb_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(Teb_controller
-  ${catkin_LIBRARIES}
-)
+# add_executable(Teb_controller
+#   src/Teb_controller.cpp
+# )
+# add_dependencies(Teb_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(Teb_controller
+#   ${catkin_LIBRARIES}
+# )
 
-SET( CMAKE_CXX_FLAGS "-std=c++11 -O3")
+# SET( CMAKE_CXX_FLAGS "-std=c++11 -O3")
