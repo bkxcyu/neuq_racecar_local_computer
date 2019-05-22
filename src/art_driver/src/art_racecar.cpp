@@ -7,12 +7,8 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
-<<<<<<< HEAD
 #define PI 3.14159265358979
-
-=======
 #include <ackermann_msgs/AckermannDriveStamped.h>
->>>>>>> dbf53b41716ad3e76f949500fdfae8d11673674b
 
 void TwistCallback(const geometry_msgs::Twist& twist)
 {
@@ -53,10 +49,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "art_driver");
     ros::NodeHandle n;
 
-<<<<<<< HEAD
-    ros::Subscriber sub = n.subscribe("/cmd_vel",1,TwistCallback);
-=======
->>>>>>> dbf53b41716ad3e76f949500fdfae8d11673674b
+    // ros::Subscriber sub = n.subscribe("/cmd_vel",1,TwistCallback);
 
 // ros::Subscriber sub = n.subscribe("/car/cmd_vel",1,TwistCallback);
 
