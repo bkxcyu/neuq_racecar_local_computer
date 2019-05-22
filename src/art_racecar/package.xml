@@ -75,8 +75,8 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>python-serial</exec_depend>   
   <exec_depend>dynamic_reconfigure</exec_depend>
-  <exec_depend>rsband_local_planner</exec_depend>
-  <exec_depend>teb_local_planner</exec_depend>
+  <!--<exec_depend>rsband_local_planner</exec_depend>
+  <exec_depend>teb_local_planner</exec_depend>-->
 
 
 

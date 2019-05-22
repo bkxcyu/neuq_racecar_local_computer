@@ -57,9 +57,7 @@ Teb_controller::Teb_controller()
     goal_sub=n_.subscribe("move_base_simple/goal",1,&Teb_controller::goalCB,this);
     pub_=n_.advertise<geometry_msgs::Twist>("car/cmd_vel",1);
 
-    timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &Teb_controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-    timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &Teb_controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
-
+    timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &Teb_controller::controlLoopCB, this); 
 }
 
 void Teb_controller::odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg)
@@ -88,17 +86,9 @@ void Teb_controller::controlLoopCB(const ros::TimerEvent&)
     {
         map_path_stdv[i]=map_path.poses[i];
     }
-    bool _is_goal_reached=rs_fuzzy.isGoalReached(map_path_stdv);
-    if(!_is_goal_reached)
-    {
-        rs_fuzzy.computeVelocityCommands(map_path_stdv,cmd_vel);
-    }
+
+    rs_fuzzy.computeVelocityCommands(map_path_stdv,cmd_vel);
     pub_.publish(cmd_vel);
-}
-
-void Teb_controller::goalReachingCB(const ros::TimerEvent&)
-{
-
 }
 
 int main(int argc, char **argv)

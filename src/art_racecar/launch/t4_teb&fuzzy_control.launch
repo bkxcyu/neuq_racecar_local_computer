@@ -69,8 +69,13 @@
        
     </node>
 
+<<<<<<< HEAD
     <!-- L1 controller -->  
     <!--<node pkg="art_racecar" type="Teb_controller" respawn="false" name="Teb_controller" output="screen">              -->
+=======
+    <!-- Teb_controller -->  
+    <node pkg="art_racecar" type="Teb_controller" respawn="false" name="Teb_controller" output="screen">              
+>>>>>>> dbf53b41716ad3e76f949500fdfae8d11673674b
         <!-- remap from="/odometry/filtered" to="odom" / --> 
         <!--<remap from="/move_base_node/NavfnROS/plan" to="/move_base/TebLocalPlannerROS/local_plan" /> -->
     <!--</node>-->
