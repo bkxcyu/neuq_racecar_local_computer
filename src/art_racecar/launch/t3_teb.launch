@@ -12,8 +12,8 @@
     <include file="$(find art_racecar)/launch/ls01g_lidar.launch"/>
     <!-- IMU 陀螺仪-->
     <include file="$(find art_imu)/launch/imu.launch" />
-    <!-- Car 底盘驱动-->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
+    <!-- Car 底盘驱动   output="screen"-->
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
 
 	
       <!-- Rviz -->
@@ -47,27 +47,24 @@
         <arg name="init_a" value="$(arg init_a)"/>
     </include>
 
-    <!-- Navstack 导航堆栈-->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base">
-        <!-- local planner -->
-         <!--
-        <param name="base_global_planner" value="global_planner/GlobalPlanner"/>  
-         -->
-        <param name="base_global_planner" value="navfn/NavfnROS"/>  
-        <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>  
-        
-        <!--  teb方法 -->
-        <rosparam file="$(find art_racecar)/param/teb_local_planner_params.yaml" command="load"/>
-        <!-- costmap layers -->    
-        <rosparam file="$(find art_racecar)/param/local_costmap_params.yaml" command="load"/>
-        <rosparam file="$(find art_racecar)/param/global_costmap_params.yaml" command="load"/> 
-        <!-- move_base params -->
-        <rosparam file="$(find art_racecar)/param/base_global_planner_params.yaml" command="load"/>
-        <rosparam file="$(find art_racecar)/param/move_base_params.yaml" command="load"/>
-        <remap from="/odom" to="/odometry/filtered"/>
+     <!--  ************** Navigation ***************  -->
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+  	  	<rosparam file="$(find teb_local_planner_tutorials)/cfg/carlike/costmap_common_params.yaml" command="load" ns="global_costmap" />
+  	 	<rosparam file="$(find teb_local_planner_tutorials)/cfg/carlike/costmap_common_params.yaml" command="load" ns="local_costmap" />
+  		<rosparam file="$(find teb_local_planner_tutorials)/cfg/carlike/local_costmap_params.yaml" command="load" />
+  		<rosparam file="$(find teb_local_planner_tutorials)/cfg/carlike/global_costmap_params.yaml" command="load" />
+  		<rosparam file="$(find art_racecar)/param/teb_local_planner_params.yaml" command="load" />
 
-       
-    </node>
+		<param name="base_global_planner" value="navfn/NavfnROS" />
+		<param name="planner_frequency" value="1.0" />
+		<param name="planner_patience" value="5.0" />
+
+		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+		<param name="controller_frequency" value="5.0" />
+		<param name="controller_patience" value="15.0" />
+
+                <param name="clearing_rotation_allowed" value="false" /> <!-- Our carlike robot is not able to rotate in place -->
+	</node>
 
     <node pkg="art_driver" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive"  />
    

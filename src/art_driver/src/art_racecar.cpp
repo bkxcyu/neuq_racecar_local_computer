@@ -21,7 +21,7 @@ void TwistCallback(const geometry_msgs::Twist& twist)
         vel = twist.linear.x*50+1500;
     if(twist.linear.x<0)
         vel = twist.linear.x*50+1500-150;
-    ROS_INFO("angle= %d  vel=%d",uint16_t(angle),uint16_t(vel));
+    // ROS_INFO("angle= %d  vel=%d",uint16_t(angle),uint16_t(vel));
     send_cmd(uint16_t(vel),uint16_t(angle));
 }
 
@@ -31,14 +31,14 @@ void AckermannCallback(const ackermann_msgs::AckermannDriveStamped& Ackermann)
     double vel;
     //ROS_INFO("x= %f", twist.linear.x);
     //ROS_INFO("z= %f", twist.angular.z);
-    angle = 2500.0 - (Ackermann.drive.steering_angle+90)* 2000.0 / 180.0;
+    angle = 2500.0 - (Ackermann.drive.steering_angle*180/PI+90)* 2000.0 / 180.0;
     if(Ackermann.drive.speed>0)
-        vel = Ackermann.drive.speed*50+1500;
+        vel = Ackermann.drive.speed*50+1550;
     if(Ackermann.drive.speed<0)
-        vel = Ackermann.drive.speed*50+1500-140;
+        vel = Ackermann.drive.speed*50+1550-300;
 
-    // ROS_INFO("ACKM_angle= %f",Ackermann.drive.steering_angle);
-    // ROS_INFO("PWM_angle= %f",angle);
+    // ROS_INFO("ACKM_angle= %f",(Ackermann.drive.steering_angle*180/PI+90));
+    ROS_INFO("PWM_angle= %f, PWM_vel= %f",angle,vel);
     // send_cmd(uint16_t(vel),uint16_t(angle));
 }
 

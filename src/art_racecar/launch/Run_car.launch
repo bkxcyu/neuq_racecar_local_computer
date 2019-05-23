@@ -4,15 +4,18 @@
     <master auto="start"/>
 
     <!-- TF setting -->
-    <include file="$(find art_racecar)/launch/includes/art_car_tf.launch.xml" />
+    <!--<include file="$(find art_racecar)/launch/includes/art_car_tf.launch.xml" />-->
 
     <!-- SENSOR DEVICE -->
     <!-- second startup ls01g lidar -->
-    <include file="$(find art_racecar)/launch/ls01g_lidar.launch"/>
+    <!--<include file="$(find art_racecar)/launch/ls01g_lidar.launch"/>-->
     <!-- IMU -->
-    <include file="$(find art_imu)/launch/imu.launch" />
+    <!--<include file="$(find art_imu)/launch/imu.launch" />-->
     <!-- Car -->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
+
+
+    <node pkg="art_driver" type="cmd_vel_to_ackermann_drive.py" name="cmd_vel_to_ackermann_drive"  />
 
 	
       <!-- Rviz -->
