@@ -16,16 +16,11 @@ void TwistCallback(const geometry_msgs::Twist& twist)
     double vel;
     ROS_INFO("x= %f", twist.linear.x);
     ROS_INFO("z= %f", twist.angular.z);
-    angle = 2500.0 - (twist.angular.z*18/PI+90) * 2000.0 / 180.0;
-    vel = twist.linear.x*50+1565;
-    if(vel<1565)
-        vel=1565;
-    if(vel>1650)
-        vel=1650;
-    if(angle<700)
-        angle=700;
-    if(angle>2200)
-        angle=2200;
+    angle = 2500.0 - (twist.angular.z*180/PI+90) * 2000.0 / 180.0;
+    if(twist.linear.x>0)
+        vel = twist.linear.x*50+1500;
+    if(twist.linear.x<0)
+        vel = twist.linear.x*50+1500-150;
     ROS_INFO("angle= %d  vel=%d",uint16_t(angle),uint16_t(vel));
     send_cmd(uint16_t(vel),uint16_t(angle));
 }
@@ -36,10 +31,15 @@ void AckermannCallback(const ackermann_msgs::AckermannDriveStamped& Ackermann)
     double vel;
     //ROS_INFO("x= %f", twist.linear.x);
     //ROS_INFO("z= %f", twist.angular.z);
-    angle = 2500.0 - Ackermann.drive.steering_angle* 2000.0 / 180.0;
-    vel = Ackermann.drive.speed;
-    //ROS_INFO("angle= %d",uint16_t(angle));
-    send_cmd(uint16_t(vel),uint16_t(angle));
+    angle = 2500.0 - (Ackermann.drive.steering_angle+90)* 2000.0 / 180.0;
+    if(Ackermann.drive.speed>0)
+        vel = Ackermann.drive.speed*50+1500;
+    if(Ackermann.drive.speed<0)
+        vel = Ackermann.drive.speed*50+1500-140;
+
+    // ROS_INFO("ACKM_angle= %f",Ackermann.drive.steering_angle);
+    // ROS_INFO("PWM_angle= %f",angle);
+    // send_cmd(uint16_t(vel),uint16_t(angle));
 }
 
 int main(int argc, char** argv)
@@ -49,12 +49,9 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "art_driver");
     ros::NodeHandle n;
 
-    // ros::Subscriber sub = n.subscribe("/cmd_vel",1,TwistCallback);
 
-// ros::Subscriber sub = n.subscribe("/car/cmd_vel",1,TwistCallback);
-
-    ros::Subscriber sub = n.subscribe("/ackermann_cmd",1,AckermannCallback);
-
+    ros::Subscriber sub1 = n.subscribe("/ackermann_cmd",1,AckermannCallback);
+    ros::Subscriber sub2 = n.subscribe("/cmd_vel",1,TwistCallback);
         
 
     ros::spin();
