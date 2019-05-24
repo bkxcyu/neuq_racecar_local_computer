@@ -55,12 +55,11 @@ void AckermannCallback(const ackermann_msgs::AckermannDriveStamped& Ackermann)
     if(Ackermann.drive.speed>0)
         vel=fmap(Ackermann.drive.speed,0,1,1565,1600);
     if(Ackermann.drive.speed<0)
-        vel=fmap(Ackermann.drive.speed,0,-1,1435,1400)
-    if(Ackermann.drive.speed=0)
+        vel=fmap(Ackermann.drive.speed,0,-1,1435,1400);
+    if(Ackermann.drive.speed==0)
         vel=1500;
     //ROS_INFO("angle= %d",uint16_t(angle));
     send_cmd(uint16_t(vel),uint16_t(angle));
->>>>>>> dcafe4a216d5234363d90b36bb62da8401c7666f
 }
 
 int main(int argc, char** argv)
