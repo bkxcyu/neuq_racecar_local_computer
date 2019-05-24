@@ -9,6 +9,11 @@
 #include <geometry_msgs/Twist.h>
 #include <ackermann_msgs/AckermannDriveStamped.h>
 
+float fmap(float toMap, float in_min, float in_max, float out_min, float out_max)
+{
+  return(toMap - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 void TwistCallback(const geometry_msgs::Twist& twist)
 {
     double angle;
@@ -25,8 +30,17 @@ void AckermannCallback(const ackermann_msgs::AckermannDriveStamped& Ackermann)
     double vel;
     //ROS_INFO("x= %f", twist.linear.x);
     //ROS_INFO("z= %f", twist.angular.z);
-    angle = 2500.0 - Ackermann.drive.steering_angle* 2000.0 / 180.0;
-    vel = Ackermann.drive.speed;
+    // angle = 2500.0 - Ackermann.drive.steering_angle* 2000.0 / 180.0;
+    if(Ackermann.drive.steering_angle>=0)
+        angle=fmap(Ackermann.drive.steering_angle,0,0.4,1500,2500);
+    if(Ackermann.drive.steering_angle<0)
+        angle=fmap(Ackermann.drive.steering_angle,-0.4,0,500,1500);
+    if(Ackermann.drive.speed>0)
+        vel=fmap(Ackermann.drive.speed,0,1,1565,1600);
+    if(Ackermann.drive.speed<0)
+        vel=fmap(Ackermann.drive.speed,-1,0,1400,1435)
+    if(Ackermann.drive.speed=0)
+        vel=1500;
     //ROS_INFO("angle= %d",uint16_t(angle));
     send_cmd(uint16_t(vel),uint16_t(angle));
 }
