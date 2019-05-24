@@ -34,11 +34,11 @@ void AckermannCallback(const ackermann_msgs::AckermannDriveStamped& Ackermann)
     if(Ackermann.drive.steering_angle>=0)
         angle=fmap(Ackermann.drive.steering_angle,0,0.4,1500,2500);
     if(Ackermann.drive.steering_angle<0)
-        angle=fmap(Ackermann.drive.steering_angle,-0.4,0,500,1500);
+        angle=fmap(Ackermann.drive.steering_angle,0,-0.4,1500,500);
     if(Ackermann.drive.speed>0)
         vel=fmap(Ackermann.drive.speed,0,1,1565,1600);
     if(Ackermann.drive.speed<0)
-        vel=fmap(Ackermann.drive.speed,-1,0,1400,1435)
+        vel=fmap(Ackermann.drive.speed,0,-1,1435,1400)
     if(Ackermann.drive.speed=0)
         vel=1500;
     //ROS_INFO("angle= %d",uint16_t(angle));
