@@ -392,6 +392,7 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     {
         /*Estimate Steering Angle*///估计转向角
         double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
+        double slow_down_weight_int=integral_function(  );
         if(foundForwardPt)//是否存在可行航路点
         {
             cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
@@ -400,7 +401,7 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
             {
                 //double u = getGasInput(carVel.linear.x);
                 //cmd_vel.linear.x = baseSpeed - u;
-                cmd_vel.linear.x = baseSpeed;
+                cmd_vel.linear.x = baseSpeed-slow_down_weight_int;
                 ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
             }
         }
@@ -424,6 +425,7 @@ nav_msgs::Path Trans(const geometry_msgs::Point& wayPt, const geometry_msgs::Pos
 }
 double L1Controller::integral_function(const nav_msgs::Path& trans)
 {
+    
     double num_integeral;
     int j;
     num_integeral = 0;
@@ -444,18 +446,20 @@ double L1Controller::integral_function(const nav_msgs::Path& trans)
     ROS_INFO("err: %f", err);
     return err;
 }
-void L1Controller::slow_down(const nav_msgs::Path& trans,double err)
-{   //根据
-    geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
-    geometry_msgs::Twist carVel = odom.twist.twist;//速度
-    cmd_vel.linear.x = 1650;
+// void L1Controller::slow_down(const nav_msgs::Path& trans,double err)
+// {   //根据
+//     geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
+//     geometry_msgs::Twist carVel = odom.twist.twist;//速度
+//     cmd_vel.linear.x = 1650;
    
-    if(err > 0.5)
-    {
-        cmd_vel.linear.x = baseSpeed;
-    }
-    pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
-}
+//     if(err > 0.5)
+//     {
+//         cmd_vel.linear.x = baseSpeed-60;
+//     }
+//     else 
+//         cmd_vel.linear.x = baseSpeed;
+//     pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
+// }
 
 /*****************/
 /* MAIN FUNCTION */
