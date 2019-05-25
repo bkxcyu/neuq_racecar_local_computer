@@ -228,7 +228,8 @@ target_link_libraries(art_car_controller
 	${PROJECT_SOURCE_DIR}/src/lib/libart_controller.a
 )
 #add_dependencies(art_car_controller art_car_generate_messages_cpp)
-
+# add_executable(L1_controller_v2 )
+# target_link_libraries(L1_controller_v2 ${catkin_LIBRARIES})
 
 
 

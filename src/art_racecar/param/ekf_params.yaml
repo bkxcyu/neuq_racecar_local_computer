@@ -72,7 +72,7 @@ odom0_relative: false
 # required. Data is specified at the level of pose and twist variables, rather than for each variable in isolation.
 # For messages that have both pose and twist data, the parameter specifies to which part of the message we are applying
 # the thresholds. 
-odom0_pose_rejection_threshold: 10
+odom0_pose_rejection_threshold: 15
 odom0_twist_rejection_threshold: 10
 
 imu0: /imu_data
