@@ -415,7 +415,8 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
 std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
 {
     std_msgs::Float64 vel;
-
+    double k=1;
+    vel.data=k*Err.data;
     return vel;
 }
 
@@ -450,7 +451,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
            return Err;
         }
     }
-    /*---------------------------------------------------------------------------------*/
+    /*------------------------------------算法实现部分----------------------------------------*/
     for(int i=0;i<path_point_number;i++)
     {
         tf_listener.transformPose("base_footprint", ros::Time(0) , map_path.poses[i], "map" ,map_pathOfCarFrame);
@@ -462,7 +463,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
         ROS_INFO("\nAdd %d times\n now err=%f",(int)i,err);
     }
     err=err/path_y_max;
-    /*---------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------*/
     points.points.clear();
     points.points.push_back(map_pathOfCarFrame.pose.position);
     marker_pub.publish(points);
