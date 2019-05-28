@@ -443,6 +443,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     {
         path_point_number--;
     }
+    /*---------------------------------------------------------------------------------*/
     for(int i=0;i<path_point_number;i++)
     {
         tf_listener.transformPose("base_footprint", ros::Time(0) , map_path.poses[i], "map" ,map_pathOfCarFrame);
@@ -450,10 +451,10 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
         path_y=map_pathOfCarFrame.pose.position.y;
         path_y=std::max(path_y,path_y_last);
         path_y_last=path_y;
-        err+=path_y;
-        
+        err+=path_y;     
     }
     err=err/path_y;
+    /*---------------------------------------------------------------------------------*/
     Err.data=err;
     err_pub.publish(Err);
     return Err;
