@@ -28,6 +28,7 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include "nav_msgs/Path.h"
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/Marker.h>
+#include "std_msgs/Float64.h"
 
 #define PI 3.14159265358979
 
@@ -47,12 +48,15 @@ class L1Controller
         double getL1Distance(const double& _Vcmd);
         double getSteeringAngle(double eta);
         double getGasInput(const float& current_v);
+        std_msgs::Float64 computeSlowDownVel();
+        std_msgs::Float64 computeIntegralErr();
+        std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
         geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
 
     private:
         ros::NodeHandle n_;
         ros::Subscriber odom_sub, path_sub, goal_sub;
-        ros::Publisher pub_, marker_pub;
+        ros::Publisher pub_, marker_pub,err_pub;
         ros::Timer timer1, timer2;
         tf::TransformListener tf_listener;
 
@@ -101,6 +105,7 @@ L1Controller::L1Controller()
     goal_sub = n_.subscribe("/move_base_simple/goal", 1, &L1Controller::goalCB, this);//订阅位置（目标位置）信息          注意回调函数
     marker_pub = n_.advertise<visualization_msgs::Marker>("car_path", 10);//创建发布控制命令的发布者
     pub_ = n_.advertise<geometry_msgs::Twist>("car/cmd_vel", 1);//角速度 先速度
+    err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
 
     //Timer 定时中断
     timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
@@ -388,6 +393,9 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     {
         /*Estimate Steering Angle*///估计转向角
         double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
+        std_msgs::Float64 slow_down_vel;
+        slow_down_vel=computeSlowDownVel();
+        
         if(foundForwardPt)//是否存在可行航路点
         {
             cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
@@ -403,6 +411,69 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     }
     pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
 }
+
+std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
+{
+    std_msgs::Float64 vel;
+
+    return vel;
+}
+
+
+
+
+std_msgs::Float64 L1Controller::computeIntegralErr()
+{
+    std_msgs::Float64 Err;
+    float err;
+    //坐标转换
+    geometry_msgs::Pose carPose = odom.pose.pose;//ori
+    geometry_msgs::PoseStamped carPoseSt;//ori
+    geometry_msgs::PoseStamped carPoseOfCarFrame;//actually
+    geometry_msgs::PoseStamped map_pathOfCarFrame;//actually
+    int path_point_number;
+    int path_x;
+    int path_y;
+    int path_y_last=0;
+    carPoseSt.header=carPoseOfCarFrame.header;
+    carPoseSt.pose=carPose;
+    tf_listener.transformPose("base_footprint", ros::Time(0) , carPoseSt, "odom" ,carPoseOfCarFrame);
+
+    while(path_point_number>map_path.poses.size())
+    {
+        path_point_number--;
+    }
+    for(int i=0;i<path_point_number;i++)
+    {
+        tf_listener.transformPose("base_footprint", ros::Time(0) , map_path.poses[i], "map" ,map_pathOfCarFrame);
+        path_x=map_pathOfCarFrame.pose.position.x;
+        path_y=map_pathOfCarFrame.pose.position.y;
+        path_y=std::max(path_y,path_y_last);
+        path_y_last=path_y;
+        err+=path_y;
+        
+    }
+    err=err/path_y;
+    Err.data=err;
+    err_pub.publish(Err);
+    return Err;
+}
+
+
+std_msgs::Float64 L1Controller::computeSlowDownVel()
+{
+    std_msgs::Float64 slow_down_vel;
+    std_msgs::Float64 Err;
+
+    Err=computeIntegralErr();
+    slow_down_vel=switchErrIntoVel(Err);
+
+    return slow_down_vel;
+}
+
+
+
+
 
 
 /*****************/
