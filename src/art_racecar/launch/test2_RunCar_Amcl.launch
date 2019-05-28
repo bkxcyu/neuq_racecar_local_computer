@@ -74,20 +74,16 @@
         <!-- L1 -->
         <param name="Vcmd" value="2.25" /> <!-- speed of car m/s -->        
         <!-- ESC -->
-<<<<<<< HEAD
+
         <param name="baseSpeed" value="1610"/> <!-- pwm for motor constant speed, 1500: stop --> 
-=======
-        <param name="baseSpeed" value="1630"/> <!-- pwm for motor constant speed, 1500: stop --> 
->>>>>>> dev-zrj
+
  
 
         <!-- Servo -->
         <param name="baseAngle" value="90.0"/> <!-- the middle pos of servo, for tt02: 87, for hsp: ? -->
-<<<<<<< HEAD
+
         <param name="AngleGain" value="-3.0"/> <!-- for tt02: >0, for hsp: <0 -->	
-=======
-        <param name="AngleGain" value="-4"/> <!-- for tt02: >0, for hsp: <0 -->	
->>>>>>> dev-zrj
+
         <param name="GasGain" value="2.0"/>
 
         <!-- remap from="/odometry/filtered" to="odom" / --> 
