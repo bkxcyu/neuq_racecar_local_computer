@@ -75,7 +75,7 @@
         <param name="Vcmd" value="2.25" /> <!-- speed of car m/s -->        
         <!-- ESC -->
 
-        <param name="baseSpeed" value="1610"/> <!-- pwm for motor constant speed, 1500: stop --> 
+        <param name="baseSpeed" value="1600"/> <!-- pwm for motor constant speed, 1500: stop --> 
 
  
 

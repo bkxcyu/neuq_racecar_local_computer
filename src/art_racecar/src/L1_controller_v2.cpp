@@ -419,11 +419,12 @@ std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
     std_msgs::Float64 vel;
     double k=1;
     /*---------------------------------------------------------------------------------------*/
-
-
-    
+    if(Err.data>4.85||Err.data<-4.85)
+    k=6;
+    else
+    k=k;
     /*---------------------------------------------------------------------------------------*/
-    vel.data=k*Err.data;
+    vel.data=abs(k*Err.data);
     return vel;
 }
 
@@ -440,7 +441,8 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     carPoseSt.header=odom.header;
     geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
     geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
-    int path_point_number=30;
+    geometry_msgs::PoseStamped map_pathOfOdomFrame;//车坐标系下 路径的坐标
+    int path_point_number=100;
     std_msgs::Float64 path_x;
     std_msgs::Float64 path_y;
     std_msgs::Float64 path_x_max;
@@ -480,7 +482,8 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     Err.data=Err.data/path_x_max.data;
     /*---------------------------------------------------------------------------------------*/
     points.points.clear();
-    points.points.push_back(map_pathOfCarFrame.pose.position);
+    tf_listener.transformPose("odom", ros::Time(0) , map_path.poses[path_point_number], "map" ,map_pathOfOdomFrame);
+    points.points.push_back(map_pathOfOdomFrame.pose.position);
     marker_pub.publish(points);
     if(std::isnan(Err.data)||std::isinf(Err.data))
     {
