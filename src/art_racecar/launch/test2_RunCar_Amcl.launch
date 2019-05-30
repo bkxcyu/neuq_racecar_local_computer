@@ -54,7 +54,7 @@
         <param name="base_global_planner" value="global_planner/GlobalPlanner"/>  
          -->
         <param name="base_global_planner" value="navfn/NavfnROS"/>  
-        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>  
+        <!--<param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>  -->
         
         <!--  dwa_local_planner 动态窗口方法导航  http://wiki.ros.org/dwa_local_planner This package provides an implementation of the Dynamic Window Approach to local robot navigation on a plane.Given a global plan to follow and a costmap -->
         <rosparam file="$(find art_racecar)/param/dwa_local_planner_params.yaml" command="load"/>
@@ -72,19 +72,19 @@
     <!-- L1 controller -->  
     <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
         <!-- L1 -->
-        <param name="Vcmd" value="2.25" /> <!-- speed of car m/s -->        
+        <param name="Vcmd" value="2" /> <!-- speed of car m/s -->        
         <!-- ESC -->
 
-        <param name="baseSpeed" value="1600"/> <!-- pwm for motor constant speed, 1500: stop --> 
+        <param name="baseSpeed" value="1665"/> <!-- pwm for motor constant speed, 1500: stop --> 
 
  
 
         <!-- Servo -->
         <param name="baseAngle" value="90.0"/> <!-- the middle pos of servo, for tt02: 87, for hsp: ? -->
 
-        <param name="AngleGain" value="-3.0"/> <!-- for tt02: >0, for hsp: <0 -->	
+        <param name="AngleGain" value="-6"/> <!-- for tt02: >0, for hsp: <0 -->	
 
-        <param name="GasGain" value="2.0"/>
+        <param name="GasGain" value="3.0"/>
 
         <!-- remap from="/odometry/filtered" to="odom" / --> 
         <remap from="/move_base_node/NavfnROS/plan" to="/move_base/NavfnROS/plan" /> 

@@ -417,14 +417,15 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
 std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
 {
     std_msgs::Float64 vel;
-    double k=1;
+    double k=0.5;
     /*---------------------------------------------------------------------------------------*/
-    if(Err.data>4.85||Err.data<-4.85)
-    k=6;
-    else
-    k=k;
+
+
     /*---------------------------------------------------------------------------------------*/
-    vel.data=abs(k*Err.data);
+    vel.data=fabs(k*Err.data);
+    if(vel.data>30)
+        vel.data=30;
+    ROS_INFO("\nslow down vel=%f",vel.data);
     return vel;
 }
 
@@ -453,10 +454,10 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     while(path_point_number>map_path.poses.size())
     {
         path_point_number--;
-        ROS_INFO("\npath_point_number now is big than the size of path,so cut down it to %d",path_point_number);
+        // ROS_INFO("\npath_point_number now is big than the size of path,so cut down it to %d",path_point_number);
         if(path_point_number==0)
         {
-           ROS_INFO("\n---------------\npath_point_number=0 now,we maybe we've arrived,if not,please check");
+        //    ROS_INFO("\n---------------\npath_point_number=0 now,we maybe we've arrived,if not,please check");
            Err.data=0;
            return Err;
         }
@@ -467,7 +468,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
         tf_listener.transformPose("base_footprint", ros::Time(0) , map_path.poses[i], "map" ,map_pathOfCarFrame);
         if(map_pathOfCarFrame.pose.position.x<0)
         {
-            ROS_WARN("The path_x<0  now ignore it and jump to next") ;
+            // ROS_WARN("The path_x<0  now ignore it and jump to next") ;
             continue;
         }
         path_x.data=map_pathOfCarFrame.pose.position.x;
@@ -475,9 +476,9 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
         path_x_max.data=std::max(path_x.data,path_x_max.data);//x坐标最大值
         Err.data+=path_y.data;
 
-        ROS_INFO("\nmap_pathOfCarFrame.x=%f map_pathOfCarFrame.y=%f ",map_pathOfCarFrame.pose.position.x,map_pathOfCarFrame.pose.position.y);
-        ROS_INFO("\nAdd %d times\n now err=%f",(int)i,Err.data);
-        ROS_INFO("\nmax_x =%f",path_x_max.data);
+        // ROS_INFO("\nmap_pathOfCarFrame.x=%f map_pathOfCarFrame.y=%f ",map_pathOfCarFrame.pose.position.x,map_pathOfCarFrame.pose.position.y);
+        // ROS_INFO("\nAdd %d times\n now err=%f",(int)i,Err.data);
+        // ROS_INFO("\nmax_x =%f",path_x_max.data);
     }
     Err.data=Err.data/path_x_max.data;
     /*---------------------------------------------------------------------------------------*/
