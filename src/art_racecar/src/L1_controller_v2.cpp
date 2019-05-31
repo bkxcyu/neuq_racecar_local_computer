@@ -43,12 +43,14 @@ class L1Controller
         void initMarker();
         bool isForwardWayPt(const geometry_msgs::Point& wayPt, const geometry_msgs::Pose& carPose);
         bool isWayPtAwayFromLfwDist(const geometry_msgs::Point& wayPt, const geometry_msgs::Point& car_pos);
+        bool getCurrantVel();
         double getYawFromPose(const geometry_msgs::Pose& carPose);
         double getEta(const geometry_msgs::Pose& carPose);
         double getCar2GoalDist();
         double getL1Distance(const double& _Vcmd);
         double getSteeringAngle(double eta);
         double getGasInput(const float& current_v);
+        float map(float value, float istart, float istop, float ostart, float ostop);
         std_msgs::Float64 computeSlowDownVel();
         std_msgs::Float64 computeIntegralErr();
         std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
@@ -63,6 +65,7 @@ class L1Controller
 
         visualization_msgs::Marker points, line_strip, goal_circle;
         geometry_msgs::Twist cmd_vel;
+        geometry_msgs::Twist last_cmd_vel;
         geometry_msgs::Point odom_goal_pos;
         nav_msgs::Odometry odom;
         nav_msgs::Path map_path, odom_path;
@@ -83,6 +86,10 @@ class L1Controller
 
 L1Controller::L1Controller()
 {
+
+    last_cmd_vel.linear.x=Vcmd;
+    last_cmd_vel.angular.z=0;
+
     //Private parameters handler
     ros::NodeHandle pn("~");
 
@@ -300,19 +307,19 @@ geometry_msgs::Point L1Controller::get_odom_car2WayPtVec(const geometry_msgs::Po
     /*Visualized Target Point on RVIZ*/
     /*Clear former target point Marker*/
     //下面是rviz可视化的内容
-    // points.points.clear();
-    // line_strip.points.clear();
+    points.points.clear();
+    line_strip.points.clear();
 
-    // if(foundForwardPt && !goal_reached)//前方有可行航路点而且未到达目标位置
-    // {
-    //     points.points.push_back(carPose_pos);
-    //     points.points.push_back(forwardPt);
-    //     line_strip.points.push_back(carPose_pos);
-    //     line_strip.points.push_back(forwardPt);
-    // }
+    if(foundForwardPt && !goal_reached)//前方有可行航路点而且未到达目标位置
+    {
+        points.points.push_back(carPose_pos);
+        points.points.push_back(forwardPt);
+        line_strip.points.push_back(carPose_pos);
+        line_strip.points.push_back(forwardPt);
+    }
 
-    // marker_pub.publish(points);
-    // marker_pub.publish(line_strip);
+    marker_pub.publish(points);
+    marker_pub.publish(line_strip);
 
     odom_car2WayPtVec.x = cos(carPose_yaw)*(forwardPt.x - carPose_pos.x) + sin(carPose_yaw)*(forwardPt.y - carPose_pos.y);
     odom_car2WayPtVec.y = -sin(carPose_yaw)*(forwardPt.x - carPose_pos.x) + cos(carPose_yaw)*(forwardPt.y - carPose_pos.y);
@@ -389,15 +396,24 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     geometry_msgs::Twist carVel = odom.twist.twist;//速度
     cmd_vel.linear.x = 1500;
     cmd_vel.angular.z = baseAngle;
-
+/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+    float last_vel_in_MperS;
+    last_vel_in_MperS=map(last_cmd_vel.linear.x,1550,1700,1,4);//将上一次速度（pwm）映射到 m/s
+    Lfw = goalRadius = getL1Distance(last_vel_in_MperS);//获取预瞄距离  期望速度越快 预瞄距离越大
+/*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
     if(goal_received)//取得目标
     {
         /*Estimate Steering Angle*///估计转向角
         double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
-
+/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
         std_msgs::Float64 slow_down_vel;
         slow_down_vel=computeSlowDownVel();
-
+        if(slow_down_vel.data<0)
+        {
+            slow_down_vel.data=0;
+            ROS_ERROR("slow_down_vel<0,CHECK!");
+        }
+/*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
         if(foundForwardPt)//是否存在可行航路点
         {
             cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
@@ -411,7 +427,20 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
             }
         }
     }
+    last_cmd_vel=cmd_vel;
     pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
+}
+/*---------------------------------------------------------------------------------------*/
+
+bool L1Controller::getCurrantVel()
+{
+    return false;
+}
+
+
+float L1Controller::map(float value, float istart, float istop, float ostart, float ostop)
+{
+	return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
 }
 
 std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
@@ -451,10 +480,10 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     while(path_point_number>map_path.poses.size())
     {
         path_point_number--;
-        ROS_INFO("\npath_point_number now is big than the size of path,so cut down it to %d",path_point_number);
+        // ROS_INFO("\npath_point_number now is big than the size of path,so cut down it to %d",path_point_number);
         if(path_point_number==0)
         {
-           ROS_INFO("\n---------------\npath_point_number=0 now,we maybe we've arrived,if not,please check");
+           ROS_WARN("\n---------------\npath_point_number=0 now,we maybe we've arrived,if not,please check");
            Err.data=0;
            return Err;
         }
@@ -465,7 +494,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
         tf_listener.transformPose("base_footprint", ros::Time(0) , map_path.poses[i], "map" ,map_pathOfCarFrame);
         if(map_pathOfCarFrame.pose.position.x<0)
         {
-            ROS_WARN("The path_x<0  now ignore it and jump to next") ;
+            ROS_INFO("The path_x<0  now ignore it and jump to next") ;
             continue;
         }
         path_x.data=map_pathOfCarFrame.pose.position.x;
@@ -473,9 +502,9 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
         path_x_max.data=std::max(path_x.data,path_x_max.data);//x坐标最大值
         Err.data+=path_y.data;
 
-        ROS_INFO("\nmap_pathOfCarFrame.x=%f map_pathOfCarFrame.y=%f ",map_pathOfCarFrame.pose.position.x,map_pathOfCarFrame.pose.position.y);
-        ROS_INFO("\nAdd %d times\n now err=%f",(int)i,Err.data);
-        ROS_INFO("\nmax_x =%f",path_x_max.data);
+        // ROS_INFO("\nmap_pathOfCarFrame.x=%f map_pathOfCarFrame.y=%f ",map_pathOfCarFrame.pose.position.x,map_pathOfCarFrame.pose.position.y);
+        // ROS_INFO("\nAdd %d times\n now err=%f",(int)i,Err.data);
+        // ROS_INFO("\nmax_x =%f",path_x_max.data);
     }
     Err.data=Err.data/path_x_max.data;
     /*---------------------------------------------------------------------------------------*/
@@ -484,7 +513,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     marker_pub.publish(points);
     if(std::isnan(Err.data)||std::isinf(Err.data))
     {
-        ROS_WARN("The IntegralErr is nan or inf,something wrong,check it") ;
+        ROS_ERROR("The IntegralErr is nan or inf,something wrong,check it") ;
         Err.data=0;
         return Err;
     }
