@@ -72,10 +72,10 @@
     <!-- L1 controller -->  
     <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
         <!-- L1 -->
-        <param name="Vcmd" value="2" /> <!-- speed of car m/s -->        
+        <param name="Vcmd" value="2.5" /> <!-- speed of car m/s -->        
         <!-- ESC -->
 
-        <param name="baseSpeed" value="1665"/> <!-- pwm for motor constant speed, 1500: stop --> 
+        <param name="baseSpeed" value="1675"/> <!-- pwm for motor constant speed, 1500: stop --> 
 
  
 
