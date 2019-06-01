@@ -29,6 +29,8 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/Marker.h>
 #include "std_msgs/Float64.h"
+#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
 
 
 #define PI 3.14159265358979
@@ -55,11 +57,12 @@ class L1Controller
         std_msgs::Float64 computeIntegralErr();
         std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
         geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
+        visualization_msgs::Marker ObstacleMarker;
 
     private:
         ros::NodeHandle n_;
-        ros::Subscriber odom_sub, path_sub, goal_sub;
-        ros::Publisher pub_, marker_pub,err_pub;
+        ros::Subscriber odom_sub, path_sub, goal_sub,obst_sub;
+        ros::Publisher pub_, marker_pub,err_pub,obst_marker_pub_;
         ros::Timer timer1, timer2;
         tf::TransformListener tf_listener;
 
@@ -78,6 +81,7 @@ class L1Controller
         void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
         void pathCB(const nav_msgs::Path::ConstPtr& pathMsg);
         void goalCB(const geometry_msgs::PoseStamped::ConstPtr& goalMsg);
+        void obstCB(const visualization_msgs::Marker::ConstPtr& obstMsg);
         void goalReachingCB(const ros::TimerEvent&);
         void controlLoopCB(const ros::TimerEvent&);
 
@@ -111,6 +115,8 @@ L1Controller::L1Controller()
     odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
     path_sub = n_.subscribe("/move_base_node/NavfnROS/plan", 1, &L1Controller::pathCB, this);//订阅导航堆栈信息         注意回调函数
     goal_sub = n_.subscribe("/move_base_simple/goal", 1, &L1Controller::goalCB, this);//订阅位置（目标位置）信息          注意回调函数
+    obst_sub = n_.subscribe("teb_markers", 1, &L1Controller::obstCB, this);
+    obst_marker_pub_ = n_.advertise<visualization_msgs::Marker>("obst_markers", 1000);
     marker_pub = n_.advertise<visualization_msgs::Marker>("car_path", 10);//创建发布控制命令的发布者
     pub_ = n_.advertise<geometry_msgs::Twist>("car/cmd_vel", 1);//角速度 先速度
     err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
@@ -181,6 +187,12 @@ void L1Controller::initMarker()
     goal_circle.color.a = 0.5;
 }
 
+
+void L1Controller::obstCB(const visualization_msgs::Marker::ConstPtr& obstMsg)
+{
+    ObstacleMarker = *obstMsg;
+    obst_marker_pub_.publish(ObstacleMarker);
+}
 
 void L1Controller::odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg)
 {
