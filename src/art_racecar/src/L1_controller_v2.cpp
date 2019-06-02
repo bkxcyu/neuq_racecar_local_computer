@@ -31,6 +31,9 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include "std_msgs/Float64.h"
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
+#include <base_local_planner/odometry_helper_ros.h>
+#include <nav_core/base_local_planner.h>
+
 
 
 #define PI 3.14159265358979
@@ -58,6 +61,7 @@ class L1Controller
         std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
         geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
         visualization_msgs::Marker ObstacleMarker;
+        
 
     private:
         ros::NodeHandle n_;
@@ -69,9 +73,11 @@ class L1Controller
         visualization_msgs::Marker points, line_strip, goal_circle;
         geometry_msgs::Twist cmd_vel;
         geometry_msgs::Twist last_cmd_vel;
+        geometry_msgs::Twist currant_vel_from_odom;
         geometry_msgs::Point odom_goal_pos;
         nav_msgs::Odometry odom;
         nav_msgs::Path map_path, odom_path;
+        base_local_planner::OdometryHelperRos odom_helper_;
 
         double L, Lfw, Lrv, Vcmd, lfw, lrv, steering, u, v;
         double Gas_gain, baseAngle, Angle_gain, goalRadius;
@@ -93,6 +99,8 @@ L1Controller::L1Controller()
 
     last_cmd_vel.linear.x=Vcmd;
     last_cmd_vel.angular.z=0;
+
+    odom_helper_.setOdomTopic("/odometry/filtered");
 
     //Private parameters handler
     ros::NodeHandle pn("~");
@@ -446,6 +454,11 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
 
 bool L1Controller::getCurrantVel()
 {
+    tf::Stamped<tf::Pose> robot_vel_tf;
+    odom_helper_.getRobotVel(robot_vel_tf);
+    currant_vel_from_odom.linear.x = robot_vel_tf.getOrigin().getX();
+    currant_vel_from_odom.linear.y = robot_vel_tf.getOrigin().getY();
+    currant_vel_from_odom.angular.z = tf::getYaw(robot_vel_tf.getRotation());
     return false;
 }
 

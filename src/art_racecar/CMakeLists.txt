@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   visualization_msgs
   dynamic_reconfigure
+  base_local_planner
 )
 
 generate_dynamic_reconfigure_options(cfg/imu.cfg)
@@ -115,7 +116,7 @@ generate_dynamic_reconfigure_options(cfg/imu.cfg)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES art_racecar
-  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs base_local_planner
 #  DEPENDS system_lib
 )
 

@@ -75,7 +75,7 @@
   <exec_depend>python-serial</exec_depend>   
   <exec_depend>dynamic_reconfigure</exec_depend>
 
-
+  <depend>base_local_planner</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
