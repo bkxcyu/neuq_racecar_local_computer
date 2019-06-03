@@ -29,6 +29,7 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/Marker.h>
 #include "std_msgs/Float64.h"
+#include <math.h>
 
 
 #define PI 3.14159265358979
@@ -396,16 +397,16 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     geometry_msgs::Twist carVel = odom.twist.twist;//速度
     cmd_vel.linear.x = 1500;
     cmd_vel.angular.z = baseAngle;
-/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-    float last_vel_in_MperS;
-    last_vel_in_MperS=map(last_cmd_vel.linear.x,1550,1700,1,4);//将上一次速度（pwm）映射到 m/s
-    Lfw = goalRadius = getL1Distance(last_vel_in_MperS);//获取预瞄距离  期望速度越快 预瞄距离越大
+/*>>>>>>>>>>>>>>>>>>>>   VEL_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+    // float last_vel_in_MperS;
+    // last_vel_in_MperS=map(last_cmd_vel.linear.x,1550,1700,1,4);//将上一次速度（pwm）映射到 m/s
+    // Lfw = goalRadius = getL1Distance(last_vel_in_MperS);//获取预瞄距离  期望速度越快 预瞄距离越大
 /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
     if(goal_received)//取得目标
     {
         /*Estimate Steering Angle*///估计转向角
         double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
-/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+/*>>>>>>>>>>>>>>>>>>   SLOW_down feature >>>>>>>>>>>>>>>>>>>>>>>>*/
         std_msgs::Float64 slow_down_vel;
         slow_down_vel=computeSlowDownVel();
         if(slow_down_vel.data<0)
@@ -446,14 +447,23 @@ float L1Controller::map(float value, float istart, float istop, float ostart, fl
 std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
 {
     std_msgs::Float64 vel;
-    double k=0.5;
-    /*---------------------------------------------------------------------------------------*/
+    // double k=0.5;
+    // /*---------------------------------------------------------------------------------------*/
 
 
-    /*---------------------------------------------------------------------------------------*/
-    vel.data=fabs(k*Err.data);
-    if(vel.data>30)
-        vel.data=30;
+    // /*---------------------------------------------------------------------------------------*/
+    // vel.data=fabs(k*Err.data);
+    // if(vel.data>30)
+    //     vel.data=30;
+    //vel.data= -0.0027*fabs(Err.data)*fabs(Err.data)*fabs(Err.data)+0.1736*fabs(Err.data)*fabs(Err.data)-0.6398*fabs(Err.data)+3;
+    double mediate;
+    double fErr = fabs(Err.data);
+    mediate = -pow(fErr,1.5)+6;
+    vel.data = 30/(1+exp(mediate));
+    vel.data=fabs(vel.data);
+    if(vel.data>20)
+        vel.data=20;
+
     ROS_INFO("\nslow down vel=%f",vel.data);
     return vel;
 }
@@ -540,8 +550,6 @@ std_msgs::Float64 L1Controller::computeSlowDownVel()
 
     return slow_down_vel;
 }
-
-
 
 
 
