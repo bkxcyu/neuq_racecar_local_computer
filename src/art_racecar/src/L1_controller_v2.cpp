@@ -30,6 +30,11 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include <visualization_msgs/Marker.h>
 #include "std_msgs/Float64.h"
 #include <math.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
+#include <base_local_planner/odometry_helper_ros.h>
+#include <nav_core/base_local_planner.h>
+
 
 
 #define PI 3.14159265358979
@@ -56,20 +61,24 @@ class L1Controller
         std_msgs::Float64 computeIntegralErr();
         std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
         geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
+        visualization_msgs::Marker ObstacleMarker;
+        
 
     private:
         ros::NodeHandle n_;
-        ros::Subscriber odom_sub, path_sub, goal_sub;
-        ros::Publisher pub_, marker_pub,err_pub;
+        ros::Subscriber odom_sub, path_sub, goal_sub,obst_sub;
+        ros::Publisher pub_, marker_pub,err_pub,obst_marker_pub_;
         ros::Timer timer1, timer2;
         tf::TransformListener tf_listener;
 
         visualization_msgs::Marker points, line_strip, goal_circle;
         geometry_msgs::Twist cmd_vel;
         geometry_msgs::Twist last_cmd_vel;
+        geometry_msgs::Twist currant_vel_from_odom;
         geometry_msgs::Point odom_goal_pos;
         nav_msgs::Odometry odom;
         nav_msgs::Path map_path, odom_path;
+        base_local_planner::OdometryHelperRos odom_helper_;
 
         double L, Lfw, Lrv, Vcmd, lfw, lrv, steering, u, v;
         double Gas_gain, baseAngle, Angle_gain, goalRadius;
@@ -79,6 +88,7 @@ class L1Controller
         void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
         void pathCB(const nav_msgs::Path::ConstPtr& pathMsg);
         void goalCB(const geometry_msgs::PoseStamped::ConstPtr& goalMsg);
+        void obstCB(const visualization_msgs::Marker& obstMsg);
         void goalReachingCB(const ros::TimerEvent&);
         void controlLoopCB(const ros::TimerEvent&);
 
@@ -90,6 +100,8 @@ L1Controller::L1Controller()
 
     last_cmd_vel.linear.x=Vcmd;
     last_cmd_vel.angular.z=0;
+
+    odom_helper_.setOdomTopic("/odometry/filtered");
 
     //Private parameters handler
     ros::NodeHandle pn("~");
@@ -112,6 +124,8 @@ L1Controller::L1Controller()
     odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
     path_sub = n_.subscribe("/move_base_node/NavfnROS/plan", 1, &L1Controller::pathCB, this);//订阅导航堆栈信息         注意回调函数
     goal_sub = n_.subscribe("/move_base_simple/goal", 1, &L1Controller::goalCB, this);//订阅位置（目标位置）信息          注意回调函数
+    // obst_sub = n_.subscribe("teb_markers", 1, &L1Controller::obstCB, this);
+    // obst_marker_pub_ = n_.advertise<visualization_msgs::Marker>("obst_markers", 1000);
     marker_pub = n_.advertise<visualization_msgs::Marker>("car_path", 10);//创建发布控制命令的发布者
     pub_ = n_.advertise<geometry_msgs::Twist>("car/cmd_vel", 1);//角速度 先速度
     err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
@@ -182,6 +196,12 @@ void L1Controller::initMarker()
     goal_circle.color.a = 0.5;
 }
 
+
+void L1Controller::obstCB(const visualization_msgs::Marker& obstMsg)
+{
+    ObstacleMarker = obstMsg;
+    obst_marker_pub_.publish(ObstacleMarker);
+}
 
 void L1Controller::odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg)
 {
@@ -397,6 +417,9 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     geometry_msgs::Twist carVel = odom.twist.twist;//速度
     cmd_vel.linear.x = 1500;
     cmd_vel.angular.z = baseAngle;
+
+    getCurrantVel();
+    ROS_INFO("SPEED_X:%f Y:%f  Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.linear.y ,currant_vel_from_odom.angular.z );
 /*>>>>>>>>>>>>>>>>>>>>   VEL_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
     // float last_vel_in_MperS;
     // last_vel_in_MperS=map(last_cmd_vel.linear.x,1550,1700,1,4);//将上一次速度（pwm）映射到 m/s
@@ -435,7 +458,12 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
 
 bool L1Controller::getCurrantVel()
 {
-    return false;
+    tf::Stamped<tf::Pose> robot_vel_tf;
+    odom_helper_.getRobotVel(robot_vel_tf);
+    currant_vel_from_odom.linear.x = robot_vel_tf.getOrigin().getX();
+    currant_vel_from_odom.linear.y = robot_vel_tf.getOrigin().getY();
+    currant_vel_from_odom.angular.z = tf::getYaw(robot_vel_tf.getRotation());
+    return true;
 }
 
 
