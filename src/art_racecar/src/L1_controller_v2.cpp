@@ -49,11 +49,11 @@ class L1Controller
         void initMarker();
         bool isForwardWayPt(const geometry_msgs::Point& wayPt, const geometry_msgs::Pose& carPose);
         bool isWayPtAwayFromLfwDist(const geometry_msgs::Point& wayPt, const geometry_msgs::Point& car_pos);
-        bool getCurrantVel();
+        float getCurrantVel();
         double getYawFromPose(const geometry_msgs::Pose& carPose);
         double getEta(const geometry_msgs::Pose& carPose);
         double getCar2GoalDist();
-        double getL1Distance(const double& _Vcmd);
+        double getL1Distance();
         double getSteeringAngle(double eta);
         double getGasInput(const float& current_v);
         float map(float value, float istart, float istop, float ostart, float ostop);
@@ -135,7 +135,7 @@ L1Controller::L1Controller()
     timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
 
     //Init variables
-    Lfw = goalRadius = getL1Distance(Vcmd);//获取预瞄距离  期望速度越快 预瞄距离越大
+    Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
     foundForwardPt = false;//是否存在可行航迹点
     goal_received = false;//目标是否获取到（目标是否发布）
     goal_reached = false;//是否到达目标
@@ -368,15 +368,23 @@ double L1Controller::getCar2GoalDist()
     return dist2goal;
 }
 
-double L1Controller::getL1Distance(const double& _Vcmd)
+double L1Controller::getL1Distance()
 {   //获取预瞄距离  期望速度越快 预瞄距离越大
-    double L1 = 0;
-    if(_Vcmd < 1.34)
-        L1 = 3 / 3.0;
-    else if(_Vcmd > 1.34 && _Vcmd < 5.36)
-        L1 = _Vcmd*2.24 / 3.0;
-    else
-        L1 = 12 / 3.0;
+    
+    float v_el =  getCurrantVel();
+    double L1 = 0.8;
+    // v = fabs(v_el);
+    // //if(v >= 0 || v <= 3)
+    // //L1 = 0.22*(v*v-6*v+9)+1;
+    // //  if(v < 1.34)
+    // //      L1 = 3 / 3.0;
+    // //  else if(v > 1.34 && v < 5.36)
+    // //      L1 = v*2.24 / 3.0;
+    //  if(v>=0||v<=3)
+    //     L1 = 1.07*v + 0.8;
+    //  else
+    //      L1 = 4;
+        ROS_INFO("L1 = %.2f",L1);
     return L1;
 }
 
@@ -419,7 +427,8 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     cmd_vel.angular.z = baseAngle;
 
     getCurrantVel();
-    ROS_INFO("SPEED_X:%f Y:%f  Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.linear.y ,currant_vel_from_odom.angular.z );
+    ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
+    Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
 /*>>>>>>>>>>>>>>>>>>>>   VEL_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
     // float last_vel_in_MperS;
     // last_vel_in_MperS=map(last_cmd_vel.linear.x,1550,1700,1,4);//将上一次速度（pwm）映射到 m/s
@@ -447,7 +456,7 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
                 //double u = getGasInput(carVel.linear.x);
                 //cmd_vel.linear.x = baseSpeed - u;
                 cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
-                // ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
+                 ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
             }
         }
     }
@@ -456,14 +465,14 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
 }
 /*---------------------------------------------------------------------------------------*/
 
-bool L1Controller::getCurrantVel()
+float L1Controller::getCurrantVel()
 {
     tf::Stamped<tf::Pose> robot_vel_tf;
     odom_helper_.getRobotVel(robot_vel_tf);
     currant_vel_from_odom.linear.x = robot_vel_tf.getOrigin().getX();
     currant_vel_from_odom.linear.y = robot_vel_tf.getOrigin().getY();
     currant_vel_from_odom.angular.z = tf::getYaw(robot_vel_tf.getRotation());
-    return true;
+    return currant_vel_from_odom.linear.x;
 }
 
 
