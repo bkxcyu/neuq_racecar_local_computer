@@ -22,14 +22,14 @@ void TwistCallback(const geometry_msgs::Twist& twist)
         abs=angle-1500;
     if(angle-1500<0)
         abs=-angle+1500;
-    vel = twist.linear.x-slow_down_weight*abs*abs;
-    if(vel>2500)
-        vel=2500;
-    if(vel<500)
-        vel=500;
+    // vel = twist.linear.x-slow_down_weight*abs*abs;
+    // if(vel>2500)
+    //     vel=2500;
+    // if(vel<500)
+    //     vel=500;
     
     ROS_INFO("vel= %d",uint16_t(vel));
-    send_cmd(uint16_t(vel),uint16_t(angle));
+    send_cmd(uint16_t(twist.linear.x),uint16_t(angle));
 }
 
 int main(int argc, char** argv)

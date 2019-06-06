@@ -373,17 +373,17 @@ double L1Controller::getL1Distance()
     
     float v_el =  getCurrantVel();
     double L1 = 0.8;
-    // v = fabs(v_el);
-    // //if(v >= 0 || v <= 3)
-    // //L1 = 0.22*(v*v-6*v+9)+1;
-    // //  if(v < 1.34)
-    // //      L1 = 3 / 3.0;
-    // //  else if(v > 1.34 && v < 5.36)
-    // //      L1 = v*2.24 / 3.0;
+    v = fabs(v_el);
+    // if(v >= 0 || v <= 3)
+    // L1 = 0.22*(v*v-6*v+9)+1;
+     if(v < 1.34)
+         L1 = 3 / 3.0;
+     else if(v > 1.34 && v < 5.36)
+         L1 = v*2.24 / 3.0;
     //  if(v>=0||v<=3)
     //     L1 = 1.07*v + 0.8;
-    //  else
-    //      L1 = 4;
+     else
+         L1 = 4;
         ROS_INFO("L1 = %.2f",L1);
     return L1;
 }
