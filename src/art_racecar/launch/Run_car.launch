@@ -5,15 +5,15 @@
     <master auto="start"/>
 
     <!-- TF setting 坐标变换-->
-    <include file="$(find art_racecar)/launch/includes/art_car_tf.launch.xml" />
+    <!--<include file="$(find art_racecar)/launch/includes/art_car_tf.launch.xml" />-->
 
     <!-- SENSOR DEVICE -->
     <!-- second startup ls01g lidar激光雷达 -->
-    <include file="$(find art_racecar)/launch/ls01g_lidar.launch"/>
+    <!--<include file="$(find art_racecar)/launch/ls01g_lidar.launch"/>-->
     <!-- IMU 陀螺仪-->
-    <include file="$(find art_imu)/launch/imu.launch" />
+    <!--<include file="$(find art_imu)/launch/imu.launch" />-->
     <!-- Car 底盘驱动-->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
 
 	
       <!-- Rviz -->
