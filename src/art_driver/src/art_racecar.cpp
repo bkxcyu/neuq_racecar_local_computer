@@ -29,7 +29,7 @@ void TwistCallback(const geometry_msgs::Twist& twist)
         angle=fmap(twist.angular.z,0,-0.3,1500,2100);
 
     if(twist.linear.x>0)
-        vel=fmap(twist.linear.x,0,1,1550,1600);
+        vel=fmap(twist.linear.x,0,2,1550,1620);
     if(twist.linear.x<0)
         vel=fmap(twist.linear.x,0,-1,1350,1300);
     if(twist.linear.x==0)

@@ -14,13 +14,13 @@ TebLocalPlannerROS:
 
  # Robot
  cmd_angle_instead_rotvel: True
- max_vel_x: 0.5
- max_vel_x_backwards: 0.5
+ max_vel_x: 2
+ max_vel_x_backwards: 1
  max_vel_theta: 0.3
- acc_lim_x: 1.5
+ acc_lim_x: 2.5
  acc_lim_theta: 1.1
  min_turning_radius: 0.52
- wheelbase: 0.33
+ wheelbase: 0.35
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
    type: "line"
    line_start: [-0.2, 0.0] # for type "line"
@@ -34,7 +34,7 @@ TebLocalPlannerROS:
 
  # Obstacles
 
- min_obstacle_dist: 0.16
+ min_obstacle_dist: 0.4
  include_costmap_obstacles: True
  costmap_obstacles_behind_robot_dist: 0.35
  obstacle_poses_affected: 30
@@ -44,8 +44,8 @@ TebLocalPlannerROS:
 
  # Optimization
 
- no_inner_iterations: 5
- no_outer_iterations: 4
+ no_inner_iterations: 4
+ no_outer_iterations: 3
  optimization_activate: True
  optimization_verbose: False
  penalty_epsilon: 0.1
@@ -66,7 +66,7 @@ TebLocalPlannerROS:
  enable_homotopy_class_planning: False
  enable_multithreading: False
  simple_exploration: False
- max_number_classes: 4
+ max_number_classes: 2
  roadmap_graph_no_samples: 15
  roadmap_graph_area_width: 5
  h_signature_prescaler: 0.5
