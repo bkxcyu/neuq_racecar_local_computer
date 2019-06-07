@@ -18,10 +18,10 @@ void TwistCallback(const geometry_msgs::Twist& twist)
     //ROS_INFO("x= %f", twist.linear.x);
     //ROS_INFO("z= %f", twist.angular.z);
     angle = 2500.0 - twist.angular.z * 2000.0 / 180.0;//2200    1500   770
-    if(angle-1500>0)
-        abs=angle-1500;
-    if(angle-1500<0)
-        abs=-angle+1500;
+    // if(angle-1500>0)
+    //     abs=angle-1500;
+    // if(angle-1500<0)
+    //     abs=-angle+1500;
     // vel = twist.linear.x-slow_down_weight*abs*abs;
     // if(vel>2500)
     //     vel=2500;
