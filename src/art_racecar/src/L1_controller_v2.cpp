@@ -418,13 +418,13 @@ void L1Controller::testcontrol(const ros::TimerEvent&)
     static int mode=1;
     if(cmd_vel.linear.x<1700&&mode==1)
     {
-        cmd_vel.linear.x+=0.01;
+        cmd_vel.linear.x+=0.1;
         if(cmd_vel.linear.x==1700)
             mode=-1;
     }
     if(cmd_vel.linear.x>1200&&mode==-1)
     {
-        cmd_vel.linear.x-=0.01;
+        cmd_vel.linear.x-=0.1;
         if(cmd_vel.linear.x==1200)
             mode=1;
     }
