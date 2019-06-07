@@ -7,30 +7,37 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
+#define PI 3.14159265358979
+#include <ackermann_msgs/AckermannDriveStamped.h>
+
+float fmap(float toMap, float in_min, float in_max, float out_min, float out_max)
+{
+  return(toMap - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 void TwistCallback(const geometry_msgs::Twist& twist)
 {
     double angle;
-
-    double slow_down_weight=0.00015;
     double vel;
-    double abs;
-    //ROS_INFO("x= %f", twist.linear.x);
-    //ROS_INFO("z= %f", twist.angular.z);
-    angle = 2500.0 - twist.angular.z * 2000.0 / 180.0;//2200    1500   770
-    // if(angle-1500>0)
-    //     abs=angle-1500;
-    // if(angle-1500<0)
-    //     abs=-angle+1500;
-    // vel = twist.linear.x-slow_down_weight*abs*abs;
-    // if(vel>2500)
-    //     vel=2500;
-    // if(vel<500)
-    //     vel=500;
-    
-    ROS_INFO("vel= %d",uint16_t(vel));
-    send_cmd(uint16_t(twist.linear.x),uint16_t(angle));
+    double angle_in_degree;
+    ROS_INFO("x= %f", twist.linear.x);
+    ROS_INFO("z= %f", twist.angular.z);
+
+     if(twist.angular.z>=0)
+        angle=fmap(twist.angular.z,0,0.36,1500,2222);
+    if(twist.angular.z<0)
+        angle=fmap(twist.angular.z,0,-0.36,1500,777);
+
+    if(twist.linear.x>0)
+        vel=fmap(twist.linear.x,0,1,1550,1600);
+    if(twist.linear.x<0)
+        vel=fmap(twist.linear.x,0,-1,1350,1300);
+    if(twist.linear.x==0)
+        vel=1500;
+     ROS_INFO("angle= %d  vel=%d",uint16_t(angle),uint16_t(vel));
+    send_cmd(uint16_t(vel),uint16_t(angle));
 }
+
 
 int main(int argc, char** argv)
 {
@@ -39,9 +46,8 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "art_driver");
     ros::NodeHandle n;
 
-    ros::Subscriber sub = n.subscribe("/car/cmd_vel",1,TwistCallback);
-
-
+    ros::Subscriber sub2 = n.subscribe("/cmd_vel",1,TwistCallback);
+        
 
     ros::spin();
 
