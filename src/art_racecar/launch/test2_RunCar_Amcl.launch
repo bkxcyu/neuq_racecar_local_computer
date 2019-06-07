@@ -72,18 +72,15 @@
     <!-- L1 controller -->  
     <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
         <!-- L1 -->
-        <param name="Vcmd" value="2.5" /> <!-- speed of car m/s -->        
+        <!--<param name="Vcmd" value="2.5" />  speed of car m/s         -->
         <!-- ESC -->
-
-        <param name="baseSpeed" value="1680"/> <!-- pwm for motor constant speed, 1500: stop --> 
-
- 
+        <param name="baseSpeed" value="1680"/> <!-- pwm for motor constant speed, 1500: stop -->        
+        <param name="MAX_SLOW_DOWN" value="40"/><!--最大减速-->
+        <param name="TRAVERSAL_POINT" value="100"/><!--积分点数目-->
 
         <!-- Servo -->
         <param name="baseAngle" value="90.0"/> <!-- the middle pos of servo, for tt02: 87, for hsp: ? -->
-
         <param name="AngleGain" value="-6"/> <!-- for tt02: >0, for hsp: <0 -->	
-
         <param name="GasGain" value="3.0"/>
 
         <!-- remap from="/odometry/filtered" to="odom" / --> 
