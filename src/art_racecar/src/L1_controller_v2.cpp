@@ -91,6 +91,7 @@ class L1Controller
         void obstCB(const visualization_msgs::Marker& obstMsg);
         void goalReachingCB(const ros::TimerEvent&);
         void controlLoopCB(const ros::TimerEvent&);
+        void testcontrol(const ros::TimerEvent&);
 
 }; // end of class
 
@@ -131,9 +132,10 @@ L1Controller::L1Controller()
     err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
 
     //Timer 定时中断
-    timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
+    // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
+    timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::testcontrol, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
     timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
-
+    
     //Init variables
     Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
     foundForwardPt = false;//是否存在可行航迹点
@@ -418,6 +420,42 @@ void L1Controller::goalReachingCB(const ros::TimerEvent&)
         }
     }
 }
+
+void L1Controller::testcontrol(const ros::TimerEvent&)
+{
+/*--------------------test1------------------------*/
+    static int mode=1;
+    if(cmd_vel.linear.x<1700&&mode==1)
+    {
+        cmd_vel.linear.x+=0.01;
+        if(cmd_vel.linear.x==1700)
+            mode=-1;
+    }
+    if(cmd_vel.linear.x>1200&&mode==-1)
+    {
+        cmd_vel.linear.x-=0.01;
+        if(cmd_vel.linear.x==1200)
+            mode=1;
+    }
+/*--------------------test2------------------------*/
+    static int counter=0;
+    counter++;
+    if(counter<1000)
+        cmd_vel.linear.x=1650;
+    if(counter>1000&&counter<2000)
+        cmd_vel.linear.x=1600;
+    if(counter>2000&&counter<3000)
+        cmd_vel.linear.x=1550;
+    if(counter>4000)
+        counter=0;
+/*--------------------test3------------------------*/
+
+
+
+    ROS_INFO("\nPWM = %.2f\n",cmd_vel.linear.x);
+    pub_.publish(cmd_vel);
+}
+
 
 void L1Controller::controlLoopCB(const ros::TimerEvent&)
 {   //根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
