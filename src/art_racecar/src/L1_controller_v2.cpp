@@ -29,6 +29,7 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/Marker.h>
 #include "std_msgs/Float64.h"
+#include <math.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <base_local_planner/odometry_helper_ros.h>
@@ -48,11 +49,11 @@ class L1Controller
         void initMarker();
         bool isForwardWayPt(const geometry_msgs::Point& wayPt, const geometry_msgs::Pose& carPose);
         bool isWayPtAwayFromLfwDist(const geometry_msgs::Point& wayPt, const geometry_msgs::Point& car_pos);
-        bool getCurrantVel();
+        float getCurrantVel();
         double getYawFromPose(const geometry_msgs::Pose& carPose);
         double getEta(const geometry_msgs::Pose& carPose);
         double getCar2GoalDist();
-        double getL1Distance(const double& _Vcmd);
+        double getL1Distance();
         double getSteeringAngle(double eta);
         double getGasInput(const float& current_v);
         float map(float value, float istart, float istop, float ostart, float ostop);
@@ -87,7 +88,7 @@ class L1Controller
         void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
         void pathCB(const nav_msgs::Path::ConstPtr& pathMsg);
         void goalCB(const geometry_msgs::PoseStamped::ConstPtr& goalMsg);
-        void obstCB(const visualization_msgs::Marker::ConstPtr& obstMsg);
+        void obstCB(const visualization_msgs::Marker& obstMsg);
         void goalReachingCB(const ros::TimerEvent&);
         void controlLoopCB(const ros::TimerEvent&);
         void testcontrol(const ros::TimerEvent&);
@@ -124,19 +125,19 @@ L1Controller::L1Controller()
     odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
     path_sub = n_.subscribe("/move_base_node/NavfnROS/plan", 1, &L1Controller::pathCB, this);//订阅导航堆栈信息         注意回调函数
     goal_sub = n_.subscribe("/move_base_simple/goal", 1, &L1Controller::goalCB, this);//订阅位置（目标位置）信息          注意回调函数
-    obst_sub = n_.subscribe("teb_markers", 1, &L1Controller::obstCB, this);
-    obst_marker_pub_ = n_.advertise<visualization_msgs::Marker>("obst_markers", 1000);
+    // obst_sub = n_.subscribe("teb_markers", 1, &L1Controller::obstCB, this);
+    // obst_marker_pub_ = n_.advertise<visualization_msgs::Marker>("obst_markers", 1000);
     marker_pub = n_.advertise<visualization_msgs::Marker>("car_path", 10);//创建发布控制命令的发布者
     pub_ = n_.advertise<geometry_msgs::Twist>("car/cmd_vel", 1);//角速度 先速度
     err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
 
     //Timer 定时中断
-    // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-    timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::testcontrol, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
+    timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
+    // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::testcontrol, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
     timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
     
     //Init variables
-    Lfw = goalRadius = getL1Distance(Vcmd);//获取预瞄距离  期望速度越快 预瞄距离越大
+    Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
     foundForwardPt = false;//是否存在可行航迹点
     goal_received = false;//目标是否获取到（目标是否发布）
     goal_reached = false;//是否到达目标
@@ -198,9 +199,9 @@ void L1Controller::initMarker()
 }
 
 
-void L1Controller::obstCB(const visualization_msgs::Marker::ConstPtr& obstMsg)
+void L1Controller::obstCB(const visualization_msgs::Marker& obstMsg)
 {
-    ObstacleMarker = *obstMsg;
+    ObstacleMarker = obstMsg;
     obst_marker_pub_.publish(ObstacleMarker);
 }
 
@@ -369,15 +370,23 @@ double L1Controller::getCar2GoalDist()
     return dist2goal;
 }
 
-double L1Controller::getL1Distance(const double& _Vcmd)
+double L1Controller::getL1Distance()
 {   //获取预瞄距离  期望速度越快 预瞄距离越大
-    double L1 = 0;
-    if(_Vcmd < 1.34)
-        L1 = 3 / 3.0;
-    else if(_Vcmd > 1.34 && _Vcmd < 5.36)
-        L1 = _Vcmd*2.24 / 3.0;
-    else
-        L1 = 12 / 3.0;
+    
+    float v_el =  getCurrantVel();
+    double L1 = 0.8;
+    v = fabs(v_el);
+    // if(v >= 0 || v <= 3)
+    // L1 = 0.22*(v*v-6*v+9)+1;
+     if(v < 1.34)
+         L1 = 3 / 3.0;
+     else if(v > 1.34 && v < 5.36)
+         L1 = v*2.24 / 3.0;
+    //  if(v>=0||v<=3)
+    //     L1 = 1.07*v + 0.8;
+     else
+         L1 = 4;
+        ROS_INFO("L1 = %.2f",L1);
     return L1;
 }
 
@@ -454,16 +463,20 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     geometry_msgs::Twist carVel = odom.twist.twist;//速度
     cmd_vel.linear.x = 1500;
     cmd_vel.angular.z = baseAngle;
-/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-    float last_vel_in_MperS;
-    last_vel_in_MperS=map(last_cmd_vel.linear.x,1550,1700,1,4);//将上一次速度（pwm）映射到 m/s
-    Lfw = goalRadius = getL1Distance(last_vel_in_MperS);//获取预瞄距离  期望速度越快 预瞄距离越大
+
+    getCurrantVel();
+    ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
+    Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
+/*>>>>>>>>>>>>>>>>>>>>   VEL_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+    // float last_vel_in_MperS;
+    // last_vel_in_MperS=map(last_cmd_vel.linear.x,1550,1700,1,4);//将上一次速度（pwm）映射到 m/s
+    // Lfw = goalRadius = getL1Distance(last_vel_in_MperS);//获取预瞄距离  期望速度越快 预瞄距离越大
 /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
     if(goal_received)//取得目标
     {
         /*Estimate Steering Angle*///估计转向角
         double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
-/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+/*>>>>>>>>>>>>>>>>>>   SLOW_down feature >>>>>>>>>>>>>>>>>>>>>>>>*/
         std_msgs::Float64 slow_down_vel;
         slow_down_vel=computeSlowDownVel();
         if(slow_down_vel.data<0)
@@ -481,7 +494,7 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
                 //double u = getGasInput(carVel.linear.x);
                 //cmd_vel.linear.x = baseSpeed - u;
                 cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
-                // ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
+                 ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
             }
         }
     }
@@ -490,14 +503,14 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
 }
 /*---------------------------------------------------------------------------------------*/
 
-bool L1Controller::getCurrantVel()
+float L1Controller::getCurrantVel()
 {
     tf::Stamped<tf::Pose> robot_vel_tf;
     odom_helper_.getRobotVel(robot_vel_tf);
     currant_vel_from_odom.linear.x = robot_vel_tf.getOrigin().getX();
     currant_vel_from_odom.linear.y = robot_vel_tf.getOrigin().getY();
     currant_vel_from_odom.angular.z = tf::getYaw(robot_vel_tf.getRotation());
-    return false;
+    return currant_vel_from_odom.linear.x;
 }
 
 
@@ -509,14 +522,23 @@ float L1Controller::map(float value, float istart, float istop, float ostart, fl
 std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
 {
     std_msgs::Float64 vel;
-    double k=0.5;
-    /*---------------------------------------------------------------------------------------*/
+    // double k=0.5;
+    // /*---------------------------------------------------------------------------------------*/
 
 
-    /*---------------------------------------------------------------------------------------*/
-    vel.data=fabs(k*Err.data);
-    if(vel.data>30)
-        vel.data=30;
+    // /*---------------------------------------------------------------------------------------*/
+    // vel.data=fabs(k*Err.data);
+    // if(vel.data>30)
+    //     vel.data=30;
+    //vel.data= -0.0027*fabs(Err.data)*fabs(Err.data)*fabs(Err.data)+0.1736*fabs(Err.data)*fabs(Err.data)-0.6398*fabs(Err.data)+3;
+    double mediate;
+    double fErr = fabs(Err.data);
+    mediate = -pow(fErr,1.5)+6;
+    vel.data = 50/(1+exp(mediate));
+    vel.data=fabs(vel.data);
+    if(vel.data>50)
+        vel.data=50;
+
     ROS_INFO("\nslow down vel=%f",vel.data);
     return vel;
 }
@@ -535,7 +557,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
     geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
     geometry_msgs::PoseStamped map_pathOfOdomFrame;//车坐标系下 路径的坐标
-    int path_point_number=100;
+    int path_point_number=80;
     std_msgs::Float64 path_x;
     std_msgs::Float64 path_y;
     std_msgs::Float64 path_x_max;
@@ -603,8 +625,6 @@ std_msgs::Float64 L1Controller::computeSlowDownVel()
 
     return slow_down_vel;
 }
-
-
 
 
 
