@@ -132,8 +132,8 @@ L1Controller::L1Controller()
     err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
 
     //Timer 定时中断
-    // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-    timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::testcontrol, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
+    timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
+    // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::testcontrol, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
     timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
     
     //Init variables
