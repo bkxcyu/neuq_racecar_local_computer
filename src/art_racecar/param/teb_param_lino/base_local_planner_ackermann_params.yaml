@@ -1,6 +1,6 @@
 TebLocalPlannerROS:
 
- odom_topic: odom
+ odom_topic: /odometry/filtered
  map_frame: /map
 
  # Trajectory
@@ -14,22 +14,22 @@ TebLocalPlannerROS:
 
  # Robot
  cmd_angle_instead_rotvel: True
- max_vel_x: 0.2
- max_vel_x_backwards: 0.2
+ max_vel_x: 0.5
+ max_vel_x_backwards: 0.5
  max_vel_theta: 0.3
  acc_lim_x: 1.5
  acc_lim_theta: 1.1
- min_turning_radius: 0.2
- wheelbase: 0.27
+ min_turning_radius: 0.52
+ wheelbase: 0.33
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
    type: "line"
-   line_start: [-0.135, 0.0] # for type "line"
-   line_end: [0.135, 0.0] # for type "line"
+   line_start: [-0.2, 0.0] # for type "line"
+   line_end: [0.2, 0.0] # for type "line"
 
  # GoalTolerance
 
  xy_goal_tolerance: 0.3
- yaw_goal_tolerance: 0.1
+ yaw_goal_tolerance: 0.3
  free_goal_vel: False
 
  # Obstacles

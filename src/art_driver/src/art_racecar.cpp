@@ -24,9 +24,9 @@ void TwistCallback(const geometry_msgs::Twist& twist)
     ROS_INFO("z= %f", twist.angular.z);
 
      if(twist.angular.z>=0)
-        angle=fmap(twist.angular.z,0,0.36,1500,2222);
+        angle=fmap(twist.angular.z,0,0.3,1500,900);
     if(twist.angular.z<0)
-        angle=fmap(twist.angular.z,0,-0.36,1500,777);
+        angle=fmap(twist.angular.z,0,-0.3,1500,2100);
 
     if(twist.linear.x>0)
         vel=fmap(twist.linear.x,0,1,1550,1600);

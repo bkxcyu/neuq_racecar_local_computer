@@ -13,7 +13,7 @@
     <!-- IMU 陀螺仪-->
     <include file="$(find art_imu)/launch/imu.launch" />
     <!-- Car 底盘驱动-->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
 
 	
       <!-- Rviz -->
@@ -45,13 +45,12 @@
     <node pkg="move_base" type="move_base" respawn="false" name="move_base">
 
         <!--  teb_local_planner  -->
-        <rosparam file="$(find art_racecar)/teb_param/teb_local_planner_params.yaml" command="load"/>
-        <!-- costmap layers -->    
-        <rosparam file="$(find art_racecar)/teb_param/local_costmap_params.yaml" command="load"/>
-        <rosparam file="$(find art_racecar)/teb_param/global_costmap_params.yaml" command="load"/> 
-        <rosparam file="$(find art_racecar)/teb_param/costmap_common_params.yaml" command="load" ns="global_costmap" />
-  	 	<rosparam file="$(find art_racecar)/teb_param/costmap_common_params.yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(find art_racecar)/teb_param/costmap_conversion_params.yaml" command="load"/> 
+        <rosparam file="$(find art_racecar)/param/teb_param_lino/base_local_planner_ackermann_params.yaml" command="load"/>
+        <rosparam file="$(find art_racecar)/param/teb_param_lino/local_costmap_params.yaml" command="load"/>
+        <rosparam file="$(find art_racecar)/param/teb_param_lino/global_costmap_params.yaml" command="load"/> 
+        <rosparam file="$(find art_racecar)/param/teb_param_lino/costmap_common_params.yaml" command="load" ns="global_costmap" />
+  	 	<rosparam file="$(find art_racecar)/param/teb_param_lino/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <!--<rosparam file="$(find art_racecar)/param/teb_param_lino/costmsap_conversion_params.yaml" command="load"/> -->
         <!-- global_planner -->
         <param name="base_global_planner" value="global_planner/GlobalPlanner" />
 		<param name="planner_frequency" value="1.0" />
@@ -62,14 +61,15 @@
 		<param name="controller_patience" value="15.0" />
         <!-- move_base params -->
         <rosparam file="$(find art_racecar)/param/base_global_planner_params.yaml" command="load"/>
-        <rosparam file="$(find art_racecar)/param/move_base_params.yaml" command="load"/>
+        <!--<rosparam file="$(find art_racecar)/param/move_base_params.yaml" command="load"/>-->
+        <rosparam file="$(find art_racecar)/param/teb_param_lino/move_base_params.yaml" command="load"/>
         <param name="clearing_rotation_allowed" value="false" />
         <remap from="/odom" to="/odometry/filtered"/>
     </node>
 
     <!-- Localization -->
     <node pkg="amcl" type="amcl" name="amcl" output="screen">
-		<rosparam file="$(find art_racecar)/teb_param/amcl_params.yaml" command="load" />
+		<rosparam file="$(find art_racecar)/param/teb_param_ori/amcl_params.yaml" command="load" />
 
 	    <param name="initial_pose_x"            value="2"/>
 		<param name="initial_pose_y"            value="2"/>
@@ -77,22 +77,15 @@
 	</node>
 
     <!-- L1 controller -->  
-    <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
-        <!-- L1 -->
-        <!--<param name="Vcmd" value="2.5" />  speed of car m/s         -->
-        <!-- ESC -->
-        <param name="baseSpeed" value="1680"/> <!-- pwm for motor constant speed, 1500: stop -->        
-        <param name="MAX_SLOW_DOWN" value="40"/><!--最大减速-->
-        <param name="TRAVERSAL_POINT" value="100"/><!--积分点数目-->
-
-        <!-- Servo -->
-        <param name="baseAngle" value="90.0"/> <!-- the middle pos of servo, for tt02: 87, for hsp: ? -->
-        <param name="AngleGain" value="-6"/> <!-- for tt02: >0, for hsp: <0 -->	
+    <!--<node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
+        <param name="baseSpeed" value="1680"/>         
+        <param name="MAX_SLOW_DOWN" value="40"/>
+        <param name="TRAVERSAL_POINT" value="100"/>
+        <param name="baseAngle" value="90.0"/> 
+        <param name="AngleGain" value="-6"/> 
         <param name="GasGain" value="3.0"/>
-
-        <!-- remap from="/odometry/filtered" to="odom" / --> 
         <remap from="/move_base_node/NavfnROS/plan" to="/move_base/NavfnROS/plan" /> 
-    </node>
+    </node>-->
 
     <!-- Rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find art_racecar)/rviz/amcl.rviz" if="$(arg use_rviz)" />
