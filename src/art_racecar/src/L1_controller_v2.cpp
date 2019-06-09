@@ -534,10 +534,10 @@ std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
     double mediate;
     double fErr = fabs(Err.data);
     mediate = -pow(fErr,1.5)+6;
-    vel.data = 50/(1+exp(mediate));
+    vel.data = 100/(1+exp(mediate));
     vel.data=fabs(vel.data);
-    if(vel.data>50)
-        vel.data=50;
+    // if(vel.data>50)
+    //     vel.data=50;
 
     ROS_INFO("\nslow down vel=%f",vel.data);
     return vel;
@@ -557,7 +557,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
     geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
     geometry_msgs::PoseStamped map_pathOfOdomFrame;//车坐标系下 路径的坐标
-    int path_point_number=80;
+    int path_point_number=120;
     std_msgs::Float64 path_x;
     std_msgs::Float64 path_y;
     std_msgs::Float64 path_x_max;
