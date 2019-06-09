@@ -81,8 +81,10 @@ class L1Controller
         base_local_planner::OdometryHelperRos odom_helper_;
 
         double L, Lfw, Lrv, Vcmd, lfw, lrv, steering, u, v;
+        double MAX_SLOW_DOWN;
         double Gas_gain, baseAngle, Angle_gain, goalRadius;
         int controller_freq, baseSpeed;
+        int TRAVERSAL_POINT;
         bool foundForwardPt, goal_received, goal_reached;
 
         void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
@@ -120,6 +122,8 @@ L1Controller::L1Controller()
     pn.param("GasGain", Gas_gain, 1.0);//电机输出增益（系数P）
     pn.param("baseSpeed", baseSpeed, 1470);//基速度
     pn.param("baseAngle", baseAngle, 90.0);//基角度
+    pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 40.0);
+    pn.param("TRAVERSAL_POINT", TRAVERSAL_POINT, 100);
 
     //Publishers and Subscribers
     odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
@@ -427,13 +431,13 @@ void L1Controller::testcontrol(const ros::TimerEvent&)
     static int mode=1;
     if(cmd_vel.linear.x<1700&&mode==1)
     {
-        cmd_vel.linear.x+=0.01;
+        cmd_vel.linear.x+=0.1;
         if(cmd_vel.linear.x==1700)
             mode=-1;
     }
     if(cmd_vel.linear.x>1200&&mode==-1)
     {
-        cmd_vel.linear.x-=0.01;
+        cmd_vel.linear.x-=0.1;
         if(cmd_vel.linear.x==1200)
             mode=1;
     }
@@ -464,13 +468,11 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     cmd_vel.linear.x = 1500;
     cmd_vel.angular.z = baseAngle;
 
+    
+/*>>>>>>>>>>>>>>>>>>>>   Lfw_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
     getCurrantVel();
     ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
-    Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
-/*>>>>>>>>>>>>>>>>>>>>   VEL_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-    // float last_vel_in_MperS;
-    // last_vel_in_MperS=map(last_cmd_vel.linear.x,1550,1700,1,4);//将上一次速度（pwm）映射到 m/s
-    // Lfw = goalRadius = getL1Distance(last_vel_in_MperS);//获取预瞄距离  期望速度越快 预瞄距离越大
+    Lfw = goalRadius = getL1Distance();
 /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
     if(goal_received)//取得目标
     {
@@ -534,10 +536,14 @@ std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
     double mediate;
     double fErr = fabs(Err.data);
     mediate = -pow(fErr,1.5)+6;
-    vel.data = 100/(1+exp(mediate));
-    vel.data=fabs(vel.data);
-    // if(vel.data>50)
-    //     vel.data=50;
+    vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
+
+    if(std::isnan(vel.data)||std::isinf(vel.data))
+    {
+        ROS_ERROR("The caculated vel is nan or inf,something wrong,check it") ;
+        Err.data=MAX_SLOW_DOWN;
+        return vel;
+    }
 
     ROS_INFO("\nslow down vel=%f",vel.data);
     return vel;
@@ -557,7 +563,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
     geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
     geometry_msgs::PoseStamped map_pathOfOdomFrame;//车坐标系下 路径的坐标
-    int path_point_number=120;
+    int path_point_number=TRAVERSAL_POINT;
     std_msgs::Float64 path_x;
     std_msgs::Float64 path_y;
     std_msgs::Float64 path_x_max;
@@ -640,3 +646,4 @@ int main(int argc, char **argv)
     ros::spin();//循环执行
     return 0;
 }
+
