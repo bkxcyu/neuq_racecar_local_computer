@@ -34,7 +34,14 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include <visualization_msgs/Marker.h>
 #include <base_local_planner/odometry_helper_ros.h>
 #include <nav_core/base_local_planner.h>
-
+// costmap
+#include <costmap_2d/costmap_2d_ros.h>
+#include <costmap_converter/costmap_converter_interface.h>
+// boost classes
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+//eigen
+#include <tf_conversions/tf_eigen.h>
 
 
 #define PI 3.14159265358979
@@ -56,13 +63,15 @@ class L1Controller
         double getL1Distance();
         double getSteeringAngle(double eta);
         double getGasInput(const float& current_v);
+        int countCostOfARegion(geometry_msgs::Pose robotPose);
         float map(float value, float istart, float istop, float ostart, float ostop);
         std_msgs::Float64 computeSlowDownVel();
         std_msgs::Float64 computeIntegralErr();
         std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
         geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
         visualization_msgs::Marker ObstacleMarker;
-        
+        costmap_2d::Costmap2DROS* costmap_ros;//！！！由于无法直接引用move_base创建的costmap对象 这里可能会出现问题
+        costmap_2d::Costmap2D* costmap_;
 
     private:
         ros::NodeHandle n_;
@@ -96,7 +105,6 @@ class L1Controller
         void obstCB(const visualization_msgs::Marker& obstMsg);
         void goalReachingCB(const ros::TimerEvent&);
         void controlLoopCB(const ros::TimerEvent&);
-        void testcontrol(const ros::TimerEvent&);
 
 }; // end of class
 
@@ -106,6 +114,8 @@ L1Controller::L1Controller()
 
     last_cmd_vel.linear.x=Vcmd;
     last_cmd_vel.angular.z=0;
+    
+    costmap_ = costmap_ros->getCostmap(); 
 
     odom_helper_.setOdomTopic("/odometry/filtered");
 
@@ -146,7 +156,6 @@ L1Controller::L1Controller()
 
     //Timer 定时中断
     timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-    // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::testcontrol, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
     timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
     
     //Init variables
@@ -434,42 +443,6 @@ void L1Controller::goalReachingCB(const ros::TimerEvent&)
     }
 }
 
-void L1Controller::testcontrol(const ros::TimerEvent&)
-{
-/*--------------------test1------------------------*/
-    static int mode=1;
-    if(cmd_vel.linear.x<1700&&mode==1)
-    {
-        cmd_vel.linear.x+=0.1;
-        if(cmd_vel.linear.x==1700)
-            mode=-1;
-    }
-    if(cmd_vel.linear.x>1200&&mode==-1)
-    {
-        cmd_vel.linear.x-=0.1;
-        if(cmd_vel.linear.x==1200)
-            mode=1;
-    }
-/*--------------------test2------------------------*/
-    static int counter=0;
-    counter++;
-    if(counter<1000)
-        cmd_vel.linear.x=1650;
-    if(counter>1000&&counter<2000)
-        cmd_vel.linear.x=1600;
-    if(counter>2000&&counter<3000)
-        cmd_vel.linear.x=1550;
-    if(counter>4000)
-        counter=0;
-/*--------------------test3------------------------*/
-
-
-
-    ROS_INFO("\nPWM = %.2f\n",cmd_vel.linear.x);
-    pub_.publish(cmd_vel);
-}
-
-
 void L1Controller::controlLoopCB(const ros::TimerEvent&)
 {   //根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
     geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
@@ -517,6 +490,62 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
     pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
 }
 /*---------------------------------------------------------------------------------------*/
+
+int L1Controller::countCostOfARegion(geometry_msgs::Pose robot_pose_of_odom)
+{
+    int cost=0;
+    // geometry_msgs::Pose carPoseOfMapFrame;
+    // tf_listener.transformPose("map", ros::Time(0) , robot_pose_of_odom, "odom" ,carPoseOfMapFrame);
+
+    // Eigen::Vector2d robot_orient = robot_pose_of_odom.orientationUnitVec();
+
+    for (unsigned int i=0; i<costmap_->getSizeInCellsX()-1; ++i)
+    {
+      for (unsigned int j=0; j<costmap_->getSizeInCellsY()-1; ++j)
+      {
+
+        if (costmap_->getCost(i,j) == costmap_2d::LETHAL_OBSTACLE)
+        {
+            geometry_msgs::PoseStamped obs_of_map;
+            geometry_msgs::PoseStamped obs_of_car;
+            geometry_msgs::PoseStamped obst_markers;
+            
+            costmap_->mapToWorld(i,j,obs_of_map.pose.position.x, obs_of_map.pose.position.y);
+            ROS_INFO("obs_of_map:(%.1f,%.1f)\n",obs_of_map.pose.position.x,obs_of_map.pose.position.y);
+
+            tf_listener.transformPose("base_footprint", ros::Time(0) , obs_of_map, "map" ,obs_of_car);
+            ROS_INFO("obs_of_car:(%.1f,%.1f)\n",obs_of_car.pose.position.x,obs_of_car.pose.position.y);
+
+            Eigen::Vector2d obs_dir(obs_of_car.pose.position.x,obs_of_car.pose.position.y);
+            Eigen::Vector2d car_dir(0,1);
+            float theta;
+            theta=std::acos(obs_dir.dot(car_dir)/(obs_dir.norm()*car_dir.norm()));
+            ROS_INFO("theta:%.1f\n",theta);
+
+            if (std::fabs(theta)<0.3)
+            {
+                cost++;
+                ROS_INFO("cost:%d\n\n",cost);
+                obst_markers.pose.position.x=obs_of_map.pose.position.x;
+                obst_markers.pose.position.y=obs_of_map.pose.position.y;
+                tf_listener.transformPose("odom", ros::Time(0) , obs_of_map, "map" ,obst_markers);
+                points.points.push_back(obst_markers.pose.position);
+            }     
+        }
+      }
+    }
+
+    marker_pub.publish(points);
+    return cost;
+}
+
+
+
+
+
+
+
+
 
 float L1Controller::getCurrantVel()
 {
