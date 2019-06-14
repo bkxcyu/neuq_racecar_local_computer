@@ -57,7 +57,7 @@
         <!--<param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>  -->
         
         <!--  dwa_local_planner 动态窗口方法导航  http://wiki.ros.org/dwa_local_planner This package provides an implementation of the Dynamic Window Approach to local robot navigation on a plane.Given a global plan to follow and a costmap -->
-        <rosparam file="$(find art_racecar)/param/dwa_local_planner_params.yaml" command="load"/>
+        <!--<rosparam file="$(find art_racecar)/param/dwa_local_planner_params.yaml" command="load"/>-->
         <!-- costmap layers -->    
         <rosparam file="$(find art_racecar)/param/local_costmap_params.yaml" command="load"/>
         <rosparam file="$(find art_racecar)/param/global_costmap_params.yaml" command="load"/> 
@@ -69,26 +69,20 @@
        
     </node>
 
-    <!-- L1 controller -->  
+   
+
+
+<!-- L1 controller -->  
     <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
-        <!-- L1 -->
-        <param name="Vcmd" value="2.5" /> <!-- speed of car m/s -->        
-        <!-- ESC -->
-
-        <param name="baseSpeed" value="1680"/> <!-- pwm for motor constant speed, 1500: stop --> 
-
- 
-
-        <!-- Servo -->
-        <param name="baseAngle" value="90.0"/> <!-- the middle pos of servo, for tt02: 87, for hsp: ? -->
-
-        <param name="AngleGain" value="-6"/> <!-- for tt02: >0, for hsp: <0 -->	
-
+        <param name="baseSpeed" value="1640"/>         
+        <param name="MAX_SLOW_DOWN" value="40"/>
+        <param name="TRAVERSAL_POINT" value="100"/>
+        <param name="baseAngle" value="90.0"/> 
+        <param name="AngleGain" value="-6"/> 
         <param name="GasGain" value="3.0"/>
-
-        <!-- remap from="/odometry/filtered" to="odom" / --> 
         <remap from="/move_base_node/NavfnROS/plan" to="/move_base/NavfnROS/plan" /> 
     </node>
+
 
     <!-- Rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find art_racecar)/rviz/amcl.rviz" if="$(arg use_rviz)" />
