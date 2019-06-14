@@ -115,7 +115,7 @@ L1Controller::L1Controller()
     last_cmd_vel.linear.x=Vcmd;
     last_cmd_vel.angular.z=0;
     
-    costmap_ = costmap_ros->getCostmap(); 
+    // costmap_ = costmap_ros->getCostmap(); 
 
     odom_helper_.setOdomTopic("/odometry/filtered");
 
