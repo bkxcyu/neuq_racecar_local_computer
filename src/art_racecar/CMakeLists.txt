@@ -18,6 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   visualization_msgs
   dynamic_reconfigure
+  base_local_planner
+  costmap_2d
+  costmap_converter
 )
 
 generate_dynamic_reconfigure_options(cfg/imu.cfg)
@@ -78,10 +81,10 @@ generate_dynamic_reconfigure_options(cfg/imu.cfg)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs std_msgs costmap_converter
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -115,7 +118,12 @@ generate_dynamic_reconfigure_options(cfg/imu.cfg)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES art_racecar
-  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS 
+  roscpp rospy 
+  std_msgs 
+  base_local_planner
+  costmap_2d
+	costmap_converter
 #  DEPENDS system_lib
 )
 
@@ -218,18 +226,67 @@ install(DIRECTORY src
 
 
 
-add_executable(art_car_controller 
-	src/art_car_controller.cpp 
-	src/art_car_controller.hpp
-	src/PID.h
-)
-target_link_libraries(art_car_controller 
-	${catkin_LIBRARIES}
-	${PROJECT_SOURCE_DIR}/src/lib/libart_controller.a
-)
+## C++11 support
+## Unfortunately, the 3d-party dependency libg2o requires c++11 starting from ROS Jade.
+## Even if the ROS Jade specifications do not want c++11-only packages,
+## we cannot compile without c++11 enabled. Another option would be to downgrade  
+## libg2o third-party package.
+## By now, if you do not want c++11, please refer to the ros indigo version.
+IF(NOT MSVC)
+  include(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support which is required 
+  by linked third party packages starting from ROS Jade. Ignore this message for ROS Indigo.")
+endif()
+endif()
+
+
+# Eigen3 FindScript Backward compatibility (ubuntu saucy)
+# Since FindEigen.cmake is deprecated starting from jade.
+if (EXISTS "FindEigen3.cmake")
+  find_package(Eigen3 REQUIRED)
+  set(Eigen_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
+elseif (EXISTS "FindEigen.cmake")
+  find_package(Eigen REQUIRED)
+elseif (EXISTS "FindEigen.cmake")
+  message(WARNING "No findEigen cmake script found. You must provde one of them,
+  e.g. by adding it to ${PROJECT_SOURCE_DIR}/cmake_modules.")
+endif (EXISTS "FindEigen3.cmake")
+
+set(EXTERNAL_INCLUDE_DIRS ${Eigen_INCLUDE_DIRS} ${SUITESPARSE_INCLUDE_DIRS} ${G2O_INCLUDE_DIR})
+set(EXTERNAL_LIBS ${SUITESPARSE_LIBRARIES} ${G2O_LIBRARIES})
+# add_executable(art_car_controller 
+# 	src/art_car_controller.cpp 
+# 	src/art_car_controller.hpp
+# 	src/PID.h
+# )
+# target_link_libraries(art_car_controller 
+# 	${catkin_LIBRARIES}
+# 	${PROJECT_SOURCE_DIR}/src/lib/libart_controller.a
+# )
 #add_dependencies(art_car_controller art_car_generate_messages_cpp)
 # add_executable(L1_controller_v2 )
 # target_link_libraries(L1_controller_v2 ${catkin_LIBRARIES})
+
+# add_executable(art_car_controller 
+# 	src/art_car_controller.cpp 
+# 	src/art_car_controller.hpp
+# 	src/PID.h
+# ) 
+# target_link_libraries(art_car_controller 
+# 	${catkin_LIBRARIES}
+# 	${PROJECT_SOURCE_DIR}/src/lib/libart_controller.a
+# )
+#add_dependencies(art_car_controller art_car_generate_messages_cpp)
+add_executable(L1_controller_v2 src/L1_controller_v2.cpp)
+target_link_libraries(L1_controller_v2 ${catkin_LIBRARIES})
+
 
 
 
