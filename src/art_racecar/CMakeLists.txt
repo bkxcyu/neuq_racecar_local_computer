@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   base_local_planner
   costmap_2d
   costmap_converter
+  dwa_local_planner
 )
 
 generate_dynamic_reconfigure_options(cfg/imu.cfg)
@@ -124,6 +125,7 @@ catkin_package(
   base_local_planner
   costmap_2d
 	costmap_converter
+  dwa_local_planner
 #  DEPENDS system_lib
 )
 

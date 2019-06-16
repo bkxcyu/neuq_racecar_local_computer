@@ -42,6 +42,8 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/shared_ptr.hpp>
 //eigen
 #include <tf_conversions/tf_eigen.h>
+//dwa
+#include <dwa_local_planner/dwa_planner_ros.h>
 
 
 #define PI 3.14159265358979
@@ -70,7 +72,7 @@ class L1Controller
         std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
         geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
         visualization_msgs::Marker ObstacleMarker;
-        costmap_2d::Costmap2DROS* costmap_ros;//！！！由于无法直接引用move_base创建的costmap对象 这里可能会出现问题
+        // costmap_2d::Costmap2DROS* costmap_ros;//！！！由于无法直接引用move_base创建的costmap对象 这里可能会出现问题
         costmap_2d::Costmap2D* costmap_;
 
     private:
@@ -112,7 +114,14 @@ L1Controller::L1Controller()
     last_cmd_vel.linear.x=Vcmd;
     last_cmd_vel.angular.z=0;
     
-    costmap_ = costmap_ros->getCostmap(); 
+    //create a dwa project
+    tf::TransformListener tf(ros::Duration(10));
+    costmap_2d::Costmap2DROS costmap_ros("my_costmap", tf);
+    // dwa_local_planner::DWAPlannerROS dp;
+    // dp.initialize("my_dwa_planner", &tf, &costmap_ros);
+
+    costmap_ = costmap_ros.getCostmap(); 
+    // costmap_->start();
 
     odom_helper_.setOdomTopic("/odometry/filtered");
 
