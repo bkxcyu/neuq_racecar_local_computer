@@ -74,12 +74,14 @@
 
 <!-- L1 controller -->  
     <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
-        <param name="baseSpeed" value="1650"/> 
+        <param name="baseSpeed" value="1640"/> 
         <param name="qujian_min" value="6"/>
         <param name="qujian_max" value="20"/>         
-        <param name="MAX_SLOW_DOWN" value="60"/>
-        <param name="KP" value="-5.0"/>
-        <param name="KD" value="-1.0"/>
+        <param name="MAX_SLOW_DOWN" value="50"/>
+        <param name="KP" value="-4.8"/>
+        <param name="KD" value="-0.6"/>
+        <param name="KI" value="-1.5"/>
+        <param name="err_sum" value="0"/>
         <param name="last_error" value="0"/>
         <param name="TRAVERSAL_POINT" value="100"/>
         <param name="baseAngle" value="77.5"/> 

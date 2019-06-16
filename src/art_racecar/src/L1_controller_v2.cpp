@@ -91,10 +91,10 @@ class L1Controller
 
         double L, Lfw, Lrv, Vcmd, lfw, lrv, steering, u, v;
         double MAX_SLOW_DOWN;
-        double KD,KP;
+        double KD,KP,KI;
         double qujian_max,qujian_min;
         double Gas_gain, baseAngle, Angle_gain, goalRadius;
-        double last_error;//////////////
+        double last_error,err_sum;//////////////
         int controller_freq, baseSpeed;
         int TRAVERSAL_POINT;
         bool foundForwardPt, goal_received, goal_reached;
@@ -474,7 +474,8 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
           //  cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
             //   cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error);
            //    last_error=getSteeringAngle(eta);
-            cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error);
+           err_sum=err_sum+baseAngle;
+            cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
             last_error=getSteeringAngle(eta);
             /*Estimate Gas Input*/
             if(!goal_reached)//如果沒有到達目標點则继续以基速度行驶
