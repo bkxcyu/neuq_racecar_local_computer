@@ -93,7 +93,10 @@ class L1Controller
 
         double L, Lfw, Lrv, Vcmd, lfw, lrv, steering, u, v;
         double MAX_SLOW_DOWN;
+        double KD,KP,KI;
+        double qujian_max,qujian_min;
         double Gas_gain, baseAngle, Angle_gain, goalRadius;
+        double last_error,err_sum;//////////////
         int controller_freq, baseSpeed;
         int TRAVERSAL_POINT;
         bool foundForwardPt, goal_received, goal_reached;
@@ -123,6 +126,7 @@ L1Controller::L1Controller()
     costmap_ = costmap_ros.getCostmap(); 
     // costmap_->start();
 
+
     odom_helper_.setOdomTopic("/odometry/filtered");
 
     //Private parameters handler
@@ -138,10 +142,16 @@ L1Controller::L1Controller()
     //Controller parameter
     pn.param("controller_freq", controller_freq, 20);//控制频率
     pn.param("AngleGain", Angle_gain, -1.0);//角度增益（系数）
+ 
+    pn.param("KP", KP, -1.0);//角度增益（系数）
+    pn.param("KD", KD, -1.0);//角度增益（系数）
+
     pn.param("GasGain", Gas_gain, 1.0);//电机输出增益（系数P）
     pn.param("baseSpeed", baseSpeed, 1470);//基速度
     pn.param("baseAngle", baseAngle, 90.0);//基角度
     pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 40.0);
+    pn.param("qujian_min", qujian_min, 7.0);
+    pn.param("qujian_max", qujian_max, 20.0);
     pn.param("TRAVERSAL_POINT", TRAVERSAL_POINT, 100);
 
     //Publishers and Subscribers
@@ -400,14 +410,14 @@ double L1Controller::getL1Distance()
     v = fabs(v_el);
     // if(v >= 0 || v <= 3)
     // L1 = 0.22*(v*v-6*v+9)+1;
-     if(v < 1.34)
+     if(v <= 1.6)
          L1 = 3 / 3.0;
-     else if(v > 1.34 && v < 5.36)
-         L1 = v*2.24 / 3.0;
+     else if(v > 1.6 && v < 4.8)
+         L1 = 1.25*v-1;
     //  if(v>=0||v<=3)
     //     L1 = 1.07*v + 0.8;
-     else
-         L1 = 4;
+     else if(v >= 4.8)
+         L1 = 5;
         ROS_INFO("L1 = %.2f",L1);
     return L1;
 }
@@ -471,7 +481,12 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
 /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
         if(foundForwardPt)//是否存在可行航路点
         {
-            cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
+          //  cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
+            //   cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error);
+           //    last_error=getSteeringAngle(eta);
+           err_sum=err_sum+baseAngle;
+            cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
+            last_error=getSteeringAngle(eta);
             /*Estimate Gas Input*/
             if(!goal_reached)//如果沒有到達目標點则继续以基速度行驶
             {
@@ -573,9 +588,27 @@ std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
     //vel.data= -0.0027*fabs(Err.data)*fabs(Err.data)*fabs(Err.data)+0.1736*fabs(Err.data)*fabs(Err.data)-0.6398*fabs(Err.data)+3;
     double mediate;
     double fErr = fabs(Err.data);
-    mediate = -pow(fErr,1.5)+6;
-    vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
-
+     mediate = -pow(fErr,1.5)+12;
+     vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
+    
+    //work at 6.11 p.m.10:35 without error,but have not been test;
+    // double a,b,c;
+    // a = -1;
+    // b = (qujian_min*qujian_min-qujian_max*qujian_max-MAX_SLOW_DOWN)/(qujian_min-qujian_max);
+    // c = (qujian_min*qujian_min*qujian_max-qujian_min*MAX_SLOW_DOWN-qujian_min*qujian_max*qujian_max)/(qujian_max-qujian_min);
+    // if(0.5*b>=qujian_min && 0.5*b<=qujian_max)
+    //     a = -0.5*b/qujian_max;
+    //     else
+    //     a = -1;
+    // if (fErr <= qujian_min)
+    //  vel.data = 0;
+    // if (fErr > qujian_min && fErr < qujian_max)
+    //  vel.data = a*fErr*fErr + b*fErr +c;
+        
+    // else
+    //  vel.data = MAX_SLOW_DOWN;
+    //test test test test test test test
+    
     if(std::isnan(vel.data)||std::isinf(vel.data))
     {
         ROS_ERROR("The caculated vel is nan or inf,something wrong,check it") ;
