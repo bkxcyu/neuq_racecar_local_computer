@@ -33,6 +33,10 @@
   <depend>tf_conversions</depend>
   <depend>yaml-cpp</depend>
 
+  <depend>ygeometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>visualization_msgs</depend>
+
   <export>
     <nav_core plugin="${prefix}/blp_plugin.xml"/>
   </export>

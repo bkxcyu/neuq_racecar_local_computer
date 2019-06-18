@@ -18,6 +18,10 @@ find_package(catkin REQUIRED
     roscpp
     tf
     tf_conversions
+    sensor_msgs
+    std_msgs
+    visualization_msgs
+    costmap_converter
 )
 
 find_package(OMPL REQUIRED)
@@ -45,6 +49,7 @@ catkin_package(
     roscpp
     tf
     tf_conversions
+    std_msgs
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
 )
@@ -81,3 +86,49 @@ install(
   FILES blp_plugin.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+
+add_library(neuq_controller
+  include/rsband_local_planner/neuq_controller.h
+  src/neuq_controller.cpp
+)
+add_dependencies(neuq_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(neuq_controller
+  ${catkin_LIBRARIES}
+)
+
+## C++11 support
+## Unfortunately, the 3d-party dependency libg2o requires c++11 starting from ROS Jade.
+## Even if the ROS Jade specifications do not want c++11-only packages,
+## we cannot compile without c++11 enabled. Another option would be to downgrade  
+## libg2o third-party package.
+## By now, if you do not want c++11, please refer to the ros indigo version.
+IF(NOT MSVC)
+  include(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support which is required 
+  by linked third party packages starting from ROS Jade. Ignore this message for ROS Indigo.")
+endif()
+endif()
+
+
+# Eigen3 FindScript Backward compatibility (ubuntu saucy)
+# Since FindEigen.cmake is deprecated starting from jade.
+if (EXISTS "FindEigen3.cmake")
+  find_package(Eigen3 REQUIRED)
+  set(Eigen_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
+elseif (EXISTS "FindEigen.cmake")
+  find_package(Eigen REQUIRED)
+elseif (EXISTS "FindEigen.cmake")
+  message(WARNING "No findEigen cmake script found. You must provde one of them,
+  e.g. by adding it to ${PROJECT_SOURCE_DIR}/cmake_modules.")
+endif (EXISTS "FindEigen3.cmake")
+
+set(EXTERNAL_INCLUDE_DIRS ${Eigen_INCLUDE_DIRS} ${SUITESPARSE_INCLUDE_DIRS} ${G2O_INCLUDE_DIR})
+set(EXTERNAL_LIBS ${SUITESPARSE_LIBRARIES} ${G2O_LIBRARIES})

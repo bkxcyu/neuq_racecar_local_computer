@@ -53,6 +53,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 
+#include "rsband_local_planner/neuq_controller.h"
+
 namespace rsband_local_planner
 {
 
@@ -162,6 +164,7 @@ namespace rsband_local_planner
       boost::shared_ptr<ReedsSheppPlanner> rsPlanner_;
       //! path tracking controller ptr
       boost::shared_ptr<FuzzyPTC> ptc_;
+      boost::shared_ptr<L1Controller> L1_;
 
       //! distance to goal tolerance
       double xyGoalTolerance_;

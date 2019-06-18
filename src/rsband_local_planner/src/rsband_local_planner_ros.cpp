@@ -91,7 +91,8 @@ namespace rsband_local_planner
     ebandToRSStrategy_ = static_cast<EbandToRSStrategy>(0);
 
     // create new path tracking controller
-    ptc_ = boost::shared_ptr<FuzzyPTC>(new FuzzyPTC(name));
+    // ptc_ = boost::shared_ptr<FuzzyPTC>(new FuzzyPTC(name));
+    L1_ = boost::shared_ptr<L1Controller>(new L1Controller(name));
 
     // create and initialize dynamic reconfigure
     drs_.reset(new drs(pnh));
@@ -121,11 +122,11 @@ namespace rsband_local_planner
       ROS_ERROR("Reconfigure CB called before reeds shepp planner "
         "initialization");
 
-    if (ptc_)
-      ptc_->reconfigure(config);
-    else
-      ROS_ERROR("Reconfigure CB called before path tracking controller "
-        "initialization!");
+    // if (ptc_)
+    //   ptc_->reconfigure(config);
+    // else
+    //   ROS_ERROR("Reconfigure CB called before path tracking controller "
+    //     "initialization!");
   }
 
 
@@ -310,7 +311,8 @@ namespace rsband_local_planner
       base_local_planner::publishPlan(rsPlan, rsPlanPub_);
 
       // compute velocity command
-      if (!ptc_->computeVelocityCommands(localPlan, cmd))
+      // if (!ptc_->computeVelocityCommands(localPlan, cmd))
+      if (!L1_->computeVelocityCommands(cmd))
       {
         ROS_ERROR("Path tracking controller failed to produce command");
         return false;
