@@ -35,8 +35,8 @@ along with hypha_racecar.  If not, see <http://www.gnu.org/licenses/>.
 #include <base_local_planner/odometry_helper_ros.h>
 #include <nav_core/base_local_planner.h>
 // costmap
-#include <costmap_2d/costmap_2d_ros.h>
-#include <costmap_converter/costmap_converter_interface.h>
+// #include <costmap_2d/costmap_2d_ros.h>
+// #include <costmap_converter/costmap_converter_interface.h>
 // boost classes
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
@@ -70,8 +70,8 @@ class L1Controller
         std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
         geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
         visualization_msgs::Marker ObstacleMarker;
-        costmap_2d::Costmap2DROS* costmap_ros;//！！！由于无法直接引用move_base创建的costmap对象 这里可能会出现问题
-        costmap_2d::Costmap2D* costmap_;
+        // costmap_2d::Costmap2DROS* costmap_ros;//！！！由于无法直接引用move_base创建的costmap对象 这里可能会出现问题
+        // costmap_2d::Costmap2D* costmap_;
 
     private:
         ros::NodeHandle n_;
@@ -408,7 +408,7 @@ double L1Controller::getL1Distance()
     //     L1 = 1.07*v + 0.8;
      else if(v >= 4.8)
          L1 = 5;
-        ROS_INFO("L1 = %.2f",L1);
+        // ROS_INFO("L1 = %.2f",L1);
     return L1;
 }
 
@@ -452,8 +452,8 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
 
     
 /*>>>>>>>>>>>>>>>>>>>>   Lfw_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-    getCurrantVel();
-    ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
+    // getCurrantVel();
+    // ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
     Lfw = goalRadius = getL1Distance();
 /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
     if(goal_received)//取得目标
@@ -483,7 +483,7 @@ void L1Controller::controlLoopCB(const ros::TimerEvent&)
                 //double u = getGasInput(carVel.linear.x);
                 //cmd_vel.linear.x = baseSpeed - u;
                 cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
-                 ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
+                //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
             }
         }
     }
@@ -500,43 +500,43 @@ int L1Controller::countCostOfARegion(geometry_msgs::Pose robot_pose_of_odom)
 
     // Eigen::Vector2d robot_orient = robot_pose_of_odom.orientationUnitVec();
 
-    for (unsigned int i=0; i<costmap_->getSizeInCellsX()-1; ++i)
-    {
-      for (unsigned int j=0; j<costmap_->getSizeInCellsY()-1; ++j)
-      {
+    // for (unsigned int i=0; i<costmap_->getSizeInCellsX()-1; ++i)
+    // {
+    //   for (unsigned int j=0; j<costmap_->getSizeInCellsY()-1; ++j)
+    //   {
 
-        if (costmap_->getCost(i,j) == costmap_2d::LETHAL_OBSTACLE)
-        {
-            geometry_msgs::PoseStamped obs_of_map;
-            geometry_msgs::PoseStamped obs_of_car;
-            geometry_msgs::PoseStamped obst_markers;
+    //     if (costmap_->getCost(i,j) == costmap_2d::LETHAL_OBSTACLE)
+    //     {
+    //         geometry_msgs::PoseStamped obs_of_map;
+    //         geometry_msgs::PoseStamped obs_of_car;
+    //         geometry_msgs::PoseStamped obst_markers;
             
-            costmap_->mapToWorld(i,j,obs_of_map.pose.position.x, obs_of_map.pose.position.y);
-            ROS_INFO("obs_of_map:(%.1f,%.1f)\n",obs_of_map.pose.position.x,obs_of_map.pose.position.y);
+    //         costmap_->mapToWorld(i,j,obs_of_map.pose.position.x, obs_of_map.pose.position.y);
+    //         ROS_INFO("obs_of_map:(%.1f,%.1f)\n",obs_of_map.pose.position.x,obs_of_map.pose.position.y);
 
-            tf_listener.transformPose("base_footprint", ros::Time(0) , obs_of_map, "map" ,obs_of_car);
-            ROS_INFO("obs_of_car:(%.1f,%.1f)\n",obs_of_car.pose.position.x,obs_of_car.pose.position.y);
+    //         tf_listener.transformPose("base_footprint", ros::Time(0) , obs_of_map, "map" ,obs_of_car);
+    //         ROS_INFO("obs_of_car:(%.1f,%.1f)\n",obs_of_car.pose.position.x,obs_of_car.pose.position.y);
 
-            Eigen::Vector2d obs_dir(obs_of_car.pose.position.x,obs_of_car.pose.position.y);
-            Eigen::Vector2d car_dir(0,1);
-            float theta;
-            theta=std::acos(obs_dir.dot(car_dir)/(obs_dir.norm()*car_dir.norm()));
-            ROS_INFO("theta:%.1f\n",theta);
+    //         Eigen::Vector2d obs_dir(obs_of_car.pose.position.x,obs_of_car.pose.position.y);
+    //         Eigen::Vector2d car_dir(0,1);
+    //         float theta;
+    //         theta=std::acos(obs_dir.dot(car_dir)/(obs_dir.norm()*car_dir.norm()));
+    //         ROS_INFO("theta:%.1f\n",theta);
 
-            if (std::fabs(theta)<0.3)
-            {
-                cost++;
-                ROS_INFO("cost:%d\n\n",cost);
-                obst_markers.pose.position.x=obs_of_map.pose.position.x;
-                obst_markers.pose.position.y=obs_of_map.pose.position.y;
-                tf_listener.transformPose("odom", ros::Time(0) , obs_of_map, "map" ,obst_markers);
-                points.points.push_back(obst_markers.pose.position);
-            }     
-        }
-      }
-    }
+    //         if (std::fabs(theta)<0.3)
+    //         {
+    //             cost++;
+    //             ROS_INFO("cost:%d\n\n",cost);
+    //             obst_markers.pose.position.x=obs_of_map.pose.position.x;
+    //             obst_markers.pose.position.y=obs_of_map.pose.position.y;
+    //             tf_listener.transformPose("odom", ros::Time(0) , obs_of_map, "map" ,obst_markers);
+    //             points.points.push_back(obst_markers.pose.position);
+    //         }     
+    //     }
+    //   }
+    // }
 
-    marker_pub.publish(points);
+    // marker_pub.publish(points);
     return cost;
 }
 
@@ -606,7 +606,7 @@ std_msgs::Float64 L1Controller::switchErrIntoVel(std_msgs::Float64 Err)
         return vel;
     }
 
-    ROS_INFO("\nslow down vel=%f",vel.data);
+    // ROS_INFO("\nslow down vel=%f",vel.data);
     return vel;
 }
 
@@ -623,15 +623,21 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     carPoseSt.header=odom.header;
     geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
     geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
-    geometry_msgs::PoseStamped map_pathOfOdomFrame;//车坐标系下 路径的坐标
     int path_point_number=TRAVERSAL_POINT;
     std_msgs::Float64 path_x;
     std_msgs::Float64 path_y;
     std_msgs::Float64 path_x_max;
     path_x_max.data=0;
 
-    tf_listener.transformPose("base_footprint", ros::Time(0) , carPoseSt, "odom" ,carPoseOfCarFrame);
-
+    try
+    {
+        tf_listener.transformPose("base_footprint", ros::Time(0) , carPoseSt, "odom" ,carPoseOfCarFrame);
+    }
+    catch(tf::TransformException &ex)
+    {
+        ROS_ERROR("%s,at L1 line 639",ex.what());
+        ros::Duration(1.0).sleep();
+    }
     while(path_point_number>map_path.poses.size())
     {
         path_point_number--;
@@ -645,11 +651,20 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     }
     /*------------------------------------算法实现部分----------------------------------------*/
     for(int i=0;i<path_point_number;i++)
-    {
-        tf_listener.transformPose("base_footprint", ros::Time(0) , map_path.poses[i], "map" ,map_pathOfCarFrame);
+    {   
+        try
+        {
+            tf_listener.transformPose("base_footprint", ros::Time(0) , map_path.poses[i], "map" ,map_pathOfCarFrame);
+        }
+        catch(tf::TransformException &ex)
+        {
+            ROS_ERROR("%s,at L1 line 655",ex.what());
+            ros::Duration(1.0).sleep();
+        }
+
         if(map_pathOfCarFrame.pose.position.x<0)
         {
-            ROS_INFO("The path_x<0  now ignore it and jump to next") ;
+            // ROS_INFO("The path_x<0  now ignore it and jump to next") ;
             continue;
         }
         path_x.data=map_pathOfCarFrame.pose.position.x;
@@ -663,10 +678,21 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     }
     Err.data=Err.data/path_x_max.data;
     /*---------------------------------------------------------------------------------------*/
+
+     try
+    {
     points.points.clear();
+    geometry_msgs::PoseStamped map_pathOfOdomFrame;
     tf_listener.transformPose("odom", ros::Time(0) , map_path.poses[path_point_number], "map" ,map_pathOfOdomFrame);
     points.points.push_back(map_pathOfOdomFrame.pose.position);
     marker_pub.publish(points);
+    }
+    catch(tf::TransformException &ex)
+    {
+        ROS_ERROR("%s,in L1,at line 685",ex.what());
+        ros::Duration(1.0).sleep();
+    }
+
     if(std::isnan(Err.data)||std::isinf(Err.data))
     {
         ROS_ERROR("The IntegralErr is nan or inf,something wrong,check it") ;
@@ -675,7 +701,7 @@ std_msgs::Float64 L1Controller::computeIntegralErr()
     }
 
 
-    ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+    // ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
     err_pub.publish(Err);
     return Err;
