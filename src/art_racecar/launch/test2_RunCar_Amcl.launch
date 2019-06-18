@@ -54,7 +54,7 @@
         <param name="base_global_planner" value="global_planner/GlobalPlanner"/>  
          -->
         <param name="base_global_planner" value="navfn/NavfnROS"/>  
-        <!--<param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>  -->
+        <param name="base_local_planner" value="rsband_local_planner/RSbandPlannerROS"/>  
         
         <!--  dwa_local_planner 动态窗口方法导航  http://wiki.ros.org/dwa_local_planner This package provides an implementation of the Dynamic Window Approach to local robot navigation on a plane.Given a global plan to follow and a costmap -->
         <!--<rosparam file="$(find art_racecar)/param/dwa_local_planner_params.yaml" command="load"/>-->
@@ -65,13 +65,14 @@
         <rosparam file="$(find art_racecar)/param/base_global_planner_params.yaml" command="load"/>
         <rosparam file="$(find art_racecar)/param/move_base_params.yaml" command="load"/>
         <remap from="/odom" to="/odometry/filtered"/>
+        <remap from="/move_base_node/NavfnROS/plan" to="/move_base/NavfnROS/plan" /> 
 
        
     </node>
 
    
 <!-- L1 controller -->  
-    <node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
+    <!--<node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
         <param name="baseSpeed" value="1640"/> 
         <param name="qujian_min" value="6"/>
         <param name="qujian_max" value="20"/>         
@@ -86,7 +87,7 @@
         <param name="AngleGain" value="-6"/> 
         <param name="GasGain" value="3.0"/>
         <remap from="/move_base_node/NavfnROS/plan" to="/move_base/NavfnROS/plan" /> 
-    </node>
+    </node>-->
 
 
     <!-- Rviz -->
