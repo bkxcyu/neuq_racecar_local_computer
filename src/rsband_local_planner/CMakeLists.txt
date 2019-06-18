@@ -60,6 +60,7 @@ link_directories(/usr/local/lib ${catkin_INCLUDE_DIRS})
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}_ros.cpp
   src/fuzzy_ptc.cpp
+  src/neuq_controller.cpp
   src/reeds_shepp_planner.cpp
 )
 

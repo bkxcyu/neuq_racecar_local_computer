@@ -392,6 +392,7 @@ namespace rsband_local_planner
         }
         last_cmd_vel=cmd_vel;
         cmd=cmd_vel;
+        return true;
 
     }                
 

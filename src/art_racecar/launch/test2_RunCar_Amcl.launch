@@ -54,7 +54,7 @@
         <param name="base_global_planner" value="global_planner/GlobalPlanner"/>  
          -->
         <param name="base_global_planner" value="navfn/NavfnROS"/>  
-        <param name="base_local_planner" value="rsband_local_planner/RSbandPlannerROS"/>  
+        <param name="base_local_planner" value="rsband_local_planner/RSBandPlannerROS"/>  
         
         <!--  dwa_local_planner 动态窗口方法导航  http://wiki.ros.org/dwa_local_planner This package provides an implementation of the Dynamic Window Approach to local robot navigation on a plane.Given a global plan to follow and a costmap -->
         <!--<rosparam file="$(find art_racecar)/param/dwa_local_planner_params.yaml" command="load"/>-->
