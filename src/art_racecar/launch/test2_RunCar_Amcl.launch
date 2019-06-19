@@ -48,7 +48,7 @@
     </include>
 
     <!-- Navstack 导航堆栈-->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base">
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
         <!-- local planner -->
          <!--
         <param name="base_global_planner" value="global_planner/GlobalPlanner"/>  
