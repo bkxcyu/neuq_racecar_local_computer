@@ -44,7 +44,7 @@ namespace rsband_local_planner
         // obst_sub = n_.subscribe("teb_markers", 1, &L1Controller::obstCB, this);
         // obst_marker_pub_ = n_.advertise<visualization_msgs::Marker>("obst_markers", 1000);
         marker_pub = n_.advertise<visualization_msgs::Marker>("car_path", 10);//创建发布控制命令的发布者
-        pub_ = n_.advertise<geometry_msgs::Twist>("car/cmd_vel", 1);//角速度 先速度
+        // pub_ = n_.advertise<geometry_msgs::Twist>("car/cmd_vel", 1);//角速度 先速度
         err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
 
         //Timer 定时中断
@@ -392,6 +392,7 @@ namespace rsband_local_planner
         }
         last_cmd_vel=cmd_vel;
         cmd=cmd_vel;
+        return true;
 
     }                
 
@@ -440,7 +441,7 @@ namespace rsband_local_planner
             }
         }
         last_cmd_vel=cmd_vel;
-        pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
+        // pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
     }
     /*---------------------------------------------------------------------------------------*/
 
