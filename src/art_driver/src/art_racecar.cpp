@@ -11,24 +11,27 @@
 void TwistCallback(const geometry_msgs::Twist& twist)
 {
     double angle;
+    static double last_in_x;
+    static double last_in_z;
 
-    double slow_down_weight=0.00015;
-    double vel;
-    double abs;
-    //ROS_INFO("x= %f", twist.linear.x);
-    //ROS_INFO("z= %f", twist.angular.z);
+    ROS_INFO("get x= %f", twist.linear.x);
+    ROS_INFO("get z= %f", twist.angular.z);
+
+    //aviod noize
+    if(twist.linear.x==0&&last_in_x!=0)
+    {
+        ROS_INFO(" corrected output x= %f", last_in_x);
+        ROS_INFO(" corrected output z= %f", last_in_z);
+        send_cmd(uint16_t(last_in_x),uint16_t(last_in_z));
+        return;
+    }
+
     angle = 2500.0 - twist.angular.z * 2000.0 / 180.0;//2200    1500   770
-    // if(angle-1500>0)
-    //     abs=angle-1500;
-    // if(angle-1500<0)
-    //     abs=-angle+1500;
-    // vel = twist.linear.x-slow_down_weight*abs*abs;
-    // if(vel>2500)
-    //     vel=2500;
-    // if(vel<500)
-    //     vel=500;
     
-    ROS_INFO("vel= %d",uint16_t(vel));
+    last_in_x=twist.linear.x;
+    last_in_z=twist.angular.z;
+    ROS_INFO("output x= %f", twist.linear.x);
+    ROS_INFO("output z= %f", twist.angular.z);
     send_cmd(uint16_t(twist.linear.x),uint16_t(angle));
 }
 

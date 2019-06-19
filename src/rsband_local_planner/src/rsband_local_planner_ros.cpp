@@ -140,7 +140,7 @@ namespace rsband_local_planner
     }
 
     globalPlan_ = globalPlan;
-
+return true;
     std::vector<int> planStartEndCounters(2, globalPlan_.size());
 
     if (!eband_local_planner::transformGlobalPlan(*tfListener_, globalPlan_,
@@ -187,128 +187,128 @@ namespace rsband_local_planner
       return false;
     }
 
-    std::vector<geometry_msgs::PoseStamped> ebandPlan, rsPlan, localPlan;
+    // std::vector<geometry_msgs::PoseStamped> ebandPlan, rsPlan, localPlan;
 
-    if (isGoalReached())
-    {
-      cmd.linear.x = 0.0;
-      cmd.linear.y = 0.0;
-      cmd.angular.z = 0.0;
-    }
-    else
-    {
-      if (!updateEBand())
-      {
-        ROS_ERROR("Failed to update eband!");
-        return false;
-      }
+    // if (isGoalReached())
+    // {
+    //   cmd.linear.x = 0.0;
+    //   cmd.linear.y = 0.0;
+    //   cmd.angular.z = 0.0;
+    // }
+    // else
+    // {
+    //   if (!updateEBand())
+    //   {
+    //     ROS_ERROR("Failed to update eband!");
+    //     return false;
+    //   }
 
-      if (!ebandPlanner_->getPlan(ebandPlan)
-        || ebandPlan.empty())
-      {
-        ROS_ERROR("Failed to get eband planner plan!");
-        return false;
-      }
+    //   if (!ebandPlanner_->getPlan(ebandPlan)
+    //     || ebandPlan.empty())
+    //   {
+    //     ROS_ERROR("Failed to get eband planner plan!");
+    //     return false;
+    //   }
 
-      // interpolate orientations of eband plan
-      interpolateOrientations(ebandPlan);
+    //   // interpolate orientations of eband plan
+    //   interpolateOrientations(ebandPlan);
 
-      // use reeds shepp planner to connect eband waypoints using RS paths
-      // select between the available eband to reeds shepp conversion strategies
-      int failIdx;
-      switch (ebandToRSStrategy_)
-      {
-        case startToEnd:
-          failIdx = ebandPlan.size() * rsPlanner_->planPath(
-              ebandPlan.front(), ebandPlan.back(), rsPlan);
-          break;
-        case startToNext:
-        {
-          // TODO: move below segment to reeds_shepp_planner new function
-          int next = 0;
-          double dist = 0.0;
-          while (dist < updateSubGoalDistThreshold_
-            && next < ebandPlan.size()-1)
-          {
-            next++;
-            dist += hypot(
-              ebandPlan[next-1].pose.position.x
-              - ebandPlan[next].pose.position.x,
-              ebandPlan[next-1].pose.position.y
-              - ebandPlan[next].pose.position.y);
-          }
-          failIdx = rsPlanner_->planPath(ebandPlan.front(), ebandPlan[next],
-            rsPlan);
-          break;
-        }
-        case pointToPoint:
-          failIdx = rsPlanner_->planPathUntilFailure(ebandPlan, rsPlan);
-          break;
-        case skipFailures:
-          failIdx = rsPlanner_->planPathSkipFailures(ebandPlan, rsPlan);
-          break;
-        case startToRecedingEnd:
-          failIdx = rsPlanner_->planRecedingPath(ebandPlan, rsPlan);
-          break;
-        default:  // invalid strategy
-          ROS_ERROR("Invalid eband_to_rs_strategy!");
-          exit(EXIT_FAILURE);
-      }
+    //   // use reeds shepp planner to connect eband waypoints using RS paths
+    //   // select between the available eband to reeds shepp conversion strategies
+    //   int failIdx;
+    //   switch (ebandToRSStrategy_)
+    //   {
+    //     case startToEnd:
+    //       failIdx = ebandPlan.size() * rsPlanner_->planPath(
+    //           ebandPlan.front(), ebandPlan.back(), rsPlan);
+    //       break;
+    //     case startToNext:
+    //     {
+    //       // TODO: move below segment to reeds_shepp_planner new function
+    //       int next = 0;
+    //       double dist = 0.0;
+    //       while (dist < updateSubGoalDistThreshold_
+    //         && next < ebandPlan.size()-1)
+    //       {
+    //         next++;
+    //         dist += hypot(
+    //           ebandPlan[next-1].pose.position.x
+    //           - ebandPlan[next].pose.position.x,
+    //           ebandPlan[next-1].pose.position.y
+    //           - ebandPlan[next].pose.position.y);
+    //       }
+    //       failIdx = rsPlanner_->planPath(ebandPlan.front(), ebandPlan[next],
+    //         rsPlan);
+    //       break;
+    //     }
+    //     case pointToPoint:
+    //       failIdx = rsPlanner_->planPathUntilFailure(ebandPlan, rsPlan);
+    //       break;
+    //     case skipFailures:
+    //       failIdx = rsPlanner_->planPathSkipFailures(ebandPlan, rsPlan);
+    //       break;
+    //     case startToRecedingEnd:
+    //       failIdx = rsPlanner_->planRecedingPath(ebandPlan, rsPlan);
+    //       break;
+    //     default:  // invalid strategy
+    //       ROS_ERROR("Invalid eband_to_rs_strategy!");
+    //       exit(EXIT_FAILURE);
+    //   }
 
-      double dyaw = fabs(angles::shortest_angular_distance(
-        tf::getYaw(ebandPlan[0].pose.orientation),
-        tf::getYaw(ebandPlan[1].pose.orientation)));
+    //   double dyaw = fabs(angles::shortest_angular_distance(
+    //     tf::getYaw(ebandPlan[0].pose.orientation),
+    //     tf::getYaw(ebandPlan[1].pose.orientation)));
 
-      // if reeds shepp planning failed or there is orientation error > π/4
-      // attempt emergency planning to reach target orientation (if enabled)
-      if (emergencyPlanning_ && (failIdx == 0 || dyaw > M_PI/2))
-      {
-        ROS_DEBUG("Failed to get reeds shepp plan. Attempting "
-          "emergency planning...");
+    //   // if reeds shepp planning failed or there is orientation error > π/4
+    //   // attempt emergency planning to reach target orientation (if enabled)
+    //   if (emergencyPlanning_ && (failIdx == 0 || dyaw > M_PI/2))
+    //   {
+    //     ROS_DEBUG("Failed to get reeds shepp plan. Attempting "
+    //       "emergency planning...");
 
-        // enable emergency mode if not already enable
-        if (!emergencyMode_)
-        {
-          ROS_DEBUG("Commencing Emergency Mode.");
-          emergencyMode_ = true;
-          // add initial robot pose as emergency goal pose but with desired
-          // orientation
-          emergencyPoses_[1] = ebandPlan[0];
-          emergencyPoses_[1].pose.orientation =
-            ebandPlan[std::min<int>(1,ebandPlan.size()-1)].pose.orientation;
-          emergencyPoses_[2] = ebandPlan[0];
-        }
+    //     // enable emergency mode if not already enable
+    //     if (!emergencyMode_)
+    //     {
+    //       ROS_DEBUG("Commencing Emergency Mode.");
+    //       emergencyMode_ = true;
+    //       // add initial robot pose as emergency goal pose but with desired
+    //       // orientation
+    //       emergencyPoses_[1] = ebandPlan[0];
+    //       emergencyPoses_[1].pose.orientation =
+    //         ebandPlan[std::min<int>(1,ebandPlan.size()-1)].pose.orientation;
+    //       emergencyPoses_[2] = ebandPlan[0];
+    //     }
 
-        emergencyPoses_[0] = ebandPlan[0];
+    //     emergencyPoses_[0] = ebandPlan[0];
 
 
-        if (emergencyPlan(emergencyPoses_, rsPlan))
-        {
-          ROS_DEBUG("Emergency Planning succeeded!");
-        }
-        else
-        {
-          ROS_DEBUG("Emergency Planning failed!");
-          emergencyMode_ = false;
-          return false;
-        }
-      }
-      else if (!failIdx)
-      {
-          ROS_DEBUG("Failed to convert eband to rsband plan!");
-          return false;
-      }
-      else
-        emergencyMode_ = false;
+    //     if (emergencyPlan(emergencyPoses_, rsPlan))
+    //     {
+    //       ROS_DEBUG("Emergency Planning succeeded!");
+    //     }
+    //     else
+    //     {
+    //       ROS_DEBUG("Emergency Planning failed!");
+    //       emergencyMode_ = false;
+    //       return false;
+    //     }
+    //   }
+    //   else if (!failIdx)
+    //   {
+    //       ROS_DEBUG("Failed to convert eband to rsband plan!");
+    //       return false;
+    //   }
+    //   else
+    //     emergencyMode_ = false;
 
-      // set reeds shepp plan as local plan
-      localPlan = rsPlan;
+    //   // set reeds shepp plan as local plan
+    //   localPlan = rsPlan;
 
-      // publish plans
-      base_local_planner::publishPlan(globalPlan_, globalPlanPub_);
-      base_local_planner::publishPlan(localPlan, localPlanPub_);
-      base_local_planner::publishPlan(ebandPlan, ebandPlanPub_);
-      base_local_planner::publishPlan(rsPlan, rsPlanPub_);
+    //   // publish plans
+    //   base_local_planner::publishPlan(globalPlan_, globalPlanPub_);
+    //   base_local_planner::publishPlan(localPlan, localPlanPub_);
+    //   base_local_planner::publishPlan(ebandPlan, ebandPlanPub_);
+    //   base_local_planner::publishPlan(rsPlan, rsPlanPub_);
 
       // compute velocity command
       // if (!ptc_->computeVelocityCommands(localPlan, cmd))
@@ -317,7 +317,7 @@ namespace rsband_local_planner
         ROS_ERROR("Path tracking controller failed to produce command");
         return false;
       }
-    }
+    // }
 
     return true;
   }

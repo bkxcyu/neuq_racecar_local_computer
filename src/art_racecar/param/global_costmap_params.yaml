@@ -2,8 +2,8 @@ global_costmap:
     footprint: [[-0.305, -0.18], [-0.305, 0.18], [0.305, 0.18], [0.305, -0.18]]   #机器人形状  左上角开始 顺时针方向 原始值：[[-0.305, -0.18], [-0.305, 0.18], [0.305, 0.18], [0.305, -0.18]] 实测值（0.56 0.34 0.23 0.13）：[[-0.28, -0.17], [-0.28, 0.17], [0.28, 0.17], [0.28, -0.17]] 
     footprint_padding: 0.01
     transform_tolerance: 0.5 #坐标系间的转换可以忍受的最大延时;
-    update_frequency: 15.0
-    publish_frequency: 15.0
+    update_frequency: 5.0
+    publish_frequency: 5.0
 
     global_frame: /map
     robot_base_frame: /base_footprint

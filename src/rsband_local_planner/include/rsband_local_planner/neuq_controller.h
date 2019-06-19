@@ -40,7 +40,7 @@ namespace rsband_local_planner
 
             // void reconfigure(RSBandPlannerConfig& config);
 
-            bool isGoalReached(const std::vector<geometry_msgs::PoseStamped>& path);
+            bool isGoalReached();
 
             void initMarker();
             bool isForwardWayPt(const geometry_msgs::Point& wayPt, const geometry_msgs::Pose& carPose);

@@ -13,7 +13,7 @@
     <!-- IMU 陀螺仪-->
     <include file="$(find art_imu)/launch/imu.launch" />
     <!-- Car 底盘驱动-->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
 
 	
       <!-- Rviz -->
@@ -48,7 +48,7 @@
     </include>
 
     <!-- Navstack 导航堆栈-->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base">
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
         <!-- local planner -->
          <!--
         <param name="base_global_planner" value="global_planner/GlobalPlanner"/>  
@@ -65,8 +65,7 @@
         <rosparam file="$(find art_racecar)/param/base_global_planner_params.yaml" command="load"/>
         <rosparam file="$(find art_racecar)/param/move_base_params.yaml" command="load"/>
         <remap from="/odom" to="/odometry/filtered"/>
-        <remap from="/move_base_node/NavfnROS/plan" to="/move_base/NavfnROS/plan" /> 
-
+        
        
     </node>
 

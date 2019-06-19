@@ -89,14 +89,14 @@ install(
 )
 
 
-add_library(neuq_controller
-  include/rsband_local_planner/neuq_controller.h
-  src/neuq_controller.cpp
-)
-add_dependencies(neuq_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(neuq_controller
-  ${catkin_LIBRARIES}
-)
+# add_library(neuq_controller
+#   include/rsband_local_planner/neuq_controller.h
+#   src/neuq_controller.cpp
+# )
+# add_dependencies(neuq_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(neuq_controller
+#   ${catkin_LIBRARIES}
+# )
 
 ## C++11 support
 ## Unfortunately, the 3d-party dependency libg2o requires c++11 starting from ROS Jade.
