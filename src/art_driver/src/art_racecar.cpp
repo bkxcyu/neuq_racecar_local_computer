@@ -22,7 +22,8 @@ void TwistCallback(const geometry_msgs::Twist& twist)
     {
         ROS_INFO(" corrected output x= %f", last_in_x);
         ROS_INFO(" corrected output z= %f", last_in_z);
-        send_cmd(uint16_t(last_in_x),uint16_t(last_in_z));
+        angle = 2500.0 - last_in_z * 2000.0 / 180.0;
+        send_cmd(uint16_t(last_in_x),uint16_t(angle));
         return;
     }
 

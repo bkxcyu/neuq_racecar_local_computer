@@ -367,7 +367,7 @@ namespace rsband_local_planner
         cmd_vel.linear.x = 1500;
         cmd_vel.angular.z = baseAngle;
 
-        Lfw = goalRadius = getL1Distance();
+        Lfw =  getL1Distance();
 
         if(goal_received)//取得目标
         {
@@ -623,6 +623,19 @@ namespace rsband_local_planner
         return slow_down_vel;
     }
 
+    void L1Controller::reconfigure(RSBandPlannerConfig& config)
+    {//Angle_gain baseSpeed baseAngle MAX_SLOW_DOWN qujian_min qujian_max TRAVERSAL_POINT KP KD
+        Angle_gain=config.Angle_gain;
+        baseSpeed=config.baseSpeed;
+        baseAngle=config.baseAngle;
+        MAX_SLOW_DOWN=config.MAX_SLOW_DOWN;
+        qujian_min=config.qujian_min;
+        qujian_max=config.qujian_max;
+        TRAVERSAL_POINT=config.TRAVERSAL_POINT;
+        KP=config.KP;
+        KD=config.KD;
+        ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
+    }
 
 
 
