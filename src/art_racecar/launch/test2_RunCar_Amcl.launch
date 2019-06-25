@@ -13,7 +13,7 @@
     <!-- IMU 陀螺仪-->
     <include file="$(find art_imu)/launch/imu.launch" />
     <!-- Car 底盘驱动-->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
 
 	
       <!-- Rviz -->
@@ -27,7 +27,7 @@
     <arg name="init_a" default="0.0" />
 
     <!-- Map server -->
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find art_racecar)/map/3F.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find art_racecar)/map/mymap.yaml"/>
 
    
 

@@ -10,9 +10,9 @@ global_costmap:
     resolution: 0.10
 
     rolling_window: true
-    width: 60.0 #default:10
-    height: 60.0 #default:10
-    track_unknown_space: false #假如该参数设置为false的话，就意味着地图上的未知区域也会被认为是可以自由移动的区域，
+    width: 100.0 #default:10
+    height: 40.0 #default:10
+    track_unknown_space: true #假如该参数设置为false的话，就意味着地图上的未知区域也会被认为是可以自由移动的区域，
                                #这样在进行全局路径规划时，可以把一些未探索的未知区域也来参与到路径规划。
                                
     #在global_costmap中使用下面三个插件来融合三个不同图层，分别是static_layer、obstacle_layer和inflation_layer，合成一个master_layer来进行全局路径规划。                           
@@ -31,7 +31,7 @@ global_costmap:
 
     #膨胀层 
     inflation:
-        inflation_radius: 0.85 #default:0.1  #膨胀半径  The radius in meters to which the map inflates obstacle cost values.
+        inflation_radius: 1.5 #default:0.1  #膨胀半径  The radius in meters to which the map inflates obstacle cost values.
         cost_scaling_factor: 8 #default:8.0 #这个值越大 表示膨胀层的值下降得越快 A scaling factor to apply to cost values during inflation. The cost function is computed as follows for all cells in the costmap further than the inscribed radius distance and closer than the inflation radius distance away from an actual obstacle: 
         # exp(-1.0 * cost_scaling_factor * (distance_from_obstacle - inscribed_radius)) * (costmap_2d::INSCRIBED_INFLATED_OBSTACLE - 1)
         # where costmap_2d::INSCRIBED_INFLATED_OBSTACLE is currently 254. NOTE: since the cost_scaling_factor is multiplied by a negative in the formula, increasing the factor will decrease the resulting cost values.

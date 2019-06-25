@@ -14,8 +14,8 @@ void TwistCallback(const geometry_msgs::Twist& twist)
     static double last_in_x;
     static double last_in_z;
 
-    ROS_INFO("get x= %f", twist.linear.x);
-    ROS_INFO("get z= %f", twist.angular.z);
+    // ROS_INFO("get x= %f", twist.linear.x);
+    // ROS_INFO("get z= %f", twist.angular.z);
 
     //aviod noize
     if(twist.linear.x==0&&last_in_x!=0)

@@ -26,10 +26,10 @@ namespace rsband_local_planner
         pn.param("controller_freq", controller_freq, 20);//控制频率
         pn.param("AngleGain", Angle_gain, -6.0);//角度增益（系数）
     
-        pn.param("KP", KP, -1.0);//角度增益（系数）
-        pn.param("KD", KD, -1.0);//角度增益（系数）
+        pn.param("KP", KP, -6.0);//角度增益（系数）
+        pn.param("KD", KD, -0.3);//角度增益（系数）
 
-        pn.param("GasGain", Gas_gain, 1.0);//电机输出增益（系数P）
+        pn.param("GasGain", Gas_gain, 3.0);//电机输出增益（系数P）
         pn.param("baseSpeed", baseSpeed, 1600);//基速度
         pn.param("baseAngle", baseAngle, 77.0);//基角度
         pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 10.0);
@@ -605,7 +605,7 @@ namespace rsband_local_planner
         }
 
 
-        // ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+        ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
         err_pub.publish(Err);
         return Err;

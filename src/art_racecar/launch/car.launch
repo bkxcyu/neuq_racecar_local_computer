@@ -7,7 +7,7 @@
     <include file="$(find art_racecar)/launch/includes/art_car_tf.launch.xml" />
 
     <!-- Car -->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
   
 
 	
