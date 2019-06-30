@@ -29,10 +29,10 @@ void TwistCallback(const geometry_msgs::Twist& twist)
 
     angle = 2500.0 - twist.angular.z * 2000.0 / 180.0;//2200    1500   770
     
-    last_in_x=twist.linear.x;
-    last_in_z=twist.angular.z;
-    ROS_INFO("output x= %f", twist.linear.x);
-    ROS_INFO("output z= %f", twist.angular.z);
+    // last_in_x=twist.linear.x;
+    // last_in_z=twist.angular.z;
+    // ROS_INFO("output x= %f", twist.linear.x);
+    // ROS_INFO("output z= %f", twist.angular.z);
     send_cmd(uint16_t(twist.linear.x),uint16_t(angle));
 }
 

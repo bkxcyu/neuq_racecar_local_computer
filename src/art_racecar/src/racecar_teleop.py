@@ -67,12 +67,12 @@ if __name__=="__main__":
     settings = termios.tcgetattr(sys.stdin)
     
     rospy.init_node('racecar_teleop')
-    pub = rospy.Publisher('/cmd_vel', Twist, queue_size=5)
+    pub = rospy.Publisher('~/car/cmd_vel', Twist, queue_size=5)
 
     speed_start_value = 70 
     turn_start_value = 50
     speed_mid = 1500
-    turn_mid = 77.5
+    turn_mid = 80
     speed_bias = 0
     turn_bias = 0
     speed_add_once = 5
