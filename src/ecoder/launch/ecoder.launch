@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="ecoder" name="ecoder" type="ecoder" output="screen">
+    <param name="port" value="/dev/car"/>   
+    <param name="baud" value="115200"/>
+  </node>
+</launch>
