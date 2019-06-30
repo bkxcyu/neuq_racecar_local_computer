@@ -27,7 +27,7 @@
     <arg name="init_a" default="0.0" />
 
     <!-- Map server -->
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find art_racecar)/map/8f.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find art_racecar)/map/3F.yaml"/>
 
    
 
@@ -49,16 +49,11 @@
 
     <!-- Navstack 导航堆栈-->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-        <!-- local planner -->
-         <!--
-        <param name="base_global_planner" value="global_planner/GlobalPlanner"/>  
-         -->
+        <!--  planner -->
         <param name="base_global_planner" value="navfn/NavfnROS"/>  
         <param name="base_local_planner" value="rsband_local_planner/RSBandPlannerROS"/>  
-        
-        <!--  dwa_local_planner 动态窗口方法导航  http://wiki.ros.org/dwa_local_planner This package provides an implementation of the Dynamic Window Approach to local robot navigation on a plane.Given a global plan to follow and a costmap -->
-        <!--<rosparam file="$(find art_racecar)/param/dwa_local_planner_params.yaml" command="load"/>-->
         <!-- costmap layers -->    
+        <rosparam file="$(find art_racecar)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
         <rosparam file="$(find art_racecar)/param/local_costmap_params.yaml" command="load"/>
         <rosparam file="$(find art_racecar)/param/global_costmap_params.yaml" command="load"/> 
         <!-- move_base params -->
@@ -68,25 +63,6 @@
         
        
     </node>
-
-   
-<!-- L1 controller -->  
-    <!--<node pkg="art_racecar" type="L1_controller_v2" respawn="false" name="L1_controller_v2" output="screen">       
-        <param name="baseSpeed" value="1640"/> 
-        <param name="qujian_min" value="6"/>
-        <param name="qujian_max" value="20"/>         
-        <param name="MAX_SLOW_DOWN" value="50"/>
-        <param name="KP" value="-4.8"/>
-        <param name="KD" value="-0.6"/>
-        <param name="KI" value="-1.5"/>
-        <param name="err_sum" value="0"/>
-        <param name="last_error" value="0"/>
-        <param name="TRAVERSAL_POINT" value="100"/>
-        <param name="baseAngle" value="77.5"/> 
-        <param name="AngleGain" value="-6"/> 
-        <param name="GasGain" value="3.0"/>
-        <remap from="/move_base_node/NavfnROS/plan" to="/move_base/NavfnROS/plan" /> 
-    </node>-->
 
 
     <!-- Rviz -->
