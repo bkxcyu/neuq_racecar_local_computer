@@ -24,22 +24,22 @@ namespace rsband_local_planner
 
         //Controller parameter
         pn.param("controller_freq", controller_freq, 20);//控制频率
-        pn.param("AngleGain", Angle_gain, -1.0);//角度增益（系数）
+        pn.param("AngleGain", Angle_gain, -6.0);//角度增益（系数）
     
-        pn.param("KP", KP, -1.0);//角度增益（系数）
-        pn.param("KD", KD, -1.0);//角度增益（系数）
+        pn.param("KP", KP, -6.0);//角度增益（系数）
+        pn.param("KD", KD, -0.3);//角度增益（系数）
 
-        pn.param("GasGain", Gas_gain, 1.0);//电机输出增益（系数P）
-        pn.param("baseSpeed", baseSpeed, 1470);//基速度
-        pn.param("baseAngle", baseAngle, 90.0);//基角度
-        pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 40.0);
+        pn.param("GasGain", Gas_gain, 3.0);//电机输出增益（系数P）
+        pn.param("baseSpeed", baseSpeed, 1600);//基速度
+        pn.param("baseAngle", baseAngle, 77.0);//基角度
+        pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 10.0);
         pn.param("qujian_min", qujian_min, 7.0);
         pn.param("qujian_max", qujian_max, 20.0);
         pn.param("TRAVERSAL_POINT", TRAVERSAL_POINT, 100);
 
         //Publishers and Subscribers
         odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
-        path_sub = n_.subscribe("/move_base_node/NavfnROS/plan", 1, &L1Controller::pathCB, this);//订阅导航堆栈信息         注意回调函数
+        path_sub = n_.subscribe("/move_base/NavfnROS/plan", 1, &L1Controller::pathCB, this);//订阅导航堆栈信息         注意回调函数
         goal_sub = n_.subscribe("/move_base_simple/goal", 1, &L1Controller::goalCB, this);//订阅位置（目标位置）信息          注意回调函数
         // obst_sub = n_.subscribe("teb_markers", 1, &L1Controller::obstCB, this);
         // obst_marker_pub_ = n_.advertise<visualization_msgs::Marker>("obst_markers", 1000);
@@ -49,7 +49,7 @@ namespace rsband_local_planner
 
         //Timer 定时中断
         // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-        timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
+        // timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
         
         //Init variables
         Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
@@ -322,21 +322,26 @@ namespace rsband_local_planner
 
     void L1Controller::goalReachingCB(const ros::TimerEvent&)
     {   //判断车是否到达目标
-
+        static int count_reach=0;
         if(goal_received)//取得目标
         {
             double car2goal_dist = getCar2GoalDist();//获取车到目标点的距离
             //相对位置小于预瞄距离 则认为到达
-            if(car2goal_dist < goalRadius)
+            if(car2goal_dist < 1)
             {
-                goal_reached = true;
-                goal_received = false;
-                ROS_INFO("Goal Reached !");
+                count_reach++;
+                if(count_reach>10)
+                {
+                    goal_reached = true;
+                    goal_received = false;
+                    ROS_INFO("Goal Reached !");
+                }
+                
             }
         }
     }
 
-    bool L1Controller::isGoalReached(const std::vector<geometry_msgs::PoseStamped>& path)
+    bool L1Controller::isGoalReached()
     {
         if(goal_received)//取得目标
         {
@@ -362,7 +367,7 @@ namespace rsband_local_planner
         cmd_vel.linear.x = 1500;
         cmd_vel.angular.z = baseAngle;
 
-        Lfw = goalRadius = getL1Distance();
+        Lfw =  getL1Distance();
 
         if(goal_received)//取得目标
         {
@@ -600,7 +605,7 @@ namespace rsband_local_planner
         }
 
 
-        // ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+        ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
         err_pub.publish(Err);
         return Err;
@@ -618,6 +623,19 @@ namespace rsband_local_planner
         return slow_down_vel;
     }
 
+    void L1Controller::reconfigure(RSBandPlannerConfig& config)
+    {//Angle_gain baseSpeed baseAngle MAX_SLOW_DOWN qujian_min qujian_max TRAVERSAL_POINT KP KD
+        Angle_gain=config.Angle_gain;
+        baseSpeed=config.baseSpeed;
+        baseAngle=config.baseAngle;
+        MAX_SLOW_DOWN=config.MAX_SLOW_DOWN;
+        qujian_min=config.qujian_min;
+        qujian_max=config.qujian_max;
+        TRAVERSAL_POINT=config.TRAVERSAL_POINT;
+        KP=config.KP;
+        KD=config.KD;
+        ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
+    }
 
 
 

@@ -118,29 +118,7 @@ namespace rsband_local_planner
 
     private:
 
-      /**
-       * @brief Interpolates pose orientations of the given plan
-       * @param plan: The plan, for which to interpolate the poses
-       */
-      void interpolateOrientations(
-        std::vector<geometry_msgs::PoseStamped>& plan);
-
-      /**
-       * @brief Updates eband
-       * @details Prunes the eband and adds new target frames
-       * @return true if eband was updated successfully
-       */
-      bool updateEBand();
-
-      /**
-       * @brief Attempts an emergency plan in case actual plan failed
-       * @param ebandPlan: the eband plan
-       * @param emergencyPlan: the emergency plan container
-       * @return true if emergency planning succeeds
-       */
-      bool emergencyPlan(std::vector<geometry_msgs::PoseStamped>& ebandPlan,
-        std::vector<geometry_msgs::PoseStamped>& emergencyPlan);
-
+     
       /**
        * @brief Reconfigures node parameters
        * @param config: The dynamic reconfigure node configuration
@@ -158,12 +136,8 @@ namespace rsband_local_planner
       //! costmap ROS wrapper ptr
       costmap_2d::Costmap2DROS* costmapROS_;
 
-      //! eband planner ptr
-      boost::shared_ptr<eband_local_planner::EBandPlanner> ebandPlanner_;
-      //! reeds shepp planner ptr
-      boost::shared_ptr<ReedsSheppPlanner> rsPlanner_;
+
       //! path tracking controller ptr
-      boost::shared_ptr<FuzzyPTC> ptc_;
       boost::shared_ptr<L1Controller> L1_;
 
       //! distance to goal tolerance

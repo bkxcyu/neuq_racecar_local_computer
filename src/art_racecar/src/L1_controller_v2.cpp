@@ -131,7 +131,7 @@ L1Controller::L1Controller()
 
     //Controller parameter
     pn.param("controller_freq", controller_freq, 20);//控制频率
-    pn.param("AngleGain", Angle_gain, -1.0);//角度增益（系数）
+    pn.param("AngleGain", Angle_gain, -6.0);//角度增益（系数）
  
     pn.param("KP", KP, -1.0);//角度增益（系数）
     pn.param("KD", KD, -1.0);//角度增益（系数）

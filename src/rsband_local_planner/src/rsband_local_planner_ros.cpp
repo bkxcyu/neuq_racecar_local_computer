@@ -4,7 +4,6 @@
 *********************************************************************/
 
 #include "rsband_local_planner/rsband_local_planner_ros.h"
-
 #include <base_local_planner/goal_functions.h>
 #include <pluginlib/class_list_macros.h>
 #include <angles/angles.h>
