@@ -8,6 +8,13 @@
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
 
+geometry_msgs::Twist vel2pwm(geometry_msgs::Twist vel)
+{
+    geometry_msgs::Twist pwm;
+
+    return pwm;
+}
+
 void TwistCallback(const geometry_msgs::Twist& twist)
 {
     double angle;

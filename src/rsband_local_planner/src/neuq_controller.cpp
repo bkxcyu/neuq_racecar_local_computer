@@ -450,7 +450,12 @@ namespace rsband_local_planner
     }
     /*---------------------------------------------------------------------------------------*/
 
-
+    geometry_msgs::Twist pwm2vel(geometry_msgs::Twist pwm)
+    {
+        geometry_msgs::Twist vel;
+        //codes that travel pwm to vel should be write here
+        return vel;
+    }
 
     float L1Controller::getCurrantVel()
     {
