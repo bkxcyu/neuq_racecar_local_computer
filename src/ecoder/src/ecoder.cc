@@ -53,7 +53,7 @@ static uint8_t tmp[81];
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "imu");
+    ros::init(argc, argv, "ecoder");
     ros::NodeHandle n("~");
 
     name = ros::this_node::getName();

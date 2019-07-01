@@ -197,10 +197,9 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(ecoder.cc
-  src/ecoder.cc.cpp
+add_executable(ecoder
+  src/ecoder.cc
 )
-add_dependencies(ecoder.cc ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ecoder.cc
+target_link_libraries(ecoder
   ${catkin_LIBRARIES}
 )

@@ -61,6 +61,7 @@ namespace rsband_local_planner
             geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
             visualization_msgs::Marker ObstacleMarker;
             void reconfigure(RSBandPlannerConfig& config);
+            geometry_msgs::Twist pwm2vel(geometry_msgs::Twist pwm);
 
         private:
             ros::NodeHandle n_;
