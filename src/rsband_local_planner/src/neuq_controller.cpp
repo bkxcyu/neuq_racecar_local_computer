@@ -369,7 +369,7 @@ namespace rsband_local_planner
 
         Lfw =  getL1Distance();
         if (ReadyToLastRush())
-        cmd_vel.linear.x = 1680;
+        cmd_vel.linear.x = 1610;
         if(goal_received)//取得目标
         {
             double eta = getEta(carPose); 
