@@ -395,6 +395,7 @@ namespace rsband_local_planner
                 }
             }
         }
+        cmd_vel=pwm2vel(cmd_vel);
         last_cmd_vel=cmd_vel;
         cmd=cmd_vel;
         return true;
@@ -450,10 +451,12 @@ namespace rsband_local_planner
     }
     /*---------------------------------------------------------------------------------------*/
 
-    geometry_msgs::Twist pwm2vel(geometry_msgs::Twist pwm)
+    geometry_msgs::Twist L1Controller::pwm2vel(geometry_msgs::Twist pwm)
     {
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
+        vel.linear.x=0.0348*pwm.linear.x-54.1109;
+        vel.angular.z=pwm.angular.z;
         return vel;
     }
 
