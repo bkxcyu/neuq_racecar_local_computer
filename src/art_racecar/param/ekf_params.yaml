@@ -158,7 +158,7 @@ initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,
 # odom1_pose_rejection_threshold: 10
 # odom1_twist_rejection_threshold: 10
 
-# use_control: true
-# stamped_control: false
-# control_config: [true,  false, false,
-#                  false, false, false]
+use_control: true
+stamped_control: false
+control_config: [true,  false, false,
+                 false, false, false]
