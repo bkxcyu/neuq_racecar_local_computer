@@ -11,7 +11,8 @@
 geometry_msgs::Twist vel2pwm(geometry_msgs::Twist vel)
 {
     geometry_msgs::Twist pwm;
-
+    // vel.linear.x=0.0348*pwm.linear.x-54.1109;
+    pwm.linear.x=(vel.linear.x+54.1109)/0.0348;
     return pwm;
 }
 
@@ -20,12 +21,14 @@ void TwistCallback(const geometry_msgs::Twist& twist)
     double angle;
     static double last_in_x;
     static double last_in_z;
+    geometry_msgs::Twist twist_;
+    twist_=vel2pwm(twist);
 
     // ROS_INFO("get x= %f", twist.linear.x);
     // ROS_INFO("get z= %f", twist.angular.z);
 
     //aviod noize
-    if(twist.linear.x==0&&last_in_x!=0)
+    if(twist_.linear.x==0&&last_in_x!=0)
     {
         ROS_INFO(" corrected output x= %f", last_in_x);
         ROS_INFO(" corrected output z= %f", last_in_z);
@@ -34,13 +37,13 @@ void TwistCallback(const geometry_msgs::Twist& twist)
         return;
     }
 
-    angle = 2500.0 - twist.angular.z * 2000.0 / 180.0;//2200    1500   770
+    angle = 2500.0 - twist_.angular.z * 2000.0 / 180.0;//2200    1500   770
     
     // last_in_x=twist.linear.x;
     // last_in_z=twist.angular.z;
     // ROS_INFO("output x= %f", twist.linear.x);
     // ROS_INFO("output z= %f", twist.angular.z);
-    send_cmd(uint16_t(twist.linear.x),uint16_t(angle));
+    send_cmd(uint16_t(twist_.linear.x),uint16_t(angle));
 }
 
 int main(int argc, char** argv)

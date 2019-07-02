@@ -395,65 +395,19 @@ namespace rsband_local_planner
                 }
             }
         }
+        cmd_vel=pwm2vel(cmd_vel);
         last_cmd_vel=cmd_vel;
         cmd=cmd_vel;
         return true;
 
     }                
-
-    void L1Controller::controlLoopCB(const ros::TimerEvent&)
-    {   //根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-        geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
-        geometry_msgs::Twist carVel = odom.twist.twist;//速度
-        cmd_vel.linear.x = 1500;
-        cmd_vel.angular.z = baseAngle;
-
-        
-    /*>>>>>>>>>>>>>>>>>>>>   Lfw_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-        // getCurrantVel();
-        // ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
-        Lfw = goalRadius = getL1Distance();
-    /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-        if(goal_received)//取得目标
-        {
-            /*Estimate Steering Angle*///估计转向角
-            double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
-    /*>>>>>>>>>>>>>>>>>>   SLOW_down feature >>>>>>>>>>>>>>>>>>>>>>>>*/
-            std_msgs::Float64 slow_down_vel;
-            slow_down_vel=computeSlowDownVel();
-            if(slow_down_vel.data<0)
-            {
-                slow_down_vel.data=0;
-                ROS_ERROR("slow_down_vel<0,CHECK!");
-            }
-    /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-            if(foundForwardPt)//是否存在可行航路点
-            {
-            //  cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
-                //   cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error);
-            //    last_error=getSteeringAngle(eta);
-            err_sum=err_sum+baseAngle;
-                cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
-                last_error=getSteeringAngle(eta);
-                /*Estimate Gas Input*/
-                if(!goal_reached)//如果沒有到達目標點则继续以基速度行驶
-                {
-                    //double u = getGasInput(carVel.linear.x);
-                    //cmd_vel.linear.x = baseSpeed - u;
-                    cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
-                    //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
-                }
-            }
-        }
-        last_cmd_vel=cmd_vel;
-        // pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
-    }
     /*---------------------------------------------------------------------------------------*/
 
     geometry_msgs::Twist pwm2vel(geometry_msgs::Twist pwm)
     {
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
+        vel.linear.x=0.0348*pwm.linear.x-54.1109;
         return vel;
     }
 

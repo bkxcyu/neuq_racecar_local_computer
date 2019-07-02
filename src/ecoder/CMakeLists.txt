@@ -8,7 +8,8 @@ project(ecoder)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 add_definitions(-std=c++11)
-find_package(catkin REQUIRED COMPONENTS)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -201,5 +202,13 @@ add_executable(ecoder
   src/ecoder.cc
 )
 target_link_libraries(ecoder
+  ${catkin_LIBRARIES}
+)
+
+add_executable(odom
+  src/odom.cpp
+)
+add_dependencies(odom ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(odom
   ${catkin_LIBRARIES}
 )
