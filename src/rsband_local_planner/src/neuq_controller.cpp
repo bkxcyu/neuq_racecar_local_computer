@@ -368,7 +368,8 @@ namespace rsband_local_planner
         cmd_vel.angular.z = baseAngle;
 
         Lfw =  getL1Distance();
-
+        if (ReadyToLastRush())
+        cmd_vel.linear.x = 1680;
         if(goal_received)//取得目标
         {
             double eta = getEta(carPose); 
@@ -400,6 +401,35 @@ namespace rsband_local_planner
         return true;
 
     }                
+    
+    bool L1Controller::ReadyToLastRush()
+    {
+        //坐标转换
+        geometry_msgs::PoseStamped carPoseSt;//odom坐标系下车的坐标
+        carPoseSt.pose=odom.pose.pose;
+        carPoseSt.header=odom.header;
+        geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
+        geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
+        int path_point_number=TRAVERSAL_POINT;
+        std_msgs::Float64 path_x;
+        std_msgs::Float64 path_y;
+        try
+        {
+            tf_listener.transformPose("base_footprint", ros::Time(0) , carPoseSt, "odom" ,carPoseOfCarFrame);
+        }
+        catch(tf::TransformException &ex)
+        {
+            ROS_ERROR("%s,at L1 line 639",ex.what());
+            ros::Duration(1.0).sleep();
+        }
+        if(map_path.poses.size()<300)
+        {
+            ROS_INFO("Wanring!Ready To Rush");
+            return true;
+        }
+        else
+        return false;
+    }
 
     void L1Controller::controlLoopCB(const ros::TimerEvent&)
     {   //根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
@@ -447,6 +477,8 @@ namespace rsband_local_planner
         }
         last_cmd_vel=cmd_vel;
         // pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
+        // if (ReadyToLastRush())
+        // cmd_vel.linear.x = 1680;
     }
     /*---------------------------------------------------------------------------------------*/
 

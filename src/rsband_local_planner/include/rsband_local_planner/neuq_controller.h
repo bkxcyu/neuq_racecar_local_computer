@@ -94,6 +94,7 @@ namespace rsband_local_planner
             void obstCB(const visualization_msgs::Marker& obstMsg);
             void goalReachingCB(const ros::TimerEvent&);
             void controlLoopCB(const ros::TimerEvent&);
+            bool ReadyToLastRush();
 
     }; // end of class
 }
