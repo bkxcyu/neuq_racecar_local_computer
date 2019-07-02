@@ -80,6 +80,7 @@ namespace rsband_local_planner
             base_local_planner::OdometryHelperRos odom_helper_;
 
             double L, Lfw, Lrv, Vcmd, lfw, lrv, steering, u, v;
+            double RUSH_VEL;
             double MAX_SLOW_DOWN;
             double KD,KP,KI;
             double qujian_max,qujian_min;
@@ -87,6 +88,9 @@ namespace rsband_local_planner
             double last_error,err_sum;
             int controller_freq, baseSpeed;
             int TRAVERSAL_POINT;
+            int RUSH_POINT;
+            int CurrantPointNumber;
+            int MaxPointNumber;
             bool foundForwardPt, goal_received, goal_reached;
 
             void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
@@ -95,6 +99,9 @@ namespace rsband_local_planner
             void obstCB(const visualization_msgs::Marker& obstMsg);
             void goalReachingCB(const ros::TimerEvent&);
             void controlLoopCB(const ros::TimerEvent&);
+            bool ReadyToLastRush();
+            bool JudgeLockedRotor();
+            void BackOff();
 
     }; // end of class
 }
