@@ -155,7 +155,6 @@ int main(int argc, char** argv)
                 pub.publish(currant_vel);
                 found = true;
             }
-        
     }
 
     // Stop continous and close device

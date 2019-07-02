@@ -142,11 +142,11 @@ initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,
 # to generate an acceleration term. This term is then used in the robot’s state prediction. This is especially useful 
 # in situations where even small amounts of lag in convergence for a given state variable cause problems in your
 #  application (e.g., LIDAR shifting during rotations). Defaults to false
-use_control: false
+use_control: true
 # If true and use_control is also true, looks for a geometry_msgs/TwistStamped message instead of a geometry_msgs/Twist message.
 stamped_control: false
 # Controls which variables in the cmd_vel message are used in state prediction. The order of the values is X˙,Y˙,Z˙,roll˙,pitch˙,yaw˙.
 #  Only used if use_control is set to true.
 control_config: [true,  false, false,
-                 false, false, true]
+                 false, false, false]
 
