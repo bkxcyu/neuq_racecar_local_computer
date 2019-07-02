@@ -134,7 +134,7 @@ int main(int argc, char** argv)
         memcpy(data_raw, tmp, sizeof(uint8_t) * data_length);
 
         bool found = false;
-       
+
             if(data_raw[0]== 0x00)//帧头
             {
                 std_msgs::Float64 currant_vel;
@@ -146,7 +146,10 @@ int main(int argc, char** argv)
                 if(JY == DATA2)
                 {
                 /*--------------读数------------*/
+                // ROS_INFO("DATA:%d\n",DATA1);
                 currant_vel.data=(std::float_t)DATA1;
+                currant_vel.data=currant_vel.data/51;
+                ROS_INFO("currant_vel:%f\n",currant_vel.data);
                 }
                 /*--------------发布------------*/
                 pub.publish(currant_vel);
