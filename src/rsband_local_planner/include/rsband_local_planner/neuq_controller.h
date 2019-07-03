@@ -91,6 +91,8 @@ namespace rsband_local_planner
             int RUSH_POINT;
             int CurrantPointNumber;
             int MaxPointNumber;
+            int BLOOM_START_POINT;
+            int BLOOM_START_VEL;
             bool foundForwardPt, goal_received, goal_reached;
 
             void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
