@@ -86,6 +86,8 @@ namespace rsband_local_planner
             double qujian_max,qujian_min;
             double Gas_gain, baseAngle, Angle_gain, goalRadius;
             double last_error,err_sum;
+            double v1;
+            double v2;
             int controller_freq, baseSpeed;
             int TRAVERSAL_POINT;
             int RUSH_POINT;

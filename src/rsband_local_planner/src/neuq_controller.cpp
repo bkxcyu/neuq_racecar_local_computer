@@ -292,19 +292,19 @@ namespace rsband_local_planner
         
         float v_el =  getCurrantVel();
         double L1 = 0.8;
+
+        double beta;
+        beta=4.0/(v2-v1);
+
         v = fabs(v_el);
-        // if(v >= 0 || v <= 3)
-        // L1 = 0.22*(v*v-6*v+9)+1;
-        if(v <= 1.6)
-            L1 = 3 / 3.0;
-        else if(v > 1.6 && v < 4.8)
-            L1 = 1.25*v-1;
-        //  if(v>=0||v<=3)
-        //     L1 = 1.07*v + 0.8;
-        else if(v >= 4.8)
+        if(v <= v1)
+            L1 = 1;
+        else if(v > v1 && v < v2)
+            L1 = beta*v-1;
+        else if(v >= v2)
             L1 = 5;
             // ROS_INFO("L1 = %.2f",L1);
-        return Lfw_gain*L1;
+        return L1;
     }
 
     double L1Controller::getSteeringAngle(double eta)
@@ -418,13 +418,10 @@ namespace rsband_local_planner
                     else
                         cmd_vel.linear.z = 0;
 
-                    if(stop_flag)
-                    {
-                         cmd_vel.linear.x = 1500;
-                         ROS_WARN("CAR IS STOPED MANUALY");
-                    }
                     if(reset_flag)
                     {
+                        cmd_vel.linear.x = 1500;
+                        ROS_WARN("CAR IS STOPED MANUALY");
                         goal_received=false;
                     }
                        
@@ -724,8 +721,8 @@ namespace rsband_local_planner
         BLOOM_START_POINT=config.BLOOM_START_POINT;
         BLOOM_START_VEL=config.BLOOM_START_VEL;
         reset_flag=config.reset;
-        stop_flag=config.stop_car;
-        Lfw_gain=config.Lfw_gain;
+        v1=config.v1;
+        v2=config.v2;
         // ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
     }
 
