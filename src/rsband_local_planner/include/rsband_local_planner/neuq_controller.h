@@ -81,7 +81,7 @@ namespace rsband_local_planner
 
             double L, Lfw, Lrv, Vcmd, lfw, lrv, steering, u, v;
             double RUSH_VEL;
-            double MAX_SLOW_DOWN;
+            double MAX_SLOW_DOWN,Lfw_gain;
             double KD,KP,KI;
             double qujian_max,qujian_min;
             double Gas_gain, baseAngle, Angle_gain, goalRadius;
@@ -94,6 +94,7 @@ namespace rsband_local_planner
             int BLOOM_START_POINT;
             int BLOOM_START_VEL;
             bool foundForwardPt, goal_received, goal_reached;
+            bool reset_flag,stop_flag;
 
             void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
             void pathCB(const nav_msgs::Path::ConstPtr& pathMsg);

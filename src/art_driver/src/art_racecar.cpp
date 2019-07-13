@@ -12,6 +12,7 @@ geometry_msgs::Twist vel2pwm(geometry_msgs::Twist vel)
 {
     geometry_msgs::Twist pwm;
     pwm.linear.x=(vel.linear.x+54.1109)/0.0348;
+    pwm.linear.z=vel.linear.z;
     pwm.angular.z=vel.angular.z;
     return pwm;
 }
@@ -53,9 +54,9 @@ void TwistCallback(const geometry_msgs::Twist& twist)
     
     // last_in_x=twist.linear.x;
     // last_in_z=twist.angular.z;
-    // ROS_INFO("output x= %f", twist.linear.x);
-    // ROS_INFO("output z= %f", twist.angular.z);twist_.linear.x),uint16_t(angle));
-    send_cmd(uint16_t(_twist.linear.x),uint16_t(angle));
+    ROS_INFO("output x= %f", _twist.linear.x);
+    ROS_INFO("output z= %f", _twist.angular.z);
+    send_cmd(uint16_t(_twist.linear.x+_twist.linear.z*300),uint16_t(angle));
 }
 
 int main(int argc, char** argv)

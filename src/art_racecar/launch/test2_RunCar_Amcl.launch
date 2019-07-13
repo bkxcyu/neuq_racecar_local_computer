@@ -13,7 +13,7 @@
     <!-- IMU 陀螺仪-->
     <include file="$(find art_imu)/launch/imu.launch" />
     <!-- Car 底盘驱动-->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" />
     <!-- 电机反馈速度-->
     <!--<include file="$(find ecoder)/launch/ecoder.launch"/>-->
 

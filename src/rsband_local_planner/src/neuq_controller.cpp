@@ -191,7 +191,7 @@ namespace rsband_local_planner
         double dy = wayPt.y - car_pos.y;
         double dist = sqrt(dx*dx + dy*dy);//车到航路点的直线距离
 
-        if(dist < Lfw)//如果这个距离小于预瞄距离（转弯半径） 则视为不能到达
+        if(dist < Lfw||dist>2*Lfw)//如果这个距离小于预瞄距离（转弯半径） 则视为不能到达
             return false;
         else if(dist >= Lfw)
             return true;
@@ -304,7 +304,7 @@ namespace rsband_local_planner
         else if(v >= 4.8)
             L1 = 5;
             // ROS_INFO("L1 = %.2f",L1);
-        return L1;
+        return Lfw_gain*L1;
     }
 
     double L1Controller::getSteeringAngle(double eta)
@@ -385,10 +385,11 @@ namespace rsband_local_planner
 
             if(foundForwardPt)
             {
-            
+                double steeringAngle;
+                steeringAngle=getSteeringAngle(eta);
                 err_sum=err_sum+baseAngle;
-                cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
-                last_error=getSteeringAngle(eta);
+                cmd_vel.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error)+KI*err_sum;
+                last_error=steeringAngle;
                 /*Estimate Gas Input*/
                 if(!goal_reached)
                 {
@@ -411,7 +412,22 @@ namespace rsband_local_planner
                     if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
                     {
                         cmd_vel.linear.x = BLOOM_START_VEL;
+                        cmd_vel.linear.z = 1;
+                        cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
                     }
+                    else
+                        cmd_vel.linear.z = 0;
+
+                    if(stop_flag)
+                    {
+                         cmd_vel.linear.x = 1500;
+                         ROS_WARN("CAR IS STOPED MANUALY");
+                    }
+                    if(reset_flag)
+                    {
+                        goal_received=false;
+                    }
+                       
                 }
             }
         }
@@ -424,24 +440,6 @@ namespace rsband_local_planner
     
     bool L1Controller::ReadyToLastRush()
     {
-        //坐标转换
-        geometry_msgs::PoseStamped carPoseSt;//odom坐标系下车的坐标
-        carPoseSt.pose=odom.pose.pose;
-        carPoseSt.header=odom.header;
-        geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
-        geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
-        int path_point_number=TRAVERSAL_POINT;
-        std_msgs::Float64 path_x;
-        std_msgs::Float64 path_y;
-        try
-        {
-            tf_listener.transformPose("base_footprint", ros::Time(0) , carPoseSt, "odom" ,carPoseOfCarFrame);
-        }
-        catch(tf::TransformException &ex)
-        {
-            ROS_ERROR("%s,at L1 line 639",ex.what());
-            ros::Duration(1.0).sleep();
-        }
         if(map_path.poses.size()<RUSH_POINT)
         {
             ROS_INFO("Wanring!Ready To Rush");
@@ -527,7 +525,8 @@ namespace rsband_local_planner
     {
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
-        vel.linear.x=0.0348*pwm.linear.x-54.1109;
+        vel.linear.x=0.0348*pwm.linear.x-54.1109;//转移
+        vel.linear.z=pwm.linear.z;//
         vel.angular.z=pwm.angular.z;
         return vel;
     }
@@ -724,6 +723,9 @@ namespace rsband_local_planner
         RUSH_POINT=config.RUSH_POINT;
         BLOOM_START_POINT=config.BLOOM_START_POINT;
         BLOOM_START_VEL=config.BLOOM_START_VEL;
+        reset_flag=config.reset;
+        stop_flag=config.stop_car;
+        Lfw_gain=config.Lfw_gain;
         // ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
     }
 
