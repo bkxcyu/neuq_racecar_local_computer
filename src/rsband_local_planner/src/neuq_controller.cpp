@@ -36,6 +36,9 @@ namespace rsband_local_planner
         pn.param("qujian_min", qujian_min, 7.0);
         pn.param("qujian_max", qujian_max, 20.0);
         pn.param("TRAVERSAL_POINT", TRAVERSAL_POINT, 100);
+        pn.param("MAX_1", MAX_1, 4.0);
+        pn.param("MAX_2", MAX_2, 20.0);
+        pn.param("MAX_3", MAX_3, 40.0);
 
         //Publishers and Subscribers
         odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
@@ -294,13 +297,13 @@ namespace rsband_local_planner
         // if(v >= 0 || v <= 3)
         // L1 = 0.22*(v*v-6*v+9)+1;
         if(v <= 1.6)
-            L1 = 3 / 3.0;
+            L1 = 1.8;
         else if(v > 1.6 && v < 4.8)
-            L1 = 1.25*v-1;
+            L1 = 1.25*v-0.2;
         //  if(v>=0||v<=3)
         //     L1 = 1.07*v + 0.8;
         else if(v >= 4.8)
-            L1 = 5;
+            L1 = 5.8;
             // ROS_INFO("L1 = %.2f",L1);
         return L1;
     }
@@ -369,7 +372,9 @@ namespace rsband_local_planner
 
         Lfw =  getL1Distance();
         if (ReadyToLastRush())
-        cmd_vel.linear.x = 1680;
+        cmd_vel.linear.x = 1610;
+        if(JudgeLockedRotor())
+        cmd_vel.linear.x = 1500;
         if(goal_received)//取得目标
         {
             double eta = getEta(carPose); 
@@ -392,7 +397,9 @@ namespace rsband_local_planner
                 if(!goal_reached)
                 {
                     cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
+                    
                     //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
+
                 }
             }
         }
@@ -427,6 +434,18 @@ namespace rsband_local_planner
             ROS_INFO("Wanring!Ready To Rush");
             return true;
         }
+        else
+        return false;
+    }
+    
+    bool L1Controller::JudgeLockedRotor()
+    {
+        static int count = 0;
+        float VEL =  getCurrantVel();
+        if (VEL<0.1 && cmd_vel.linear.x>1550)
+        (count++);
+        if (count++ > 40)
+        return true;
         else
         return false;
     }
@@ -512,10 +531,27 @@ namespace rsband_local_planner
         // if(vel.data>30)
         //     vel.data=30;
         //vel.data= -0.0027*fabs(Err.data)*fabs(Err.data)*fabs(Err.data)+0.1736*fabs(Err.data)*fabs(Err.data)-0.6398*fabs(Err.data)+3;
-        double mediate;
+        // double mediate;
+        // double fErr = fabs(Err.data);
+        // mediate = -pow(fErr,0.82)+12;
+        // vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
+        double a;
+        a = MAX_3/49;
+        double b,c;
+        b = (MAX_2-MAX_3)/3;
+        c = 10*(MAX_2-MAX_3)/3;
+        double d,e;
+        d = (MAX_1-MAX_2)/10;
+        e = 2*MAX_2-MAX_1;
         double fErr = fabs(Err.data);
-        mediate = -pow(fErr,1.5)+12;
-        vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
+        if(fErr>0 && fErr<7)
+        vel.data = MAX_3/49;
+        if(fErr>7 && fErr<10)
+        vel.data = a*fErr+b;
+        if(fErr>10 && fErr<20)
+        vel.data = d*fErr+e;
+        else
+        vel.data = MAX_1;
         
         //work at 6.11 p.m.10:35 without error,but have not been test;
         // double a,b,c;
@@ -666,6 +702,11 @@ namespace rsband_local_planner
         TRAVERSAL_POINT=config.TRAVERSAL_POINT;
         KP=config.KP;
         KD=config.KD;
+        MAX_1=config.MAX_1;
+        MAX_2=config.MAX_2;
+        MAX_3=config.MAX_3;
+
+
         ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
     }
 

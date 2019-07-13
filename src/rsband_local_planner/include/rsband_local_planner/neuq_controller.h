@@ -84,6 +84,7 @@ namespace rsband_local_planner
             double qujian_max,qujian_min;
             double Gas_gain, baseAngle, Angle_gain, goalRadius;
             double last_error,err_sum;
+            double MAX_1,MAX_2,MAX_3;
             int controller_freq, baseSpeed;
             int TRAVERSAL_POINT;
             bool foundForwardPt, goal_received, goal_reached;
@@ -95,6 +96,7 @@ namespace rsband_local_planner
             void goalReachingCB(const ros::TimerEvent&);
             void controlLoopCB(const ros::TimerEvent&);
             bool ReadyToLastRush();
+            bool JudgeLockedRotor();
 
     }; // end of class
 }
