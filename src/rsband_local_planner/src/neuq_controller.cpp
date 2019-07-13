@@ -61,6 +61,7 @@ namespace rsband_local_planner
         goal_reached = false;//是否到达目标
         cmd_vel.linear.x = 1500; // 1500 for stop
         cmd_vel.angular.z = baseAngle;
+        MaxPointNumber = 0;
 
         //Show info
         ROS_INFO("[param] baseSpeed: %d", baseSpeed);
@@ -193,7 +194,7 @@ namespace rsband_local_planner
         double dy = wayPt.y - car_pos.y;
         double dist = sqrt(dx*dx + dy*dy);//车到航路点的直线距离
 
-        if(dist < Lfw)//如果这个距离小于预瞄距离（转弯半径） 则视为不能到达
+        if(dist < Lfw||dist>2*Lfw)//如果这个距离小于预瞄距离（转弯半径） 则视为不能到达
             return false;
         else if(dist >= Lfw)
             return true;
@@ -241,6 +242,7 @@ namespace rsband_local_planner
         else if(goal_reached)//到达目标
         {
             forwardPt = odom_goal_pos;
+            MaxPointNumber=0;
             foundForwardPt = false;
             //ROS_INFO("goal REACHED!");
         }
@@ -293,17 +295,18 @@ namespace rsband_local_planner
         
         float v_el =  getCurrantVel();
         double L1 = 0.8;
+
+        double beta;
+        beta=4.0/(v2-v1);
+
         v = fabs(v_el);
-        // if(v >= 0 || v <= 3)
-        // L1 = 0.22*(v*v-6*v+9)+1;
-        if(v <= 1.6)
-            L1 = 1.8;
-        else if(v > 1.6 && v < 4.8)
-            L1 = 1.25*v-0.2;
-        //  if(v>=0||v<=3)
-        //     L1 = 1.07*v + 0.8;
-        else if(v >= 4.8)
-            L1 = 5.8;
+
+        if(v <= v1)
+            L1 = 1;
+        else if(v > v1 && v < v2)
+            L1 = beta*v-1;
+        else if(v >= v2)
+            L1 = 5;
             // ROS_INFO("L1 = %.2f",L1);
         return L1;
     }
@@ -371,10 +374,7 @@ namespace rsband_local_planner
         cmd_vel.angular.z = baseAngle;
 
         Lfw =  getL1Distance();
-        if (ReadyToLastRush())
-        cmd_vel.linear.x = 1610;
-        if(JudgeLockedRotor())
-        cmd_vel.linear.x = 1500;
+
         if(goal_received)//取得目标
         {
             double eta = getEta(carPose); 
@@ -389,47 +389,60 @@ namespace rsband_local_planner
 
             if(foundForwardPt)
             {
-            
+                double steeringAngle;
+                steeringAngle=getSteeringAngle(eta);
                 err_sum=err_sum+baseAngle;
-                cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
-                last_error=getSteeringAngle(eta);
+                cmd_vel.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error)+KI*err_sum;
+                last_error=steeringAngle;
                 /*Estimate Gas Input*/
                 if(!goal_reached)
                 {
                     cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
-                    
-                    //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
 
+                    if (ReadyToLastRush())
+                        cmd_vel.linear.x = RUSH_VEL;
+
+                    // static int count=0;
+                    // if(JudgeLockedRotor()||count)
+                    // {
+                    //     //  cmd_vel.linear.x = 1500;
+                    //     // BackOff();
+                    // //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
+                    //     count++;
+                    //     if(count<20)
+                    //         cmd_vel.linear.x = 1250;
+                    //     else
+                    //         count=0;
+                    // }
+                    if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
+                    {
+                        cmd_vel.linear.x = BLOOM_START_VEL;
+                        cmd_vel.linear.z = 1;
+                        cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
+                    }
+                    else
+                        cmd_vel.linear.z = 0;
+
+                    if(reset_flag)
+                    {
+                        cmd_vel.linear.x = 1500;
+                        ROS_WARN("CAR IS STOPED MANUALY");
+                        goal_received=false;
+                    }
+                       
                 }
             }
         }
+        cmd_vel=pwm2vel(cmd_vel);
         last_cmd_vel=cmd_vel;
         cmd=cmd_vel;
         return true;
 
-    }                
+    }        
     
     bool L1Controller::ReadyToLastRush()
     {
-        //坐标转换
-        geometry_msgs::PoseStamped carPoseSt;//odom坐标系下车的坐标
-        carPoseSt.pose=odom.pose.pose;
-        carPoseSt.header=odom.header;
-        geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
-        geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
-        int path_point_number=TRAVERSAL_POINT;
-        std_msgs::Float64 path_x;
-        std_msgs::Float64 path_y;
-        try
-        {
-            tf_listener.transformPose("base_footprint", ros::Time(0) , carPoseSt, "odom" ,carPoseOfCarFrame);
-        }
-        catch(tf::TransformException &ex)
-        {
-            ROS_ERROR("%s,at L1 line 639",ex.what());
-            ros::Duration(1.0).sleep();
-        }
-        if(map_path.poses.size()<300)
+        if(map_path.poses.size()<RUSH_POINT)
         {
             ROS_INFO("Wanring!Ready To Rush");
             return true;
@@ -437,71 +450,89 @@ namespace rsband_local_planner
         else
         return false;
     }
-    
+
     bool L1Controller::JudgeLockedRotor()
     {
         static int count = 0;
         float VEL =  getCurrantVel();
         if (VEL<0.1 && cmd_vel.linear.x>1550)
-        (count++);
-        if (count++ > 40)
+        {
+            count++;
+        };
+        if (count++ > 30)
         return true;
         else
         return false;
     }
+    void L1Controller::BackOff()
+    {
+        for(static int i = 0;i<10;i++)
+        {
+            cmd_vel.linear.x = 1400;
+        }
 
+    }
+    
     void L1Controller::controlLoopCB(const ros::TimerEvent&)
     {   //根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-        geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
-        geometry_msgs::Twist carVel = odom.twist.twist;//速度
-        cmd_vel.linear.x = 1500;
-        cmd_vel.angular.z = baseAngle;
+    //     geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
+    //     geometry_msgs::Twist carVel = odom.twist.twist;//速度
+    //     cmd_vel.linear.x = 1500;
+    //     cmd_vel.angular.z = baseAngle;
 
         
-    /*>>>>>>>>>>>>>>>>>>>>   Lfw_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-        // getCurrantVel();
-        // ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
-        Lfw = goalRadius = getL1Distance();
-    /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-        if(goal_received)//取得目标
-        {
-            /*Estimate Steering Angle*///估计转向角
-            double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
-    /*>>>>>>>>>>>>>>>>>>   SLOW_down feature >>>>>>>>>>>>>>>>>>>>>>>>*/
-            std_msgs::Float64 slow_down_vel;
-            slow_down_vel=computeSlowDownVel();
-            if(slow_down_vel.data<0)
-            {
-                slow_down_vel.data=0;
-                ROS_ERROR("slow_down_vel<0,CHECK!");
-            }
-    /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-            if(foundForwardPt)//是否存在可行航路点
-            {
-            //  cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
-                //   cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error);
-            //    last_error=getSteeringAngle(eta);
-            err_sum=err_sum+baseAngle;
-                cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
-                last_error=getSteeringAngle(eta);
-                /*Estimate Gas Input*/
-                if(!goal_reached)//如果沒有到達目標點则继续以基速度行驶
-                {
-                    //double u = getGasInput(carVel.linear.x);
-                    //cmd_vel.linear.x = baseSpeed - u;
-                    cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
-                    //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
-                }
-            }
-        }
-        last_cmd_vel=cmd_vel;
-        // pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
-        // if (ReadyToLastRush())
-        // cmd_vel.linear.x = 1680;
+    // /*>>>>>>>>>>>>>>>>>>>>   Lfw_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+    //     // getCurrantVel();
+    //     // ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
+    //     Lfw = goalRadius = getL1Distance();
+    // /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+    //     if(goal_received)//取得目标
+    //     {
+    //         /*Estimate Steering Angle*///估计转向角
+    //         double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
+    // /*>>>>>>>>>>>>>>>>>>   SLOW_down feature >>>>>>>>>>>>>>>>>>>>>>>>*/
+    //         std_msgs::Float64 slow_down_vel;
+    //         slow_down_vel=computeSlowDownVel();
+    //         if(slow_down_vel.data<0)
+    //         {
+    //             slow_down_vel.data=0;
+    //             ROS_ERROR("slow_down_vel<0,CHECK!");
+    //         }
+    // /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
+    //         if(foundForwardPt)//是否存在可行航路点
+    //         {
+    //         //  cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
+    //             //   cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error);
+    //         //    last_error=getSteeringAngle(eta);
+    //         err_sum=err_sum+baseAngle;
+    //             cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
+    //             last_error=getSteeringAngle(eta);
+    //             /*Estimate Gas Input*/
+    //             if(!goal_reached)//如果沒有到達目標點则继续以基速度行驶
+    //             {
+    //                 //double u = getGasInput(carVel.linear.x);
+    //                 //cmd_vel.linear.x = baseSpeed - u;
+    //                 cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
+    //                 //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
+    //             }
+    //         }
+    //     }
+    //     last_cmd_vel=cmd_vel;
+    //     // pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
+    //     // if (ReadyToLastRush())
+    //     // cmd_vel.linear.x = 1680;
     }
     /*---------------------------------------------------------------------------------------*/
 
-
+    geometry_msgs::Twist L1Controller::pwm2vel(geometry_msgs::Twist pwm)
+    {
+        geometry_msgs::Twist vel;
+        //codes that travel pwm to vel should be write here
+        vel.linear.x=0.0348*pwm.linear.x-54.1109;//转移
+        vel.linear.z=pwm.linear.z;//
+        vel.angular.z=pwm.angular.z;
+        return vel;
+    }
 
     float L1Controller::getCurrantVel()
     {
@@ -610,6 +641,12 @@ namespace rsband_local_planner
             ROS_ERROR("%s,at L1 line 639",ex.what());
             ros::Duration(1.0).sleep();
         }
+        
+        CurrantPointNumber = map_path.poses.size();
+        if(MaxPointNumber < CurrantPointNumber)
+            MaxPointNumber = CurrantPointNumber;
+        
+
         while(path_point_number>map_path.poses.size())
         {
             path_point_number--;
@@ -705,9 +742,14 @@ namespace rsband_local_planner
         MAX_1=config.MAX_1;
         MAX_2=config.MAX_2;
         MAX_3=config.MAX_3;
-
-
-        ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
+        RUSH_VEL=config.RUSH_VEL;
+        RUSH_POINT=config.RUSH_POINT;
+        BLOOM_START_POINT=config.BLOOM_START_POINT;
+        BLOOM_START_VEL=config.BLOOM_START_VEL;
+        reset_flag=config.reset;
+        v1=config.v1;
+        v2=config.v2;
+        // ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
     }
 
 

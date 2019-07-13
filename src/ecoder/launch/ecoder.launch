@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="ecoder" name="ecoder" type="ecoder" output="screen">
+    <param name="port" value="/dev/car"/>   
+    <param name="baud" value="38400"/>
+  </node>
+
+  <node pkg="ecoder" name="odom_ecoder" type="odom" output="screen">
+    <param name="port" value="/dev/car"/>   
+    <param name="baud" value="38400"/>
+  </node>
+</launch>

@@ -61,6 +61,7 @@ namespace rsband_local_planner
             geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
             visualization_msgs::Marker ObstacleMarker;
             void reconfigure(RSBandPlannerConfig& config);
+            geometry_msgs::Twist pwm2vel(geometry_msgs::Twist pwm);
 
         private:
             ros::NodeHandle n_;
@@ -79,15 +80,24 @@ namespace rsband_local_planner
             base_local_planner::OdometryHelperRos odom_helper_;
 
             double L, Lfw, Lrv, Vcmd, lfw, lrv, steering, u, v;
-            double MAX_SLOW_DOWN;
+            double RUSH_VEL;
+            double MAX_SLOW_DOWN,Lfw_gain;
             double KD,KP,KI;
             double qujian_max,qujian_min;
             double Gas_gain, baseAngle, Angle_gain, goalRadius;
             double last_error,err_sum;
             double MAX_1,MAX_2,MAX_3;
+            double v1;
+            double v2;
             int controller_freq, baseSpeed;
             int TRAVERSAL_POINT;
+            int RUSH_POINT;
+            int CurrantPointNumber;
+            int MaxPointNumber;
+            int BLOOM_START_POINT;
+            int BLOOM_START_VEL;
             bool foundForwardPt, goal_received, goal_reached;
+            bool reset_flag,stop_flag;
 
             void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
             void pathCB(const nav_msgs::Path::ConstPtr& pathMsg);
@@ -97,6 +107,8 @@ namespace rsband_local_planner
             void controlLoopCB(const ros::TimerEvent&);
             bool ReadyToLastRush();
             bool JudgeLockedRotor();
+
+            void BackOff();
 
     }; // end of class
 }

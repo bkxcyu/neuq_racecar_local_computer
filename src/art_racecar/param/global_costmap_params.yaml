@@ -1,6 +1,6 @@
 global_costmap:
     footprint: [[-0.305, -0.18], [-0.305, 0.18], [0.305, 0.18], [0.305, -0.18]]   #机器人形状  左上角开始 顺时针方向 原始值：[[-0.305, -0.18], [-0.305, 0.18], [0.305, 0.18], [0.305, -0.18]] 实测值（0.56 0.34 0.23 0.13）：[[-0.28, -0.17], [-0.28, 0.17], [0.28, 0.17], [0.28, -0.17]] 
-    footprint_padding: 0.01
+    footprint_padding: 0.1
     transform_tolerance: 0.5 #坐标系间的转换可以忍受的最大延时;
     update_frequency: 10.0
     publish_frequency: 10.0
@@ -10,8 +10,8 @@ global_costmap:
     resolution: 0.10
 
     rolling_window: true
-    width: 100.0 #default:10
-    height: 40.0 #default:10
+    width: 80.0 #default:10
+    height: 80.0 #default:10
     track_unknown_space: true #假如该参数设置为false的话，就意味着地图上的未知区域也会被认为是可以自由移动的区域，
                                #这样在进行全局路径规划时，可以把一些未探索的未知区域也来参与到路径规划。
                                
@@ -20,6 +20,11 @@ global_costmap:
         - {name: static,    type: "costmap_2d::StaticLayer"}            
         - {name: sensor,    type: "costmap_2d::ObstacleLayer"}
         - {name: inflation, type: "costmap_2d::InflationLayer"}
+    #     - {name: obstacles, type: "costmap_2d::VoxelLayer"}
+
+    # obstacles:
+    #     observation_sources: base_scan
+    #     base_scan: {data_type: LaserScan, sensor_frame: laser, clearing: true, marking: true, topic: scan}
 
     static:        
         map_topic: /map 
@@ -31,8 +36,8 @@ global_costmap:
 
     #膨胀层 
     inflation:
-        inflation_radius: 1.5 #default:0.1  #膨胀半径  The radius in meters to which the map inflates obstacle cost values.
-        cost_scaling_factor: 8 #default:8.0 #这个值越大 表示膨胀层的值下降得越快 A scaling factor to apply to cost values during inflation. The cost function is computed as follows for all cells in the costmap further than the inscribed radius distance and closer than the inflation radius distance away from an actual obstacle: 
+        inflation_radius: 1.2 #default:0.1  #膨胀半径  The radius in meters to which the map inflates obstacle cost values.
+        cost_scaling_factor: 4.5 #default:8.0 #这个值越大 表示膨胀层的值下降得越快 A scaling factor to apply to cost values during inflation. The cost function is computed as follows for all cells in the costmap further than the inscribed radius distance and closer than the inflation radius distance away from an actual obstacle: 
         # exp(-1.0 * cost_scaling_factor * (distance_from_obstacle - inscribed_radius)) * (costmap_2d::INSCRIBED_INFLATED_OBSTACLE - 1)
         # where costmap_2d::INSCRIBED_INFLATED_OBSTACLE is currently 254. NOTE: since the cost_scaling_factor is multiplied by a negative in the formula, increasing the factor will decrease the resulting cost values.
 

@@ -69,10 +69,10 @@ if __name__=="__main__":
     rospy.init_node('racecar_teleop')
     pub = rospy.Publisher('~/car/cmd_vel', Twist, queue_size=5)
 
-    speed_start_value = 70 
+    speed_start_value = 50 
     turn_start_value = 50
     speed_mid = 1500
-    turn_mid = 80
+    turn_mid = 95
     speed_bias = 0
     turn_bias = 0
     speed_add_once = 5
