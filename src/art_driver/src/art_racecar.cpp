@@ -15,6 +15,15 @@ geometry_msgs::Twist vel2pwm(geometry_msgs::Twist vel)
     pwm.angular.z=vel.angular.z;
     return pwm;
 }
+void TwistCallback1(const geometry_msgs::Twist& twist)
+{
+    double angle;
+    ROS_INFO("x= %f", twist.linear.x);
+    ROS_INFO("z= %f", twist.angular.z);
+    angle = 2500.0 - twist.angular.z * 2000.0 / 180.0;
+    //ROS_INFO("angle= %d",uint16_t(angle));
+    send_cmd(uint16_t(twist.linear.x),uint16_t(angle));
+}
 
 void TwistCallback(const geometry_msgs::Twist& twist)
 {
@@ -57,6 +66,7 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     ros::Subscriber sub = n.subscribe("/cmd_vel",1,TwistCallback);
+    ros::Subscriber sub1 = n.subscribe("/car/cmd_vel",1,TwistCallback1);
 
 
 
