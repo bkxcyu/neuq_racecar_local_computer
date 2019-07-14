@@ -399,36 +399,23 @@ namespace rsband_local_planner
                 {
                     cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
 
-                    // if (ReadyToLastRush())
-                    //     cmd_vel.linear.x = RUSH_VEL;
+                    if (ReadyToLastRush())
+                        cmd_vel.linear.x = RUSH_VEL;
+                    if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
+                    {
+                        cmd_vel.linear.x = BLOOM_START_VEL;
+                        cmd_vel.linear.z = 1;
+                        cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
+                    }
+                    else
+                        cmd_vel.linear.z = 0;
 
-                    // static int count=0;
-                    // if(JudgeLockedRotor()||count)
-                    // {
-                    //     //  cmd_vel.linear.x = 1500;
-                    //     // BackOff();
-                    // //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
-                    //     count++;
-                    //     if(count<20)
-                    //         cmd_vel.linear.x = 1250;
-                    //     else
-                    //         count=0;
-                    // }
-                    // if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
-                    // {
-                    //     cmd_vel.linear.x = BLOOM_START_VEL;
-                    //     cmd_vel.linear.z = 1;
-                    //     cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
-                    // }
-                    // else
-                    //     cmd_vel.linear.z = 0;
-
-                    // if(reset_flag)
-                    // {
-                    //     cmd_vel.linear.x = 1500;
-                    //     ROS_WARN("CAR IS STOPED MANUALY");
-                    //     goal_received=false;
-                    // }
+                    if(reset_flag)
+                    {
+                        cmd_vel.linear.x = 1500;
+                        ROS_WARN("CAR IS STOPED MANUALY");
+                        goal_received=false;
+                    }
                        
                 }
             }
@@ -528,7 +515,7 @@ namespace rsband_local_planner
     {
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
-        vel.linear.x=0.0348*pwm.linear.x-54.1109;//转移
+        vel.linear.x=1.5*(0.0348*pwm.linear.x-54.1109);//转移
         vel.linear.z=pwm.linear.z;//
         vel.angular.z=pwm.angular.z;
         return vel;
