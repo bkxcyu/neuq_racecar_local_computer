@@ -304,7 +304,7 @@ namespace rsband_local_planner
         if(v <= v1)
             L1 = 1;
         else if(v > v1 && v < v2)
-            L1 = beta*v-1;
+            L1 = beta*v-beta*v1+1;
         else if(v >= v2)
             L1 = 5;
             // ROS_INFO("L1 = %.2f",L1);
@@ -710,7 +710,7 @@ namespace rsband_local_planner
         }
 
 
-        ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+        //ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
         err_pub.publish(Err);
         return Err;
