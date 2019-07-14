@@ -399,8 +399,8 @@ namespace rsband_local_planner
                 {
                     cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
 
-                    if (ReadyToLastRush())
-                        cmd_vel.linear.x = RUSH_VEL;
+                    // if (ReadyToLastRush())
+                    //     cmd_vel.linear.x = RUSH_VEL;
 
                     // static int count=0;
                     // if(JudgeLockedRotor()||count)
@@ -414,21 +414,21 @@ namespace rsband_local_planner
                     //     else
                     //         count=0;
                     // }
-                    if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
-                    {
-                        cmd_vel.linear.x = BLOOM_START_VEL;
-                        cmd_vel.linear.z = 1;
-                        cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
-                    }
-                    else
-                        cmd_vel.linear.z = 0;
+                    // if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
+                    // {
+                    //     cmd_vel.linear.x = BLOOM_START_VEL;
+                    //     cmd_vel.linear.z = 1;
+                    //     cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
+                    // }
+                    // else
+                    //     cmd_vel.linear.z = 0;
 
-                    if(reset_flag)
-                    {
-                        cmd_vel.linear.x = 1500;
-                        ROS_WARN("CAR IS STOPED MANUALY");
-                        goal_received=false;
-                    }
+                    // if(reset_flag)
+                    // {
+                    //     cmd_vel.linear.x = 1500;
+                    //     ROS_WARN("CAR IS STOPED MANUALY");
+                    //     goal_received=false;
+                    // }
                        
                 }
             }
@@ -567,22 +567,22 @@ namespace rsband_local_planner
         // mediate = -pow(fErr,0.82)+12;
         // vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
         double a;
-        a = MAX_3/49;
+        a = MAX_1/49;
         double b,c;
-        b = (MAX_2-MAX_3)/3;
-        c = 10*(MAX_2-MAX_3)/3;
+        b = (MAX_2-MAX_1)/3;
+        c = (10*MAX_1-7*MAX_2)/3;
         double d,e;
-        d = (MAX_1-MAX_2)/10;
-        e = 2*MAX_2-MAX_1;
+        d = (MAX_3-MAX_2)/10;
+        e = 2*MAX_2-MAX_3;
         double fErr = fabs(Err.data);
-        if(fErr>0 && fErr<7)
-        vel.data = MAX_3/49;
-        if(fErr>7 && fErr<10)
-        vel.data = a*fErr+b;
-        if(fErr>10 && fErr<20)
+        if(fErr>=0 && fErr<7)
+        vel.data = a*fErr*fErr;
+        if(fErr>=7 && fErr<10)
+        vel.data = b*fErr+c;
+        if(fErr>=10 && fErr<20)
         vel.data = d*fErr+e;
-        else
-        vel.data = MAX_1;
+        if(fErr>=20)
+        vel.data = MAX_3;
         
         //work at 6.11 p.m.10:35 without error,but have not been test;
         // double a,b,c;
@@ -605,11 +605,11 @@ namespace rsband_local_planner
         if(std::isnan(vel.data)||std::isinf(vel.data))
         {
             ROS_ERROR("The caculated vel is nan or inf,something wrong,check it") ;
-            Err.data=MAX_SLOW_DOWN;
+            Err.data=MAX_3;
             return vel;
         }
 
-        // ROS_INFO("\nslow down vel=%f",vel.data);
+        //  ROS_INFO("\nslow down vel=%f",vel.data);
         return vel;
     }
 
@@ -725,6 +725,7 @@ namespace rsband_local_planner
         Err=computeIntegralErr();
         slow_down_vel=switchErrIntoVel(Err);
 
+        ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
         return slow_down_vel;
     }
 
