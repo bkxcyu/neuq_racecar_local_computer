@@ -5,8 +5,8 @@ global_costmap:
     update_frequency: 10.0
     publish_frequency: 10.0
 
-    global_frame: /map
-    robot_base_frame: /base_footprint
+    global_frame: map
+    robot_base_frame: base_footprint
     resolution: 0.10
 
     rolling_window: true
@@ -27,7 +27,7 @@ global_costmap:
     #     base_scan: {data_type: LaserScan, sensor_frame: laser, clearing: true, marking: true, topic: scan}
 
     static:        
-        map_topic: /map 
+        map_topic: map 
         subscribe_to_updates: true
 
     sensor:

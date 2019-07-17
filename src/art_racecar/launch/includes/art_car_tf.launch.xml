@@ -2,7 +2,7 @@
     <!-- tf is a package that lets the user keep track of multiple coordinate frames over time. -->
     <!-- is a command line tool for sending static transforms. 静态发布一个从父坐标系到子坐标系的一个坐标变换。 -->
     <!--                 static_transform_publisher                                        x   y   z    yaw pitch roll frame_id（父坐标）child_frame_id（子坐标）  period_in_ms-->
-    <node pkg="tf" type="static_transform_publisher" name="base_footprint2base_link" args="0.0 0.0 0.15 0.0 0.0   0.0  /base_footprint /base_link                10"/>
-    <node pkg="tf" type="static_transform_publisher" name="base_link2laser_link" args="   0.07 0.0 0.0  0.0 0.0   0.0  /base_link      /laser                    10"/>
-    <node pkg="tf" type="static_transform_publisher" name="base_link2imu" args="        0.1653 0.0 0.0  0.0 0.0   0.0  /base_link      /IMU_link                 10"/>
+    <node pkg="tf" type="static_transform_publisher" name="base_footprint2base_link" args="0.0 0.0 0.15 0.0 0.0   0.0  base_footprint base_link                10"/>
+    <node pkg="tf" type="static_transform_publisher" name="base_link2laser_link" args="   0.07 0.0 0.0  0.0 0.0   0.0  base_link      laser                    10"/>
+    <node pkg="tf" type="static_transform_publisher" name="base_link2imu" args="        0.1653 0.0 0.0  0.0 0.0   0.0  base_link      IMU_link                 10"/>
 </launch>

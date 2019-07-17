@@ -65,7 +65,7 @@
         <!-- move_base params -->
         <rosparam file="$(find art_racecar)/param/base_global_planner_params.yaml" command="load"/>
         <rosparam file="$(find art_racecar)/param/move_base_params.yaml" command="load"/>
-        <remap from="/odom" to="/odometry/filtered"/>
+        <remap from="odom" to="odometry/filtered"/>
         
        
     </node>
