@@ -292,16 +292,17 @@ namespace rsband_local_planner
         
         float v_el =  getCurrantVel();
         double L1 = 0.8;
+        double v1=1.6;
+        double v2=4.8;
+        double beta;
+        beta=4.0/(v2-v1);
+
         v = fabs(v_el);
-        // if(v >= 0 || v <= 3)
-        // L1 = 0.22*(v*v-6*v+9)+1;
-        if(v <= 1.6)
-            L1 = 3 / 3.0;
-        else if(v > 1.6 && v < 4.8)
-            L1 = 1.25*v-1;
-        //  if(v>=0||v<=3)
-        //     L1 = 1.07*v + 0.8;
-        else if(v >= 4.8)
+        if(v <= v1)
+            L1 = 1;
+        else if(v > v1 && v < v2)
+            L1 = beta*v-1;
+        else if(v >= v2)
             L1 = 5;
             // ROS_INFO("L1 = %.2f",L1);
         return L1;
