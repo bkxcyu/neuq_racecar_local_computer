@@ -36,6 +36,9 @@ namespace rsband_local_planner
         pn.param("qujian_min", qujian_min, 7.0);
         pn.param("qujian_max", qujian_max, 20.0);
         pn.param("TRAVERSAL_POINT", TRAVERSAL_POINT, 100);
+        pn.param("MAX_1", MAX_1, 4.0);
+        pn.param("MAX_2", MAX_2, 20.0);
+        pn.param("MAX_3", MAX_3, 40.0);
 
         //Publishers and Subscribers
         odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
@@ -191,7 +194,7 @@ namespace rsband_local_planner
         double dy = wayPt.y - car_pos.y;
         double dist = sqrt(dx*dx + dy*dy);//车到航路点的直线距离
 
-        if(dist < Lfw)//如果这个距离小于预瞄距离（转弯半径） 则视为不能到达
+        if(dist < Lfw||dist>2*Lfw)//如果这个距离小于预瞄距离（转弯半径） 则视为不能到达
             return false;
         else if(dist >= Lfw)
             return true;
@@ -298,10 +301,11 @@ namespace rsband_local_planner
         beta=4.0/(v2-v1);
 
         v = fabs(v_el);
+
         if(v <= v1)
             L1 = 1;
         else if(v > v1 && v < v2)
-            L1 = beta*v-1;
+            L1 = beta*v-beta*v1+1;
         else if(v >= v2)
             L1 = 5;
             // ROS_INFO("L1 = %.2f",L1);
@@ -371,7 +375,7 @@ namespace rsband_local_planner
         cmd_vel.angular.z = baseAngle;
 
         Lfw =  getL1Distance();
-        
+
         if(goal_received)//取得目标
         {
             double eta = getEta(carPose); 
@@ -386,33 +390,34 @@ namespace rsband_local_planner
 
             if(foundForwardPt)
             {
-            
+                double steeringAngle;
+                steeringAngle=getSteeringAngle(eta);
                 err_sum=err_sum+baseAngle;
-                cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
-                last_error=getSteeringAngle(eta);
+                cmd_vel.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error)+KI*err_sum;
+                last_error=steeringAngle;
                 /*Estimate Gas Input*/
                 if(!goal_reached)
                 {
                     cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
+
                     if (ReadyToLastRush())
                         cmd_vel.linear.x = RUSH_VEL;
-
-                    // static int count=0;
-                    // if(JudgeLockedRotor()||count)
-                    // {
-                    //     //  cmd_vel.linear.x = 1500;
-                    //     // BackOff();
-                    // //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
-                    //     count++;
-                    //     if(count<20)
-                    //         cmd_vel.linear.x = 1250;
-                    //     else
-                    //         count=0;
-                    // }
                     if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
                     {
                         cmd_vel.linear.x = BLOOM_START_VEL;
+                        cmd_vel.linear.z = 1;
+                        cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
                     }
+                    else
+                        cmd_vel.linear.z = 0;
+
+                    if(reset_flag)
+                    {
+                        cmd_vel.linear.x = 1500;
+                        ROS_WARN("CAR IS STOPED MANUALY");
+                        goal_received=false;
+                    }
+                       
                 }
             }
         }
@@ -425,24 +430,6 @@ namespace rsband_local_planner
     
     bool L1Controller::ReadyToLastRush()
     {
-        //坐标转换
-        geometry_msgs::PoseStamped carPoseSt;//odom坐标系下车的坐标
-        carPoseSt.pose=odom.pose.pose;
-        carPoseSt.header=odom.header;
-        geometry_msgs::PoseStamped carPoseOfCarFrame;//车坐标系下 车的坐标
-        geometry_msgs::PoseStamped map_pathOfCarFrame;//车坐标系下 路径的坐标
-        int path_point_number=TRAVERSAL_POINT;
-        std_msgs::Float64 path_x;
-        std_msgs::Float64 path_y;
-        try
-        {
-            tf_listener.transformPose("base_footprint", ros::Time(0) , carPoseSt, "odom" ,carPoseOfCarFrame);
-        }
-        catch(tf::TransformException &ex)
-        {
-            ROS_ERROR("%s,at L1 line 639",ex.what());
-            ros::Duration(1.0).sleep();
-        }
         if(map_path.poses.size()<RUSH_POINT)
         {
             ROS_INFO("Wanring!Ready To Rush");
@@ -451,6 +438,7 @@ namespace rsband_local_planner
         else
         return false;
     }
+
     bool L1Controller::JudgeLockedRotor()
     {
         static int count = 0;
@@ -528,7 +516,8 @@ namespace rsband_local_planner
     {
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
-        vel.linear.x=0.0348*pwm.linear.x-54.1109;
+        vel.linear.x=1.5*(0.0348*pwm.linear.x-54.1109);//转移
+        vel.linear.z=pwm.linear.z;//
         vel.angular.z=pwm.angular.z;
         return vel;
     }
@@ -561,10 +550,27 @@ namespace rsband_local_planner
         // if(vel.data>30)
         //     vel.data=30;
         //vel.data= -0.0027*fabs(Err.data)*fabs(Err.data)*fabs(Err.data)+0.1736*fabs(Err.data)*fabs(Err.data)-0.6398*fabs(Err.data)+3;
-        double mediate;
+        // double mediate;
+        // double fErr = fabs(Err.data);
+        // mediate = -pow(fErr,0.82)+12;
+        // vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
+        double a;
+        a = MAX_1/49;
+        double b,c;
+        b = (MAX_2-MAX_1)/3;
+        c = (10*MAX_1-7*MAX_2)/3;
+        double d,e;
+        d = (MAX_3-MAX_2)/10;
+        e = 2*MAX_2-MAX_3;
         double fErr = fabs(Err.data);
-        mediate = -pow(fErr,1.5)+12;
-        vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
+        if(fErr>=0 && fErr<7)
+        vel.data = a*fErr*fErr;
+        if(fErr>=7 && fErr<10)
+        vel.data = b*fErr+c;
+        if(fErr>=10 && fErr<20)
+        vel.data = d*fErr+e;
+        if(fErr>=20)
+        vel.data = MAX_3;
         
         //work at 6.11 p.m.10:35 without error,but have not been test;
         // double a,b,c;
@@ -587,11 +593,11 @@ namespace rsband_local_planner
         if(std::isnan(vel.data)||std::isinf(vel.data))
         {
             ROS_ERROR("The caculated vel is nan or inf,something wrong,check it") ;
-            Err.data=MAX_SLOW_DOWN;
+            Err.data=MAX_3;
             return vel;
         }
 
-        // ROS_INFO("\nslow down vel=%f",vel.data);
+        //  ROS_INFO("\nslow down vel=%f",vel.data);
         return vel;
     }
 
@@ -692,7 +698,7 @@ namespace rsband_local_planner
         }
 
 
-        ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+        //ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
         err_pub.publish(Err);
         return Err;
@@ -707,6 +713,7 @@ namespace rsband_local_planner
         Err=computeIntegralErr();
         slow_down_vel=switchErrIntoVel(Err);
 
+        ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
         return slow_down_vel;
     }
 
@@ -721,10 +728,16 @@ namespace rsband_local_planner
         TRAVERSAL_POINT=config.TRAVERSAL_POINT;
         KP=config.KP;
         KD=config.KD;
+        MAX_1=config.MAX_1;
+        MAX_2=config.MAX_2;
+        MAX_3=config.MAX_3;
         RUSH_VEL=config.RUSH_VEL;
         RUSH_POINT=config.RUSH_POINT;
         BLOOM_START_POINT=config.BLOOM_START_POINT;
         BLOOM_START_VEL=config.BLOOM_START_VEL;
+        reset_flag=config.reset;
+        v1=config.v1;
+        v2=config.v2;
         // ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
     }
 

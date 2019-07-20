@@ -86,7 +86,7 @@ imu0_differential: false
 imu0_relative: true
 imu0_queue_size: 8
 imu0_pose_rejection_threshold: 10                 # Note the difference in parameter names
-imu0_twist_rejection_threshold: 20                #
+imu0_twist_rejection_threshold: 10                #
 imu0_linear_acceleration_rejection_threshold: 10  #
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set

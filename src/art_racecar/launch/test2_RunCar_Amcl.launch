@@ -13,7 +13,7 @@
     <!-- IMU 陀螺仪-->
     <include file="$(find art_imu)/launch/imu.launch" />
     <!-- Car 底盘驱动-->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
     <!-- 电机反馈速度-->
     <!--<include file="$(find ecoder)/launch/ecoder.launch"/>-->
 
@@ -54,7 +54,7 @@
     </include>
 
     <!-- Navstack 导航堆栈-->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" >
         <!--  planner -->
         <param name="base_global_planner" value="navfn/NavfnROS"/>  
         <param name="base_local_planner" value="rsband_local_planner/RSBandPlannerROS"/>  
