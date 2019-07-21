@@ -7,7 +7,8 @@
 #include <base_local_planner/goal_functions.h>
 #include <pluginlib/class_list_macros.h>
 #include <angles/angles.h>
-
+#include <tf_conversions/tf_eigen.h>
+#include"rsband_local_planner/pose_se2.h"
 PLUGINLIB_DECLARE_CLASS(rsband_local_planner, RSBandPlannerROS,
   rsband_local_planner::RSBandPlannerROS, nav_core::BaseLocalPlanner);
 
@@ -37,6 +38,7 @@ namespace rsband_local_planner
     // store tflistener and costmapROS
     tfListener_ = tfListener;
     costmapROS_ = costmapROS;
+    costmap_ = costmapROS_->getCostmap();
 
     ros::NodeHandle pnh("~/" + name);
 
@@ -130,6 +132,41 @@ namespace rsband_local_planner
     }
 
     return false;
+  }
+
+
+  int RSBandPlannerROS::re_adjust_servo()
+  {
+      int adjust_pwm;
+      PoseSE2 robot_pose_;
+      tf::Stamped<tf::Pose> robot_pose;
+      if (!costmapROS_->getRobotPose(robot_pose))
+      {
+        ROS_ERROR("Could not get robot pose!");
+        return false;
+      }
+      robot_pose_ = PoseSE2(robot_pose);
+
+      Eigen::Vector2d robot_orient = robot_pose_.orientationUnitVec();
+      for (unsigned int i=0; i<costmap_->getSizeInCellsX()-1; ++i)
+      {
+        for (unsigned int j=0; j<costmap_->getSizeInCellsY()-1; ++j)
+        {
+          if (costmap_->getCost(i,j) == costmap_2d::LETHAL_OBSTACLE)
+          {
+            Eigen::Vector2d obs;
+            costmap_->mapToWorld(i,j,obs.coeffRef(0), obs.coeffRef(1));
+            Eigen::Vector2d obs_dir = obs-robot_pose_.position();
+           //obs_dir是odom坐标系下 扫描到的障碍物与机器人位置的差向量
+           //robot_orient是机器人的方向向量
+          /*---------------------------------------------------*/
+          /*----------------WORK SHOULD DONE HERE--------------*/
+          /*---------------------------------------------------*/
+          }
+        }
+      }
+      return adjust_pwm;
+      
   }
 
 }  // namespace rsband_local_planner

@@ -176,6 +176,9 @@ namespace rsband_local_planner
       std::vector<int> planStartEndCounters_;
 
       bool initialized_;
+
+      int re_adjust_servo();
+      costmap_2d::Costmap2D* costmap_;
   };
 
 }  // namespace rsband_local_planner
