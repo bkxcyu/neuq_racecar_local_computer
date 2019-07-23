@@ -304,7 +304,7 @@ namespace rsband_local_planner
         if(v <= v1)
             L1 = 1;
         else if(v > v1 && v < v2)
-            L1 = beta*v-1;
+            L1 = beta*v-beta*v1+1;
         else if(v >= v2)
             L1 = 5;
             // ROS_INFO("L1 = %.2f",L1);
@@ -372,6 +372,7 @@ namespace rsband_local_planner
         geometry_msgs::Twist carVel = odom.twist.twist;//速度
         cmd_vel.linear.x = 1500;
         cmd_vel.angular.z = baseAngle;
+        
 
         Lfw =  getL1Distance();
 
@@ -401,19 +402,6 @@ namespace rsband_local_planner
 
                     if (ReadyToLastRush())
                         cmd_vel.linear.x = RUSH_VEL;
-
-                    // static int count=0;
-                    // if(JudgeLockedRotor()||count)
-                    // {
-                    //     //  cmd_vel.linear.x = 1500;
-                    //     // BackOff();
-                    // //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
-                    //     count++;
-                    //     if(count<20)
-                    //         cmd_vel.linear.x = 1250;
-                    //     else
-                    //         count=0;
-                    // }
                     if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
                     {
                         cmd_vel.linear.x = BLOOM_START_VEL;
@@ -440,6 +428,97 @@ namespace rsband_local_planner
 
     }        
     
+     double L1Controller::GetErrOfAngle(const geometry_msgs::Pose& carPose)
+     {
+        // geometry_msgs::Pose carPose = odom.pose.pose;
+        geometry_msgs::Point carPose_pos = carPose.position;
+        geometry_msgs::Point forwardPt_1;
+        geometry_msgs::Point forwardPt_2;
+        geometry_msgs::Point odom_car2WayPtVec_1;
+        geometry_msgs::Point odom_car2WayPtVec_2;
+        bool foundForwardPt_1 = false;
+        bool foundForwardPt_2 = false;
+        double ETA = getEta(carPose);   
+        double err_angle;
+        if(!goal_reached)
+        {
+            for(int i =0; i< map_path.poses.size(); i++)
+            {
+                geometry_msgs::PoseStamped map_path_pose_1 = map_path.poses[i];//路径信息重映射
+                geometry_msgs::PoseStamped odom_path_pose_1;
+                geometry_msgs::PoseStamped map_path_pose_2 = map_path.poses[i+1];//路径信息重映射
+                geometry_msgs::PoseStamped odom_path_pose_2;
+                tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_1, "map" ,odom_path_pose_1);
+                tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_2, "map" ,odom_path_pose_2);
+                geometry_msgs::Point odom_path_wayPt_1= odom_path_pose_1.pose.position;
+                geometry_msgs::Point odom_path_wayPt_2= odom_path_pose_2.pose.position;
+                bool _isForwardWayPt_1 = isForwardWayPt(odom_path_wayPt_1,carPose);
+                if(_isForwardWayPt_1)
+                {
+                    bool _isWayPtAwayFromLfwDist_1 = isWayPtAwayFromLfwDist(odom_path_wayPt_1,carPose_pos);
+                    if(_isWayPtAwayFromLfwDist_1)
+                    {
+                        forwardPt_1 = odom_path_wayPt_1;
+                        foundForwardPt_1 = true;
+                        double derta_x;
+                        double derta_y;
+                        derta_x = odom_path_wayPt_1.x - odom_path_wayPt_2.x;
+                        derta_y = odom_path_wayPt_1.y - odom_path_wayPt_2.y;
+                        err_angle = atan2(derta_y,derta_x)-ETA;
+                        return err_angle;
+                    }
+                }
+            }
+        }
+        
+
+     }
+    // {   
+    //     //输入车坐标（以及规划的路径信息）返回iu可行的目标向量
+    //     geometry_msgs::Point carPose_pos = carPose.position;//车的位置重映射
+    //     double carPose_yaw = getYawFromPose(carPose);//从车的姿态（四元数）计算固有转向角（舵机打角）
+        //  geometry_msgs::Point forwardPt_1;
+        //  geometry_msgs::Point forwardPt_2;
+        //  geometry_msgs::Point odom_car2WayPtVec_1;
+        //  geometry_msgs::Point odom_car2WayPtVec_2;
+    //     bool foundForwardPt_1 = false;
+    //     bool foundForwardPt_2 = false;
+    //     double err_angle;
+    //     if(!goal_reached)
+    //     { 
+    //         for(int i =0; i< map_path.poses.size(); i++)
+    //         {
+    //             geometry_msgs::PoseStamped map_path_pose_1 = map_path.poses[i];//路径信息重映射
+    //             geometry_msgs::PoseStamped odom_path_pose_1;
+    //             geometry_msgs::PoseStamped map_path_pose_2 = map_path.poses[i+1];//路径信息重映射
+    //             geometry_msgs::PoseStamped odom_path_pose_2;
+
+    //                 tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_1, "map" ,odom_path_pose_1);//将map坐标系下的路径信息（含有戳记的坐标数组）转换到odom坐标系下，存入odom_path_pose
+    //                 tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_2, "map" ,odom_path_pose_2);
+    //                 geometry_msgs::Point odom_path_wayPt_1= odom_path_pose_1.pose.position;//规划的路径坐标信息（航路点）存入odom_path_wayPt
+    //                 geometry_msgs::Point odom_path_wayPt_2= odom_path_pose_2.pose.position;                  
+    //                 bool _isForwardWayPt_1 = isForwardWayPt(odom_path_wayPt_1,carPose);//输入航路点的坐标和车的坐标 返回前方是否有航路点 即是否能到达该坐标
+    //                 bool _isForwardWayPt_2= isForwardWayPt(odom_path_wayPt_2,carPose);
+    //                 if(_isForwardWayPt_1)//如果没有可行航路点怎么办？？？  航路点太超前怎么办？？？
+    //                 {
+    //                     bool _isWayPtAwayFromLfwDist_1 = isWayPtAwayFromLfwDist(odom_path_wayPt_1,carPose_pos);//输入航路点和车坐标 返回是否能直接到达（是否在转弯的盲区）
+    //                     if(_isWayPtAwayFromLfwDist_1)
+    //                     {
+    //                         forwardPt_1 = odom_path_wayPt_1;//将可行的航路点存入forwardPt
+    //                         foundForwardPt_1 = true;
+    //                         double derta_x;
+    //                         double derta_y;
+    //                         derta_x = odom_path_wayPt_1.x - odom_path_wayPt_2.x;
+    //                         derta_y = odom_path_wayPt_1.y - odom_path_wayPt_2.y;
+    //                         err_angle = atan2(derta_y,derta_x);
+    //                         return err_angle;
+    //                     }
+    //                 }
+    //         }
+    //     }   
+    //     ROS_INFO("ERR_Angle = %.2f", err_angle);
+    //     return err_angle;
+    // }       
     bool L1Controller::ReadyToLastRush()
     {
         if(map_path.poses.size()<RUSH_POINT)
@@ -528,7 +607,7 @@ namespace rsband_local_planner
     {
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
-        vel.linear.x=0.0348*pwm.linear.x-54.1109;//转移
+        vel.linear.x=1.5*(0.0348*pwm.linear.x-54.1109);//转移
         vel.linear.z=pwm.linear.z;//
         vel.angular.z=pwm.angular.z;
         return vel;
@@ -567,22 +646,22 @@ namespace rsband_local_planner
         // mediate = -pow(fErr,0.82)+12;
         // vel.data = MAX_SLOW_DOWN/(1+exp(mediate));
         double a;
-        a = MAX_3/49;
+        a = MAX_1/49;
         double b,c;
-        b = (MAX_2-MAX_3)/3;
-        c = 10*(MAX_2-MAX_3)/3;
+        b = (MAX_2-MAX_1)/3;
+        c = (10*MAX_1-7*MAX_2)/3;
         double d,e;
-        d = (MAX_1-MAX_2)/10;
-        e = 2*MAX_2-MAX_1;
+        d = (MAX_3-MAX_2)/10;
+        e = 2*MAX_2-MAX_3;
         double fErr = fabs(Err.data);
-        if(fErr>0 && fErr<7)
-        vel.data = MAX_3/49;
-        if(fErr>7 && fErr<10)
-        vel.data = a*fErr+b;
-        if(fErr>10 && fErr<20)
+        if(fErr>=0 && fErr<7)
+        vel.data = a*fErr*fErr;
+        if(fErr>=7 && fErr<10)
+        vel.data = b*fErr+c;
+        if(fErr>=10 && fErr<20)
         vel.data = d*fErr+e;
-        else
-        vel.data = MAX_1;
+        if(fErr>=20)
+        vel.data = MAX_3;
         
         //work at 6.11 p.m.10:35 without error,but have not been test;
         // double a,b,c;
@@ -605,11 +684,11 @@ namespace rsband_local_planner
         if(std::isnan(vel.data)||std::isinf(vel.data))
         {
             ROS_ERROR("The caculated vel is nan or inf,something wrong,check it") ;
-            Err.data=MAX_SLOW_DOWN;
+            Err.data=MAX_3;
             return vel;
         }
 
-        // ROS_INFO("\nslow down vel=%f",vel.data);
+        //  ROS_INFO("\nslow down vel=%f",vel.data);
         return vel;
     }
 
@@ -710,7 +789,7 @@ namespace rsband_local_planner
         }
 
 
-        ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+        //ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
         err_pub.publish(Err);
         return Err;
@@ -725,6 +804,7 @@ namespace rsband_local_planner
         Err=computeIntegralErr();
         slow_down_vel=switchErrIntoVel(Err);
 
+        ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
         return slow_down_vel;
     }
 
@@ -765,6 +845,5 @@ namespace rsband_local_planner
     //     ros::spin();//循环执行
     //     return 0;
     // }
-
 
 }
