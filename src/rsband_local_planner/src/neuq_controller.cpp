@@ -7,6 +7,8 @@ namespace rsband_local_planner
     L1Controller::L1Controller(std::string name)
     {
 
+        ptc_ = boost::shared_ptr<FuzzyPTC>(new FuzzyPTC(name));
+
         last_cmd_vel.linear.x=Vcmd;
         last_cmd_vel.angular.z=0;
         
@@ -371,59 +373,43 @@ namespace rsband_local_planner
     {
         geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
         geometry_msgs::Twist carVel = odom.twist.twist;//速度
-        cmd_vel.linear.x = 1500;
-        cmd_vel.angular.z = baseAngle;
-
-        Lfw =  getL1Distance();
+        cmd.linear.x = 1500;
+        cmd.angular.z = baseAngle;
 
         if(goal_received)//取得目标
         {
             double eta = getEta(carPose); 
 
-            std_msgs::Float64 slow_down_vel;
-            slow_down_vel=computeSlowDownVel();
-            if(slow_down_vel.data<0)
-            {
-                slow_down_vel.data=0;
-                ROS_ERROR("slow_down_vel<0,CHECK!");
-            }
-
             if(foundForwardPt)
-            {
-                double steeringAngle;
-                steeringAngle=getSteeringAngle(eta);
-                err_sum=err_sum+baseAngle;
-                cmd_vel.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error)+KI*err_sum;
-                last_error=steeringAngle;
-                /*Estimate Gas Input*/
+            {   
                 if(!goal_reached)
                 {
-                    cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
+                    double steeringAngle;
+                    steeringAngle=getSteeringAngle(eta);/***********  1  ***********/
 
-                    if (ReadyToLastRush())
-                        cmd_vel.linear.x = RUSH_VEL;
-                    if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
+                    double orientationErr;               /***********  2  ***********/
+
+                    std_msgs::Float64 IntegralErr_;
+                    IntegralErr_=computeIntegralErr();
+                    double IntegralErr=IntegralErr_.data;/***********  3  ***********/
+
+                    float currant_vel =  getCurrantVel();/***********  4  ***********/
+                 
+                    if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,currant_vel, Lfw,cmd))
                     {
-                        cmd_vel.linear.x = BLOOM_START_VEL;
-                        cmd_vel.linear.z = 1;
-                        cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
+                        ROS_ERROR("Path tracking controller failed to produce command");
+                        return false;
                     }
-                    else
-                        cmd_vel.linear.z = 0;
 
                     if(reset_flag)
                     {
-                        cmd_vel.linear.x = 1500;
+                        cmd.linear.x = 1500;
                         ROS_WARN("CAR IS STOPED MANUALY");
-                        goal_received=false;
-                    }
-                       
+                    }           
                 }
             }
         }
-        cmd_vel=pwm2vel(cmd_vel);
-        last_cmd_vel=cmd_vel;
-        cmd=cmd_vel;
+        cmd=pwm2vel(cmd);
         return true;
 
     }        
@@ -738,6 +724,9 @@ namespace rsband_local_planner
         reset_flag=config.reset;
         v1=config.v1;
         v2=config.v2;
+
+        if (ptc_)
+             ptc_->reconfigure(config);
         // ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
     }
 
