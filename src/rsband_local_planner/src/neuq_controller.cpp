@@ -295,7 +295,8 @@ namespace rsband_local_planner
         
         float v_el =  getCurrantVel();
         double L1 = 0.8;
-
+        double v1=1.6;
+        double v2=4.8;
         double beta;
         beta=4.0/(v2-v1);
 
