@@ -15,7 +15,7 @@
     <!-- Car 底盘驱动-->
     <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
     <!-- 电机反馈速度-->
-    <!--<include file="$(find ecoder)/launch/ecoder.launch"/>-->
+    <include file="$(find ecoder)/launch/ecoder.launch"/>
 
 	
       <!-- Rviz -->
