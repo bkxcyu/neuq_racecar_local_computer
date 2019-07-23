@@ -123,8 +123,9 @@ namespace rsband_local_planner
     // subGoal_.scale.x = subGoal_.scale.y = subGoal_.scale.z = 0.1;
     // subGoal_.color.b = 1.0f; subGoal_.color.a = 1;
     // subGoalPub_ = pnh_->advertise<visualization_msgs::Marker>("sub_goal", 1);
-
+    
     initialized_ = true;
+     
   }
 
 
@@ -144,6 +145,7 @@ namespace rsband_local_planner
     //   static_cast<RearSteeringMode>(config.rear_steering_mode);
 
     // reinitialize fuzzy engine with the updated parameters
+    ROS_INFO("begin to initializeFuzzyEngine...............");
     initializeFuzzyEngine();
   }
 
@@ -156,12 +158,13 @@ namespace rsband_local_planner
         "initialization");
       return;
     }
+    ROS_INFO("-----------   1  ------------");
     // initialize FLC engine
     engine_ = new fl::Engine();
     engine_->setName("fuzzy_path_tracking_controller");
 
     //========================= INPUT VARIABLES ================================
-
+ROS_INFO("-----------   2  ------------");
     // direction input variable
     smoothness_ = new fl::InputVariable;
     smoothness_->setEnabled(true);
@@ -171,68 +174,68 @@ namespace rsband_local_planner
     smoothness_->addTerm(new fl::Trapezoid("Normal", 0.9, 1.1, 1.9, 2.1));
     smoothness_->addTerm(new fl::Trapezoid("Rough",  1.9, 2.1, 3.0, 3.0));
     engine_->addInputVariable(smoothness_);
-
+ROS_INFO("-----------   3  ------------");
     // angle deviation error fuzzy input variable initialization
     angularDeviationError_ = new fl::InputVariable;
     angularDeviationError_->setEnabled(true);
     angularDeviationError_->setName("AngleErr");
     angularDeviationError_->setRange(-90, 90);
-    angularDeviationError_->addTerm(new fl::Trapezoid("LHigh",   -90.0, -90.0, -64.0, -44.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("LMedium", -64.0, -44.0, -28.0, -20.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("LLow",    -28.0, -20.0,   0.0,   0.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("RLow",     0.0,    0.0,  20.0,  28.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("RMedium",  20.0,  28.0,  44.0,  64.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("RHigh",    44.0,  64.0,  90.0,  90.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("LHigh_a",   -90.0, -90.0, -64.0, -44.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("LMedium_a", -64.0, -44.0, -28.0, -20.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("LLow_a",    -28.0, -20.0,   0.0,   0.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("RLow_a",     0.0,    0.0,  20.0,  28.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("RMedium_a",  20.0,  28.0,  44.0,  64.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("RHigh_a",    44.0,  64.0,  90.0,  90.0));
     engine_->addInputVariable(angularDeviationError_);
-
+ROS_INFO("-----------   4  ------------");
     orientationError__ = new fl::InputVariable;
     orientationError__->setEnabled(true);
     orientationError__->setName("OrientationErr_");
     orientationError__->setRange(-180.0, 180.0);
-    orientationError__->addTerm(new fl::Trapezoid("LHigh",   -180.0, -180.0, -120.0, -90.0));
-    orientationError__->addTerm(new fl::Trapezoid("LMedium", -120.0,  -90.0,  -35.0, -25.0));
-    orientationError__->addTerm(new fl::Trapezoid("LLow",     -35.0,  -25.0,    0.0,   0.0));
-    orientationError__->addTerm(new fl::Trapezoid("RLow",       0.0,    0.0,   25.0,  35.0));
-    orientationError__->addTerm(new fl::Trapezoid("RMedium",   25.0,   35.0,   90.0, 120.0));
-    orientationError__->addTerm(new fl::Trapezoid("RHigh",     90.0,  120.0,  180.0, 180.0));
+    orientationError__->addTerm(new fl::Trapezoid("LHigh_o_",   -180.0, -180.0, -120.0, -90.0));
+    orientationError__->addTerm(new fl::Trapezoid("LMedium_o_", -120.0,  -90.0,  -35.0, -25.0));
+    orientationError__->addTerm(new fl::Trapezoid("LLow_o_",     -35.0,  -25.0,    0.0,   0.0));
+    orientationError__->addTerm(new fl::Trapezoid("RLow_o_",       0.0,    0.0,   25.0,  35.0));
+    orientationError__->addTerm(new fl::Trapezoid("RMedium_o_",   25.0,   35.0,   90.0, 120.0));
+    orientationError__->addTerm(new fl::Trapezoid("RHigh_o_",     90.0,  120.0,  180.0, 180.0));
     engine_->addInputVariable(orientationError__);
-
+ROS_INFO("-----------   5  ------------");
     // orientation error input variable initialization
     orientationError_ = new fl::InputVariable;
     orientationError_->setEnabled(true);
     orientationError_->setName("OrientationErr");
     orientationError_->setRange(0.0, 180.0);
-    orientationError_->addTerm(new fl::Trapezoid("Low",     0.0,  0.0, 20.0, 25.0));
-    orientationError_->addTerm(new fl::Trapezoid("Medium", 20.0, 25.0,   55,   60));
-    orientationError_->addTerm(new fl::Trapezoid("High",     55,   60,  180,  180));
+    orientationError_->addTerm(new fl::Trapezoid("Low_o",     0.0,  0.0, 20.0, 25.0));
+    orientationError_->addTerm(new fl::Trapezoid("Medium_o", 20.0, 25.0,   55,   60));
+    orientationError_->addTerm(new fl::Trapezoid("High_o",     55,   60,  180,  180));
     engine_->addInputVariable(orientationError_);
-
+ROS_INFO("-----------   6  ------------");
     // Integrall error input variable initialization
     integrallError_ = new fl::InputVariable;
     integrallError_->setEnabled(true);
     integrallError_->setName("IntegrallErr");
     integrallError_->setRange(0, 100.0);
-    integrallError_->addTerm(new fl::Trapezoid("Low",    0.0, 0.0, 3.0, 5.0));
-    integrallError_->addTerm(new fl::Trapezoid("Medium", 3.0, 5.0,  10,  25));
-    integrallError_->addTerm(new fl::Trapezoid("High",    10,  25, 100, 100));
+    integrallError_->addTerm(new fl::Trapezoid("Low_i",    0.0, 0.0, 3.0, 5.0));
+    integrallError_->addTerm(new fl::Trapezoid("Medium_i", 3.0, 5.0,  10,  25));
+    integrallError_->addTerm(new fl::Trapezoid("High_i",    10,  25, 100, 100));
     engine_->addInputVariable(integrallError_);
-
+ROS_INFO("-----------   7  ------------");
     // currantSpeed_ error input variable initialization
     currantSpeed_ = new fl::InputVariable;
     currantSpeed_->setEnabled(true);
     currantSpeed_->setName("currantSpeed");
     currantSpeed_->setRange(0, 5.0);
-    currantSpeed_->addTerm(new fl::Trapezoid("LLLow", 0.0, 0.0, 0.5, 0.9));
-    currantSpeed_->addTerm(new fl::Trapezoid("LLow",  0.5, 0.9, 1.2, 1.6));
-    currantSpeed_->addTerm(new fl::Trapezoid("Low",   1.2, 1.6, 1.9, 2.3));
-    currantSpeed_->addTerm(new fl::Trapezoid("Medium",1.9, 2.3, 2.6, 3.0));
-    currantSpeed_->addTerm(new fl::Trapezoid("Fast",  2.6, 3.0, 3.3, 3.7));
-    currantSpeed_->addTerm(new fl::Trapezoid("FFast", 3.3, 3.7, 4.0, 4.4));
-    currantSpeed_->addTerm(new fl::Trapezoid("FFFast",4.0, 4.4, 5.0, 5.0));
+    currantSpeed_->addTerm(new fl::Trapezoid("LLLow_c", 0.0, 0.0, 0.5, 0.9));
+    currantSpeed_->addTerm(new fl::Trapezoid("LLow_c",  0.5, 0.9, 1.2, 1.6));
+    currantSpeed_->addTerm(new fl::Trapezoid("Low_c",   1.2, 1.6, 1.9, 2.3));
+    currantSpeed_->addTerm(new fl::Trapezoid("Medium_c",1.9, 2.3, 2.6, 3.0));
+    currantSpeed_->addTerm(new fl::Trapezoid("Fast_c",  2.6, 3.0, 3.3, 3.7));
+    currantSpeed_->addTerm(new fl::Trapezoid("FFast_c", 3.3, 3.7, 4.0, 4.4));
+    currantSpeed_->addTerm(new fl::Trapezoid("FFFast_c",4.0, 4.4, 5.0, 5.0));
     engine_->addInputVariable(currantSpeed_);
 
     //========================= OUTPUT VARIABLES ===============================
-
+ROS_INFO("-----------   8  ------------");
     // front steering angle output variable initialization
     steeringAngle_ = new fl::OutputVariable;
     steeringAngle_->setEnabled(true);
@@ -254,7 +257,7 @@ namespace rsband_local_planner
     steeringAngle_->addTerm(new fl::Constant("LH",  baseAngle+21.0));
     steeringAngle_->addTerm(new fl::Constant("LHH", baseAngle+30.0));
     engine_->addOutputVariable(steeringAngle_);
-
+ROS_INFO("-----------   9  ------------");
     // rear steering angle output variable initialization
     Lfw_ = new fl::OutputVariable;
     Lfw_->setEnabled(true);
@@ -265,18 +268,19 @@ namespace rsband_local_planner
     Lfw_->setDefaultValue(0);
     Lfw_->setLockPreviousValue(true);
     Lfw_->setLockValueInRange(false);
-    Lfw_->addTerm(new fl::Constant("SShort", 1.0));
-    Lfw_->addTerm(new fl::Constant("Short",  2.0));
-    Lfw_->addTerm(new fl::Constant("Medium", 3.5));
-    Lfw_->addTerm(new fl::Constant("Long",   5.0));
-    Lfw_->addTerm(new fl::Constant("LLong",  6.0));
+    Lfw_->addTerm(new fl::Constant("SShort_L", 1.0));
+    Lfw_->addTerm(new fl::Constant("Short_L",  2.0));
+    Lfw_->addTerm(new fl::Constant("Medium_L", 3.5));
+    Lfw_->addTerm(new fl::Constant("Long_L",   5.0));
+    Lfw_->addTerm(new fl::Constant("LLong_L",  6.0));
     engine_->addOutputVariable(Lfw_);
-
+ROS_INFO("-----------   10  ------------");
     // speed output variable initialization
     speed_ = new fl::OutputVariable;
     speed_->setEnabled(true);
     speed_->setName("Speed");
     speed_->setDefaultValue(0.0);
+    maxSpeed_=5;
     speed_->setRange(0.0, maxSpeed_);
     speed_->fuzzyOutput()->setAggregation(fl::null);
     speed_->setDefuzzifier(new fl::WeightedAverage("TakagiSugeno"));
@@ -291,30 +295,31 @@ namespace rsband_local_planner
 
 
     //=============================== RULES ====================================
-
+ROS_INFO("-----------   11  ------------");
     // rule block initialization
     ruleBlock_ = new fl::RuleBlock;
-
-    // front steering rules
+ROS_INFO("-----------   12  ------------");
+    // steering rules
     BOOST_FOREACH(std::string rule, SteeringRules_)
       ruleBlock_->addRule(fl::Rule::parse(rule, engine_));
-
+ROS_INFO("-----------   13  ------------");
     // rear steering rules
     BOOST_FOREACH(std::string rule, Lfw_rules_)
       ruleBlock_->addRule(fl::Rule::parse(rule, engine_));
-
+ROS_INFO("-----------   14  ------------");
     // speed rules
     BOOST_FOREACH(std::string rule, speedRules_)
       ruleBlock_->addRule(fl::Rule::parse(rule, engine_));
-
+ROS_INFO("-----------   15  ------------");
     engine_->addRuleBlock(ruleBlock_);
     engine_->configure(
       "Minimum", "Maximum", "Minimum", "Maximum", "WeightedAverage", "General");
-
+ROS_INFO("-----------   16  ------------");
     std::string status;
     if (!engine_->isReady(&status))
         throw fl::Exception("Engine not ready. "
           "The following errors were encountered:\n" + status, FL_AT);
+    ROS_INFO("fuzzy is alredy");
   }
 
 
@@ -330,13 +335,14 @@ namespace rsband_local_planner
     orientationError__->setValue(ORIENTATION_ERR);
     integrallError_->setValue(INTEGRALL_ERR);
     currantSpeed_->setValue(CURRANT_SPEED);
-
+    ROS_INFO("data come in now");
     engine_->process();
 
     double output_vel= speed_->getValue();  
     double output_angle = steeringAngle_->getValue(); 
     output_Lfw = Lfw_->getValue();  
 
+    ROS_INFO("output_vel=%.2f  output_angle=%.2f",output_vel,output_angle);
     // create command
     cmd.linear.x = output_vel;
     cmd.angular.z = output_angle;

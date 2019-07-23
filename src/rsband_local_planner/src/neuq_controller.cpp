@@ -382,12 +382,12 @@ namespace rsband_local_planner
 
             if(foundForwardPt)
             {   
+                double steeringAngle;
+                steeringAngle=getSteeringAngle(eta);/***********  1  ***********/
+
                 if(!goal_reached)
                 {
-                    double steeringAngle;
-                    steeringAngle=getSteeringAngle(eta);/***********  1  ***********/
-
-                    double orientationErr;               /***********  2  ***********/
+                    double orientationErr=0;               /***********  2  ***********/
 
                     std_msgs::Float64 IntegralErr_;
                     IntegralErr_=computeIntegralErr();
