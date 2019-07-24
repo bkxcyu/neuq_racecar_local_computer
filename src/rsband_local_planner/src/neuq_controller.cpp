@@ -395,12 +395,17 @@ namespace rsband_local_planner
 
                     float currant_vel =  getCurrantVel();/***********  4  ***********/
                  
-                    if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,currant_vel, Lfw,cmd))
+                    // if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,currant_vel, Lfw,cmd))
+                    // {
+                    //     ROS_ERROR("Path tracking controller failed to produce command");
+                    //     return false;
+                    // }
+
+                    if (!ptc_->computeVelocityCommands(a,b,c,d, Lfw,cmd))
                     {
                         ROS_ERROR("Path tracking controller failed to produce command");
                         return false;
                     }
-
                     if(reset_flag)
                     {
                         cmd.linear.x = 1500;
@@ -720,6 +725,10 @@ namespace rsband_local_planner
         reset_flag=config.reset;
         v1=config.v1;
         v2=config.v2;
+        a=config.steeringAngle;
+        b=config.orientationErr;
+        c=config.IntegralErr;
+        d=config.currant_vel;
 
         
 

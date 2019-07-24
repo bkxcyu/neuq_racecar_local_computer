@@ -113,6 +113,7 @@ namespace rsband_local_planner
             void BackOff();
 
             boost::shared_ptr<FuzzyPTC> ptc_;
+            double a,b,c,d;
 
     }; // end of class
 }
