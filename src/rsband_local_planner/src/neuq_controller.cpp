@@ -384,7 +384,9 @@ namespace rsband_local_planner
             {   
                 double steeringAngle;
                 steeringAngle=getSteeringAngle(eta);/***********  1  ***********/
-
+                err_sum=err_sum+baseAngle;
+                cmd.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error);
+                last_error=steeringAngle;
                 if(!goal_reached)
                 {
                     double orientationErr=0;               /***********  2  ***********/
@@ -395,17 +397,19 @@ namespace rsband_local_planner
 
                     float currant_vel =  getCurrantVel();/***********  4  ***********/
                  
-                    // if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,currant_vel, Lfw,cmd))
-                    // {
-                    //     ROS_ERROR("Path tracking controller failed to produce command");
-                    //     return false;
-                    // }
-
-                    if (!ptc_->computeVelocityCommands(a,b,c,d, Lfw,cmd))
+                    if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,currant_vel, Lfw,cmd.linear.x))
                     {
                         ROS_ERROR("Path tracking controller failed to produce command");
                         return false;
                     }
+
+                    cmd.linear.x=map(cmd.linear.x,0,5,1550,1640);
+                    ROS_INFO("cmd.linear.x=%.2f",cmd.linear.x);
+                    // if (!ptc_->computeVelocityCommands(a,b,c,d, Lfw,cmd))
+                    // {
+                    //     ROS_ERROR("Path tracking controller failed to produce command");
+                    //     return false;
+                    // }
                     if(reset_flag)
                     {
                         cmd.linear.x = 1500;

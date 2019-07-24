@@ -115,10 +115,10 @@ fuzzy_rules:
 
   Lfw_rules:
     - "if Smoothness is Smooth and currantSpeed is LLLow_c then Lfw is SShort_L"
-    - "if Smoothness is Normal and currantSpeed is LLLow_c then Lfw is Short_L"
+    - "if Smoothness is Normal and currantSpeed is LLLow_c then Lfw is SShort_L"
     - "if Smoothness is Rough  and currantSpeed is LLLow_c then Lfw is Short_L"
 
-    - "if Smoothness is Smooth and currantSpeed is LLow_c then Lfw is Short_L"
+    - "if Smoothness is Smooth and currantSpeed is LLow_c then Lfw is SShort_L"
     - "if Smoothness is Normal and currantSpeed is LLow_c then Lfw is Short_L"
     - "if Smoothness is Rough  and currantSpeed is LLow_c then Lfw is Short_L"
 

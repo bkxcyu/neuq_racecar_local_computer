@@ -268,11 +268,11 @@ ROS_INFO("-----------   9  ------------");
     Lfw_->setDefaultValue(1.0);
     Lfw_->setLockPreviousValue(true);
     Lfw_->setLockValueInRange(false);
-    Lfw_->addTerm(new fl::Constant("SShort_L", 1.0));
-    Lfw_->addTerm(new fl::Constant("Short_L",  2.0));
-    Lfw_->addTerm(new fl::Constant("Medium_L", 3.5));
-    Lfw_->addTerm(new fl::Constant("Long_L",   5.0));
-    Lfw_->addTerm(new fl::Constant("LLong_L",  6.0));
+    Lfw_->addTerm(new fl::Constant("SShort_L", 0.8));
+    Lfw_->addTerm(new fl::Constant("Short_L",  1.5));
+    Lfw_->addTerm(new fl::Constant("Medium_L", 2.5));
+    Lfw_->addTerm(new fl::Constant("Long_L",   3.0));
+    Lfw_->addTerm(new fl::Constant("LLong_L",  4.0));
     engine_->addOutputVariable(Lfw_);
 ROS_INFO("-----------   10  ------------");
     // speed output variable initialization
@@ -326,48 +326,48 @@ ROS_INFO("-----------   16  ------------");
   bool FuzzyPTC::computeVelocityCommands(
     const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,const double& CURRANT_SPEED,
     double& output_Lfw,
-    geometry_msgs::Twist& cmd)
+    double& output_vel)
   {   
 
     smoothness_->setValue(SMOOTHNESS);
     angularDeviationError_->setValue(ANGULAR_ERR);
     orientationError_->setValue(fabs(ORIENTATION_ERR));
     orientationError__->setValue(ORIENTATION_ERR);
-    integrallError_->setValue(INTEGRALL_ERR);
+    integrallError_->setValue(fabs(INTEGRALL_ERR));
     currantSpeed_->setValue(CURRANT_SPEED);
 
+    ROS_INFO("input/nANGULAR_ERR=%.2f  ORIENTATION_ERR=%.2f INTEGRALL_ERR=%.2f   CURRANT_SPEED=%.2f",ANGULAR_ERR,ORIENTATION_ERR,INTEGRALL_ERR,CURRANT_SPEED);
+   
     engine_->process();
 
-    double output_vel= speed_->getValue();  
+    output_vel= speed_->getValue();  
     double output_angle = steeringAngle_->getValue(); 
     output_Lfw = Lfw_->getValue();  
 
     ROS_INFO("output_vel=%.2f  output_angle=%.2f output_lfw=%.2f",output_vel,output_angle,output_Lfw);
-    // create command
-    cmd.linear.x = output_vel;
-    cmd.angular.z = output_angle;
+   
 
     
-    if (std::isnan(cmd.linear.x) or std::isnan(cmd.linear.y))
-    {
-      ROS_ERROR("Speed=Nan. Something went wrong!");
-      cmd.linear.x = 0.0;
-      cmd.linear.y = 0.0;
-      return false;
-    }
-    if (std::isnan(cmd.angular.z))
-    {
-      ROS_ERROR("RotVel=Nan. Something went wrong!");
-      cmd.angular.z = 0.0;
-      return false;
-    }
+    // if (std::isnan(cmd.linear.x) or std::isnan(cmd.linear.y))
+    // {
+    //   ROS_ERROR("Speed=Nan. Something went wrong!");
+    //   cmd.linear.x = 0.0;
+    //   cmd.linear.y = 0.0;
+    //   return false;
+    // }
+    // if (std::isnan(cmd.angular.z))
+    // {
+    //   ROS_ERROR("RotVel=Nan. Something went wrong!");
+    //   cmd.angular.z = 0.0;
+    //   return false;
+    // }
 
-    if (stop_)
-    {
-      cmd.linear.x = 0.0;
-      cmd.linear.y = 0.0;
-      cmd.angular.z = 0.0;
-    }
+    // if (stop_)
+    // {
+    //   cmd.linear.x = 0.0;
+    //   cmd.linear.y = 0.0;
+    //   cmd.angular.z = 0.0;
+    // }
 
     return true;
   }

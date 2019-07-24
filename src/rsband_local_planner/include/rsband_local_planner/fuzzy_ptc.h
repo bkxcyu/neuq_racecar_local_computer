@@ -87,7 +87,7 @@ namespace rsband_local_planner
       bool computeVelocityCommands(
         const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,const double& CURRANT_SPEED,
         double& output_Lfw,
-        geometry_msgs::Twist& cmd);
+        double& cmd);
 
       /**
        * @brief Checks if the goal position and orientation have been reached
