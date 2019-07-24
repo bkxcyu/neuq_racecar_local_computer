@@ -207,6 +207,7 @@ namespace rsband_local_planner
         geometry_msgs::Point carPose_pos = carPose.position;//车的位置重映射
         double carPose_yaw = getYawFromPose(carPose);//从车的姿态（四元数）计算固有转向角（舵机打角）
         geometry_msgs::Point forwardPt;
+        static geometry_msgs::Point last_forwardPt;
         geometry_msgs::Point odom_car2WayPtVec;
         foundForwardPt = false;
 
@@ -228,9 +229,15 @@ namespace rsband_local_planner
                         if(_isWayPtAwayFromLfwDist)
                         {
                             forwardPt = odom_path_wayPt;//将可行的航路点存入forwardPt
+                            last_forwardPt=forwardPt;
                             foundForwardPt = true;
                             break;
                         }
+                        // else
+                        // {
+                        //     forwardPt=last_forwardPt;
+                        //     foundForwardPt = true;
+                        // }
                     }
                 }
                 catch(tf::TransformException &ex)
@@ -377,12 +384,13 @@ namespace rsband_local_planner
         cmd.linear.x = 1500;
         cmd.angular.z = baseAngle;
 
+        double eta = getEta(carPose);
         double errofangle = GetErrOfAngle(carPose);
         ROS_INFO("ERR_Angle = %.2f", errofangle);
-        ROS_INFO("Angle = %.2f", E_ta);
+        ROS_INFO("Angle = %.2f", eta);
         if(goal_received)//取得目标
         {
-            double eta = getEta(carPose); 
+             
 
             if(foundForwardPt)
             {   
@@ -393,7 +401,7 @@ namespace rsband_local_planner
                 last_error=steeringAngle;
                 if(!goal_reached)
                 {
-                    double orientationErr=0;               /***********  2  ***********/
+                    double orientationErr=errofangle;               /***********  2  ***********/
 
                     std_msgs::Float64 IntegralErr_;
                     IntegralErr_=computeIntegralErr();
@@ -437,7 +445,7 @@ namespace rsband_local_planner
         geometry_msgs::Point odom_car2WayPtVec_2;
         bool foundForwardPt_1 = false;
         bool foundForwardPt_2 = false;
-        double ETA = getEta(carPose);   
+        double ETA = getYawFromPose(carPose);   
         double err_angle;
         if(!goal_reached)
         {
@@ -464,7 +472,14 @@ namespace rsband_local_planner
                         derta_x = odom_path_wayPt_2.x - odom_path_wayPt_1.x;
                         derta_y = odom_path_wayPt_2.y - odom_path_wayPt_1.y;
                         double angel = atan2(derta_y,derta_x);
-                        err_angle = 57.3*atan2(derta_y,derta_x)-57.3*ETA;
+                        err_angle = 57.29*atan2(derta_y,derta_x)-57.29*ETA;
+                        double ferr_angle = fabs(err_angle);
+                        if(ferr_angle>200)
+                        {
+                            err_angle = 360 - ferr_angle;
+                            
+                        }
+
                         ROS_INFO("Angle_2 = %.2f", angel);
                         return err_angle;
                     }
