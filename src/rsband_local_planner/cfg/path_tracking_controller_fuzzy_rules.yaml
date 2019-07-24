@@ -51,30 +51,30 @@ fuzzy_rules:
 
     - "if Smoothness is Smooth and AngleErr is LLow_a and OrientationErr_ is LHigh_o_ then steeringAngle is LM"
     - "if Smoothness is Normal and AngleErr is LLow_a and OrientationErr_ is LHigh_o_ then steeringAngle is LM"
-    - "if Smoothness is Rough  and AngleErr is LLow_a and OrientationErr_ is LHigh_o_ then steeringAngle is LM"
+    - "if Smoothness is Rough  and AngleErr is LLow_a and OrientationErr_ is LHigh_o_ then steeringAngle is LH"
 
     - "if Smoothness is Smooth and AngleErr is LMedium_a and OrientationErr_ is LLow_o_ then steeringAngle is LM"
-    - "if Smoothness is Normal and AngleErr is LMedium_a and OrientationErr_ is LLow_o_ then steeringAngle is LM"
-    - "if Smoothness is Rough  and AngleErr is LMedium_a and OrientationErr_ is LLow_o_ then steeringAngle is LM"
+    - "if Smoothness is Normal and AngleErr is LMedium_a and OrientationErr_ is LLow_o_ then steeringAngle is LH"
+    - "if Smoothness is Rough  and AngleErr is LMedium_a and OrientationErr_ is LLow_o_ then steeringAngle is LH"
 
-    - "if Smoothness is Smooth and AngleErr is LMedium_a and OrientationErr_ is LMedium_o_ then steeringAngle is LM"
-    - "if Smoothness is Normal and AngleErr is LMedium_a and OrientationErr_ is LMedium_o_ then steeringAngle is LM"
-    - "if Smoothness is Rough  and AngleErr is LMedium_a and OrientationErr_ is LMedium_o_ then steeringAngle is LM"
+    - "if Smoothness is Smooth and AngleErr is LMedium_a and OrientationErr_ is LMedium_o_ then steeringAngle is LH"
+    - "if Smoothness is Normal and AngleErr is LMedium_a and OrientationErr_ is LMedium_o_ then steeringAngle is LH"
+    - "if Smoothness is Rough  and AngleErr is LMedium_a and OrientationErr_ is LMedium_o_ then steeringAngle is LHH"
 
-    - "if Smoothness is Smooth and AngleErr is LMedium_a and OrientationErr_ is LHigh_o_ then steeringAngle is LM"
-    - "if Smoothness is Normal and AngleErr is LMedium_a and OrientationErr_ is LHigh_o_ then steeringAngle is LM"
-    - "if Smoothness is Rough  and AngleErr is LMedium_a and OrientationErr_ is LHigh_o_ then steeringAngle is LM"
+    - "if Smoothness is Smooth and AngleErr is LMedium_a and OrientationErr_ is LHigh_o_ then steeringAngle is LH"
+    - "if Smoothness is Normal and AngleErr is LMedium_a and OrientationErr_ is LHigh_o_ then steeringAngle is LHH"
+    - "if Smoothness is Rough  and AngleErr is LMedium_a and OrientationErr_ is LHigh_o_ then steeringAngle is LHH"
 
-    - "if Smoothness is Smooth and AngleErr is LHigh_a and OrientationErr_ is LLow_o_ then steeringAngle is LM"
-    - "if Smoothness is Normal and AngleErr is LHigh_a and OrientationErr_ is LLow_o_ then steeringAngle is LM"
-    - "if Smoothness is Rough  and AngleErr is LHigh_a and OrientationErr_ is LLow_o_ then steeringAngle is LM"
+    - "if Smoothness is Smooth and AngleErr is LHigh_a and OrientationErr_ is LLow_o_ then steeringAngle is LHH"
+    - "if Smoothness is Normal and AngleErr is LHigh_a and OrientationErr_ is LLow_o_ then steeringAngle is LHH"
+    - "if Smoothness is Rough  and AngleErr is LHigh_a and OrientationErr_ is LLow_o_ then steeringAngle is LHH"
 
-    - "if Smoothness is Smooth and AngleErr is LHigh_a and OrientationErr_ is LMedium_o_ then steeringAngle is LM"
-    - "if Smoothness is Normal and AngleErr is LHigh_a and OrientationErr_ is LMedium_o_ then steeringAngle is LM"
-    - "if Smoothness is Rough  and AngleErr is LHigh_a and OrientationErr_ is LMedium_o_ then steeringAngle is LH"
+    - "if Smoothness is Smooth and AngleErr is LHigh_a and OrientationErr_ is LMedium_o_ then steeringAngle is LHH"
+    - "if Smoothness is Normal and AngleErr is LHigh_a and OrientationErr_ is LMedium_o_ then steeringAngle is LHH"
+    - "if Smoothness is Rough  and AngleErr is LHigh_a and OrientationErr_ is LMedium_o_ then steeringAngle is LHH"
 
-    - "if Smoothness is Smooth and AngleErr is LHigh_a and OrientationErr_ is LHigh_o_ then steeringAngle is LM"
-    - "if Smoothness is Normal and AngleErr is LHigh_a and OrientationErr_ is LHigh_o_ then steeringAngle is LH"
+    - "if Smoothness is Smooth and AngleErr is LHigh_a and OrientationErr_ is LHigh_o_ then steeringAngle is LHH"
+    - "if Smoothness is Normal and AngleErr is LHigh_a and OrientationErr_ is LHigh_o_ then steeringAngle is LHH"
     - "if Smoothness is Rough  and AngleErr is LHigh_a and OrientationErr_ is LHigh_o_ then steeringAngle is LHH"
 
     - "if Smoothness is Smooth and AngleErr is RLow_a and OrientationErr_ is RLow_o_ then steeringAngle is Z"
@@ -87,43 +87,43 @@ fuzzy_rules:
 
     - "if Smoothness is Smooth and AngleErr is RLow_a and OrientationErr_ is RHigh_o_ then steeringAngle is RM"
     - "if Smoothness is Normal and AngleErr is RLow_a and OrientationErr_ is RHigh_o_ then steeringAngle is RM"
-    - "if Smoothness is Rough  and AngleErr is RLow_a and OrientationErr_ is RHigh_o_ then steeringAngle is RM"
+    - "if Smoothness is Rough  and AngleErr is RLow_a and OrientationErr_ is RHigh_o_ then steeringAngle is RH"
 
     - "if Smoothness is Smooth and AngleErr is RMedium_a and OrientationErr_ is RLow_o_ then steeringAngle is RM"
-    - "if Smoothness is Normal and AngleErr is RMedium_a and OrientationErr_ is RLow_o_ then steeringAngle is RM"
-    - "if Smoothness is Rough  and AngleErr is RMedium_a and OrientationErr_ is RLow_o_ then steeringAngle is RM"
+    - "if Smoothness is Normal and AngleErr is RMedium_a and OrientationErr_ is RLow_o_ then steeringAngle is RH"
+    - "if Smoothness is Rough  and AngleErr is RMedium_a and OrientationErr_ is RLow_o_ then steeringAngle is RH"
 
-    - "if Smoothness is Smooth and AngleErr is RMedium_a and OrientationErr_ is RMedium_o_ then steeringAngle is RM"
-    - "if Smoothness is Normal and AngleErr is RMedium_a and OrientationErr_ is RMedium_o_ then steeringAngle is RM"
-    - "if Smoothness is Rough  and AngleErr is RMedium_a and OrientationErr_ is RMedium_o_ then steeringAngle is RM"
+    - "if Smoothness is Smooth and AngleErr is RMedium_a and OrientationErr_ is RMedium_o_ then steeringAngle is RH"
+    - "if Smoothness is Normal and AngleErr is RMedium_a and OrientationErr_ is RMedium_o_ then steeringAngle is RH"
+    - "if Smoothness is Rough  and AngleErr is RMedium_a and OrientationErr_ is RMedium_o_ then steeringAngle is RHH"
 
-    - "if Smoothness is Smooth and AngleErr is RMedium_a and OrientationErr_ is RHigh_o_ then steeringAngle is RM"
-    - "if Smoothness is Normal and AngleErr is RMedium_a and OrientationErr_ is RHigh_o_ then steeringAngle is RM"
-    - "if Smoothness is Rough  and AngleErr is RMedium_a and OrientationErr_ is RHigh_o_ then steeringAngle is RM"
+    - "if Smoothness is Smooth and AngleErr is RMedium_a and OrientationErr_ is RHigh_o_ then steeringAngle is RH"
+    - "if Smoothness is Normal and AngleErr is RMedium_a and OrientationErr_ is RHigh_o_ then steeringAngle is RHH"
+    - "if Smoothness is Rough  and AngleErr is RMedium_a and OrientationErr_ is RHigh_o_ then steeringAngle is RHH"
 
-    - "if Smoothness is Smooth and AngleErr is RHigh_a and OrientationErr_ is RLow_o_ then steeringAngle is RM"
-    - "if Smoothness is Normal and AngleErr is RHigh_a and OrientationErr_ is RLow_o_ then steeringAngle is RM"
-    - "if Smoothness is Rough  and AngleErr is RHigh_a and OrientationErr_ is RLow_o_ then steeringAngle is RM"
+    - "if Smoothness is Smooth and AngleErr is RHigh_a and OrientationErr_ is RLow_o_ then steeringAngle is RHH"
+    - "if Smoothness is Normal and AngleErr is RHigh_a and OrientationErr_ is RLow_o_ then steeringAngle is RHH"
+    - "if Smoothness is Rough  and AngleErr is RHigh_a and OrientationErr_ is RLow_o_ then steeringAngle is RHH"
 
-    - "if Smoothness is Smooth and AngleErr is RHigh_a and OrientationErr_ is RMedium_o_ then steeringAngle is RM"
-    - "if Smoothness is Normal and AngleErr is RHigh_a and OrientationErr_ is RMedium_o_ then steeringAngle is RM"
-    - "if Smoothness is Rough  and AngleErr is RHigh_a and OrientationErr_ is RMedium_o_ then steeringAngle is RH"
+    - "if Smoothness is Smooth and AngleErr is RHigh_a and OrientationErr_ is RMedium_o_ then steeringAngle is RHH"
+    - "if Smoothness is Normal and AngleErr is RHigh_a and OrientationErr_ is RMedium_o_ then steeringAngle is RHH"
+    - "if Smoothness is Rough  and AngleErr is RHigh_a and OrientationErr_ is RMedium_o_ then steeringAngle is RHH"
 
-    - "if Smoothness is Smooth and AngleErr is RHigh_a and OrientationErr_ is RHigh_o_ then steeringAngle is RM"
-    - "if Smoothness is Normal and AngleErr is RHigh_a and OrientationErr_ is RHigh_o_ then steeringAngle is RH"
+    - "if Smoothness is Smooth and AngleErr is RHigh_a and OrientationErr_ is RHigh_o_ then steeringAngle is RHH"
+    - "if Smoothness is Normal and AngleErr is RHigh_a and OrientationErr_ is RHigh_o_ then steeringAngle is RHH"
     - "if Smoothness is Rough  and AngleErr is RHigh_a and OrientationErr_ is RHigh_o_ then steeringAngle is RHH"
 
   Lfw_rules:
     - "if Smoothness is Smooth and currantSpeed is LLLow_c then Lfw is SShort_L"
     - "if Smoothness is Normal and currantSpeed is LLLow_c then Lfw is Short_L"
-    - "if Smoothness is Rough  and currantSpeed is LLLow_c then Lfw is Medium_L"
+    - "if Smoothness is Rough  and currantSpeed is LLLow_c then Lfw is Short_L"
 
     - "if Smoothness is Smooth and currantSpeed is LLow_c then Lfw is Short_L"
-    - "if Smoothness is Normal and currantSpeed is LLow_c then Lfw is Medium_L"
-    - "if Smoothness is Rough  and currantSpeed is LLow_c then Lfw is Medium_L"
+    - "if Smoothness is Normal and currantSpeed is LLow_c then Lfw is Short_L"
+    - "if Smoothness is Rough  and currantSpeed is LLow_c then Lfw is Short_L"
 
-    - "if Smoothness is Smooth and currantSpeed is Low_c then Lfw is Medium_L"
-    - "if Smoothness is Normal and currantSpeed is Low_c then Lfw is Medium_L"
+    - "if Smoothness is Smooth and currantSpeed is Low_c then Lfw is Short_L"
+    - "if Smoothness is Normal and currantSpeed is Low_c then Lfw is Short_L"
     - "if Smoothness is Rough  and currantSpeed is Low_c then Lfw is Medium_L"
     
     - "if Smoothness is Smooth and currantSpeed is Medium_c then Lfw is Medium_L"
@@ -131,14 +131,14 @@ fuzzy_rules:
     - "if Smoothness is Rough  and currantSpeed is Medium_c then Lfw is Medium_L"
     
     - "if Smoothness is Smooth and currantSpeed is Fast_c then Lfw is Medium_L"
-    - "if Smoothness is Normal and currantSpeed is Fast_c then Lfw is Medium_L"
-    - "if Smoothness is Rough  and currantSpeed is Fast_c then Lfw is Medium_L"
+    - "if Smoothness is Normal and currantSpeed is Fast_c then Lfw is Long_L"
+    - "if Smoothness is Rough  and currantSpeed is Fast_c then Lfw is Long_L"
     
-    - "if Smoothness is Smooth and currantSpeed is FFast_c then Lfw is Medium_L"
-    - "if Smoothness is Normal and currantSpeed is FFast_c then Lfw is Medium_L"
+    - "if Smoothness is Smooth and currantSpeed is FFast_c then Lfw is Long_L"
+    - "if Smoothness is Normal and currantSpeed is FFast_c then Lfw is Long_L"
     - "if Smoothness is Rough  and currantSpeed is FFast_c then Lfw is Long_L"
     
-    - "if Smoothness is Smooth and currantSpeed is FFFast_c then Lfw is Medium_L"
+    - "if Smoothness is Smooth and currantSpeed is FFFast_c then Lfw is Long_L"
     - "if Smoothness is Normal and currantSpeed is FFFast_c then Lfw is Long_L"
     - "if Smoothness is Rough  and currantSpeed is FFFast_c then Lfw is LLong_L"
     

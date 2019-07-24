@@ -247,15 +247,15 @@ ROS_INFO("-----------   8  ------------");
     steeringAngle_->setDefaultValue(baseAngle);
     steeringAngle_->setLockPreviousValue(true);
     steeringAngle_->setLockValueInRange(false);
-    steeringAngle_->addTerm(new fl::Constant("RHH", baseAngle-30.0));
-    steeringAngle_->addTerm(new fl::Constant("RH",  baseAngle-21.0));
+    steeringAngle_->addTerm(new fl::Constant("RHH", baseAngle-60.0));
+    steeringAngle_->addTerm(new fl::Constant("RH",  baseAngle-30.0));
     steeringAngle_->addTerm(new fl::Constant("RM",  baseAngle-14.0));
     steeringAngle_->addTerm(new fl::Constant("RL",  baseAngle-7.0));
     steeringAngle_->addTerm(new fl::Constant("Z",   baseAngle));
     steeringAngle_->addTerm(new fl::Constant("LL",  baseAngle+7.0));
     steeringAngle_->addTerm(new fl::Constant("LM",  baseAngle+14.0));
-    steeringAngle_->addTerm(new fl::Constant("LH",  baseAngle+21.0));
-    steeringAngle_->addTerm(new fl::Constant("LHH", baseAngle+30.0));
+    steeringAngle_->addTerm(new fl::Constant("LH",  baseAngle+30.0));
+    steeringAngle_->addTerm(new fl::Constant("LHH", baseAngle+60.0));
     engine_->addOutputVariable(steeringAngle_);
 ROS_INFO("-----------   9  ------------");
     // rear steering angle output variable initialization
@@ -335,14 +335,14 @@ ROS_INFO("-----------   16  ------------");
     orientationError__->setValue(ORIENTATION_ERR);
     integrallError_->setValue(INTEGRALL_ERR);
     currantSpeed_->setValue(CURRANT_SPEED);
-    ROS_INFO("data come in now");
+
     engine_->process();
 
     double output_vel= speed_->getValue();  
     double output_angle = steeringAngle_->getValue(); 
     output_Lfw = Lfw_->getValue();  
 
-    ROS_INFO("output_vel=%.2f  output_angle=%.2f",output_vel,output_angle);
+    ROS_INFO("output_vel=%.2f  output_angle=%.2f output_lfw=%.2f",output_vel,output_angle,output_Lfw);
     // create command
     cmd.linear.x = output_vel;
     cmd.angular.z = output_angle;
