@@ -294,19 +294,19 @@ namespace rsband_local_planner
     {   //获取预瞄距离  期望速度越快 预瞄距离越大
         
         float v_el =  getCurrantVel();
-        double L1 = 0.8;
+        double L1 = 3.5;
+        //test on 7.23
+        // double beta;
+        // beta=4.0/(v2-v1);
 
-        double beta;
-        beta=4.0/(v2-v1);
+        // v = fabs(v_el);
 
-        v = fabs(v_el);
-
-        if(v <= v1)
-            L1 = 1;
-        else if(v > v1 && v < v2)
-            L1 = beta*v-beta*v1+1;
-        else if(v >= v2)
-            L1 = 5;
+        // if(v <= v1)
+        //     L1 = 1;
+        // else if(v > v1 && v < v2)
+        //     L1 = beta*v-beta*v1+1;
+        // else if(v >= v2)
+        //     L1 = 5;
             // ROS_INFO("L1 = %.2f",L1);
         return L1;
     }
@@ -372,10 +372,10 @@ namespace rsband_local_planner
         geometry_msgs::Twist carVel = odom.twist.twist;//速度
         cmd_vel.linear.x = 1500;
         cmd_vel.angular.z = baseAngle;
-        
+        double errofangle = GetErrOfAngle(carPose);
+        ROS_INFO("ERR_Angle = %.2f", errofangle);
 
         Lfw =  getL1Distance();
-
         if(goal_received)//取得目标
         {
             double eta = getEta(carPose); 
