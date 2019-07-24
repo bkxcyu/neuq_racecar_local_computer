@@ -294,7 +294,7 @@ namespace rsband_local_planner
     {   //获取预瞄距离  期望速度越快 预瞄距离越大
         
         float v_el =  getCurrantVel();
-        double L1 = 3.5;
+        double L1 = 1.8;
         //test on 7.23
         // double beta;
         // beta=4.0/(v2-v1);
@@ -372,9 +372,10 @@ namespace rsband_local_planner
         geometry_msgs::Twist carVel = odom.twist.twist;//速度
         cmd_vel.linear.x = 1500;
         cmd_vel.angular.z = baseAngle;
+        double E_ta = getEta(carPose); 
         double errofangle = GetErrOfAngle(carPose);
         ROS_INFO("ERR_Angle = %.2f", errofangle);
-
+        ROS_INFO("Angle = %.2f", E_ta);
         Lfw =  getL1Distance();
         if(goal_received)//取得目标
         {
@@ -462,9 +463,11 @@ namespace rsband_local_planner
                         foundForwardPt_1 = true;
                         double derta_x;
                         double derta_y;
-                        derta_x = odom_path_wayPt_1.x - odom_path_wayPt_2.x;
-                        derta_y = odom_path_wayPt_1.y - odom_path_wayPt_2.y;
-                        err_angle = atan2(derta_y,derta_x)-ETA;
+                        derta_x = odom_path_wayPt_2.x - odom_path_wayPt_1.x;
+                        derta_y = odom_path_wayPt_2.y - odom_path_wayPt_1.y;
+                        double angel = atan2(derta_y,derta_x);
+                        err_angle = 57.3*atan2(derta_y,derta_x)-57.3*ETA;
+                        ROS_INFO("Angle_2 = %.2f", angel);
                         return err_angle;
                     }
                 }
