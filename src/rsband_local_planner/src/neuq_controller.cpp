@@ -373,9 +373,13 @@ namespace rsband_local_planner
     {
         geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
         geometry_msgs::Twist carVel = odom.twist.twist;//速度
+
         cmd.linear.x = 1500;
         cmd.angular.z = baseAngle;
 
+        double errofangle = GetErrOfAngle(carPose);
+        ROS_INFO("ERR_Angle = %.2f", errofangle);
+        ROS_INFO("Angle = %.2f", E_ta);
         if(goal_received)//取得目标
         {
             double eta = getEta(carPose); 
@@ -423,6 +427,99 @@ namespace rsband_local_planner
 
     }        
     
+     double L1Controller::GetErrOfAngle(const geometry_msgs::Pose& carPose)
+     {
+        // geometry_msgs::Pose carPose = odom.pose.pose;
+        geometry_msgs::Point carPose_pos = carPose.position;
+        geometry_msgs::Point forwardPt_1;
+        geometry_msgs::Point forwardPt_2;
+        geometry_msgs::Point odom_car2WayPtVec_1;
+        geometry_msgs::Point odom_car2WayPtVec_2;
+        bool foundForwardPt_1 = false;
+        bool foundForwardPt_2 = false;
+        double ETA = getEta(carPose);   
+        double err_angle;
+        if(!goal_reached)
+        {
+            for(int i =0; i< map_path.poses.size(); i++)
+            {
+                geometry_msgs::PoseStamped map_path_pose_1 = map_path.poses[i];//路径信息重映射
+                geometry_msgs::PoseStamped odom_path_pose_1;
+                geometry_msgs::PoseStamped map_path_pose_2 = map_path.poses[i+1];//路径信息重映射
+                geometry_msgs::PoseStamped odom_path_pose_2;
+                tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_1, "map" ,odom_path_pose_1);
+                tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_2, "map" ,odom_path_pose_2);
+                geometry_msgs::Point odom_path_wayPt_1= odom_path_pose_1.pose.position;
+                geometry_msgs::Point odom_path_wayPt_2= odom_path_pose_2.pose.position;
+                bool _isForwardWayPt_1 = isForwardWayPt(odom_path_wayPt_1,carPose);
+                if(_isForwardWayPt_1)
+                {
+                    bool _isWayPtAwayFromLfwDist_1 = isWayPtAwayFromLfwDist(odom_path_wayPt_1,carPose_pos);
+                    if(_isWayPtAwayFromLfwDist_1)
+                    {
+                        forwardPt_1 = odom_path_wayPt_1;
+                        foundForwardPt_1 = true;
+                        double derta_x;
+                        double derta_y;
+                        derta_x = odom_path_wayPt_2.x - odom_path_wayPt_1.x;
+                        derta_y = odom_path_wayPt_2.y - odom_path_wayPt_1.y;
+                        double angel = atan2(derta_y,derta_x);
+                        err_angle = 57.3*atan2(derta_y,derta_x)-57.3*ETA;
+                        ROS_INFO("Angle_2 = %.2f", angel);
+                        return err_angle;
+                    }
+                }
+            }
+        }
+        
+
+     }
+    // {   
+    //     //输入车坐标（以及规划的路径信息）返回iu可行的目标向量
+    //     geometry_msgs::Point carPose_pos = carPose.position;//车的位置重映射
+    //     double carPose_yaw = getYawFromPose(carPose);//从车的姿态（四元数）计算固有转向角（舵机打角）
+        //  geometry_msgs::Point forwardPt_1;
+        //  geometry_msgs::Point forwardPt_2;
+        //  geometry_msgs::Point odom_car2WayPtVec_1;
+        //  geometry_msgs::Point odom_car2WayPtVec_2;
+    //     bool foundForwardPt_1 = false;
+    //     bool foundForwardPt_2 = false;
+    //     double err_angle;
+    //     if(!goal_reached)
+    //     { 
+    //         for(int i =0; i< map_path.poses.size(); i++)
+    //         {
+    //             geometry_msgs::PoseStamped map_path_pose_1 = map_path.poses[i];//路径信息重映射
+    //             geometry_msgs::PoseStamped odom_path_pose_1;
+    //             geometry_msgs::PoseStamped map_path_pose_2 = map_path.poses[i+1];//路径信息重映射
+    //             geometry_msgs::PoseStamped odom_path_pose_2;
+
+    //                 tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_1, "map" ,odom_path_pose_1);//将map坐标系下的路径信息（含有戳记的坐标数组）转换到odom坐标系下，存入odom_path_pose
+    //                 tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_2, "map" ,odom_path_pose_2);
+    //                 geometry_msgs::Point odom_path_wayPt_1= odom_path_pose_1.pose.position;//规划的路径坐标信息（航路点）存入odom_path_wayPt
+    //                 geometry_msgs::Point odom_path_wayPt_2= odom_path_pose_2.pose.position;                  
+    //                 bool _isForwardWayPt_1 = isForwardWayPt(odom_path_wayPt_1,carPose);//输入航路点的坐标和车的坐标 返回前方是否有航路点 即是否能到达该坐标
+    //                 bool _isForwardWayPt_2= isForwardWayPt(odom_path_wayPt_2,carPose);
+    //                 if(_isForwardWayPt_1)//如果没有可行航路点怎么办？？？  航路点太超前怎么办？？？
+    //                 {
+    //                     bool _isWayPtAwayFromLfwDist_1 = isWayPtAwayFromLfwDist(odom_path_wayPt_1,carPose_pos);//输入航路点和车坐标 返回是否能直接到达（是否在转弯的盲区）
+    //                     if(_isWayPtAwayFromLfwDist_1)
+    //                     {
+    //                         forwardPt_1 = odom_path_wayPt_1;//将可行的航路点存入forwardPt
+    //                         foundForwardPt_1 = true;
+    //                         double derta_x;
+    //                         double derta_y;
+    //                         derta_x = odom_path_wayPt_1.x - odom_path_wayPt_2.x;
+    //                         derta_y = odom_path_wayPt_1.y - odom_path_wayPt_2.y;
+    //                         err_angle = atan2(derta_y,derta_x);
+    //                         return err_angle;
+    //                     }
+    //                 }
+    //         }
+    //     }   
+    //     ROS_INFO("ERR_Angle = %.2f", err_angle);
+    //     return err_angle;
+    // }       
     bool L1Controller::ReadyToLastRush()
     {
         if(map_path.poses.size()<RUSH_POINT)
@@ -754,6 +851,5 @@ namespace rsband_local_planner
     //     ros::spin();//循环执行
     //     return 0;
     // }
-
 
 }

@@ -109,6 +109,7 @@ namespace rsband_local_planner
             void controlLoopCB(const ros::TimerEvent&);
             bool ReadyToLastRush();
             bool JudgeLockedRotor();
+            double GetErrOfAngle(const geometry_msgs::Pose& carPose);
 
             void BackOff();
 
