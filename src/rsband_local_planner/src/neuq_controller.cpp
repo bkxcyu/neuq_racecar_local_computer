@@ -705,12 +705,8 @@ namespace rsband_local_planner
 
     void L1Controller::reconfigure(RSBandPlannerConfig& config)
     {//Angle_gain baseSpeed baseAngle MAX_SLOW_DOWN qujian_min qujian_max TRAVERSAL_POINT KP KD
-        Angle_gain=config.Angle_gain;
+    //computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,currant_vel, Lfw,cmd))
         baseSpeed=config.baseSpeed;
-        baseAngle=config.baseAngle;
-        MAX_SLOW_DOWN=config.MAX_SLOW_DOWN;
-        qujian_min=config.qujian_min;
-        qujian_max=config.qujian_max;
         TRAVERSAL_POINT=config.TRAVERSAL_POINT;
         KP=config.KP;
         KD=config.KD;
@@ -724,6 +720,8 @@ namespace rsband_local_planner
         reset_flag=config.reset;
         v1=config.v1;
         v2=config.v2;
+
+        
 
         if (ptc_)
              ptc_->reconfigure(config);
