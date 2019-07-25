@@ -23,9 +23,9 @@ fuzzy_rules:
     - "if Smoothness is Normal and IntegrallErr is Medium_i and OrientationErr is Medium_o then Speed is Medium"
     - "if Smoothness is Rough  and IntegrallErr is Medium_i and OrientationErr is Medium_o then Speed is Medium"
 
-    - "if Smoothness is Smooth and IntegrallErr is Medium_i and OrientationErr is High_o then Speed is Medium"
-    - "if Smoothness is Normal and IntegrallErr is Medium_i and OrientationErr is High_o then Speed is Medium"
-    - "if Smoothness is Rough  and IntegrallErr is Medium_i and OrientationErr is High_o then Speed is Medium"
+    - "if Smoothness is Smooth and IntegrallErr is Medium_i and OrientationErr is High_o then Speed is Low"
+    - "if Smoothness is Normal and IntegrallErr is Medium_i and OrientationErr is High_o then Speed is Low"
+    - "if Smoothness is Rough  and IntegrallErr is Medium_i and OrientationErr is High_o then Speed is Low"
 
     - "if Smoothness is Smooth and IntegrallErr is High_i and OrientationErr is Low_o then Speed is Low"
     - "if Smoothness is Normal and IntegrallErr is High_i and OrientationErr is Low_o then Speed is Medium"

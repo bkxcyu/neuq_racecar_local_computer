@@ -10,7 +10,7 @@ global_costmap:
     resolution: 0.10
 
     rolling_window: true
-    width: 50.0 #default:10
+    width: 60.0 #default:10
     height: 10.0 #default:10
     track_unknown_space: true #假如该参数设置为false的话，就意味着地图上的未知区域也会被认为是可以自由移动的区域，
                                #这样在进行全局路径规划时，可以把一些未探索的未知区域也来参与到路径规划。

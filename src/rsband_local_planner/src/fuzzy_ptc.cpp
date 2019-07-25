@@ -215,9 +215,9 @@ ROS_INFO("-----------   6  ------------");
     integrallError_->setEnabled(true);
     integrallError_->setName("IntegrallErr");
     integrallError_->setRange(0, 100.0);
-    integrallError_->addTerm(new fl::Trapezoid("Low_i",    0.0, 0.0, 3.0, 5.0));
-    integrallError_->addTerm(new fl::Trapezoid("Medium_i", 3.0, 5.0,  10,  25));
-    integrallError_->addTerm(new fl::Trapezoid("High_i",    10,  25, 100, 100));
+    integrallError_->addTerm(new fl::Trapezoid("Low_i",    0.0, 0.0, 5.0, 7.0));
+    integrallError_->addTerm(new fl::Trapezoid("Medium_i", 7.0, 10,  25,  30));
+    integrallError_->addTerm(new fl::Trapezoid("High_i",    25,  30, 100, 100));
     engine_->addInputVariable(integrallError_);
 ROS_INFO("-----------   7  ------------");
     // currantSpeed_ error input variable initialization
@@ -270,9 +270,9 @@ ROS_INFO("-----------   9  ------------");
     Lfw_->setLockValueInRange(false);
     Lfw_->addTerm(new fl::Constant("SShort_L", 0.8));
     Lfw_->addTerm(new fl::Constant("Short_L",  1.5));
-    Lfw_->addTerm(new fl::Constant("Medium_L", 2.5));
-    Lfw_->addTerm(new fl::Constant("Long_L",   3.0));
-    Lfw_->addTerm(new fl::Constant("LLong_L",  4.0));
+    Lfw_->addTerm(new fl::Constant("Medium_L", 2.0));
+    Lfw_->addTerm(new fl::Constant("Long_L",   2.5));
+    Lfw_->addTerm(new fl::Constant("LLong_L",  3.0));
     engine_->addOutputVariable(Lfw_);
 ROS_INFO("-----------   10  ------------");
     // speed output variable initialization
@@ -336,7 +336,7 @@ ROS_INFO("-----------   16  ------------");
     integrallError_->setValue(fabs(INTEGRALL_ERR));
     currantSpeed_->setValue(CURRANT_SPEED);
 
-    ROS_INFO("input/nANGULAR_ERR=%.2f  ORIENTATION_ERR=%.2f INTEGRALL_ERR=%.2f   CURRANT_SPEED=%.2f",ANGULAR_ERR,ORIENTATION_ERR,INTEGRALL_ERR,CURRANT_SPEED);
+    // ROS_INFO("input/nANGULAR_ERR=%.2f  ORIENTATION_ERR=%.2f INTEGRALL_ERR=%.2f   CURRANT_SPEED=%.2f",ANGULAR_ERR,ORIENTATION_ERR,INTEGRALL_ERR,CURRANT_SPEED);
    
     engine_->process();
 
@@ -344,7 +344,7 @@ ROS_INFO("-----------   16  ------------");
     double output_angle = steeringAngle_->getValue(); 
     output_Lfw = Lfw_->getValue();  
 
-    ROS_INFO("output_vel=%.2f  output_angle=%.2f output_lfw=%.2f",output_vel,output_angle,output_Lfw);
+    // ROS_INFO("output_vel=%.2f  output_angle=%.2f output_lfw=%.2f",output_vel,output_angle,output_Lfw);
    
 
     

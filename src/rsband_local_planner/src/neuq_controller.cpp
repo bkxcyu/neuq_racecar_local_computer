@@ -33,7 +33,7 @@ namespace rsband_local_planner
 
         pn.param("GasGain", Gas_gain, 3.0);//电机输出增益（系数P）
         pn.param("baseSpeed", baseSpeed, 1600);//基速度
-        pn.param("baseAngle", baseAngle, 77.0);//基角度
+        pn.param("baseAngle", baseAngle, 83.0);//基角度
         pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 10.0);
         pn.param("qujian_min", qujian_min, 7.0);
         pn.param("qujian_max", qujian_max, 20.0);
@@ -54,7 +54,7 @@ namespace rsband_local_planner
 
         //Timer 定时中断
         // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-        // timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
+        timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
         
         //Init variables
         Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
@@ -223,22 +223,24 @@ namespace rsband_local_planner
                     geometry_msgs::Point odom_path_wayPt = odom_path_pose.pose.position;//规划的路径坐标信息（航路点）存入odom_path_wayPt
                     bool _isForwardWayPt = isForwardWayPt(odom_path_wayPt,carPose);//输入航路点的坐标和车的坐标 返回前方是否有航路点 即是否能到达该坐标
 
-                    if(_isForwardWayPt)//如果没有可行航路点怎么办？？？  航路点太超前怎么办？？？
+                    if(_isForwardWayPt)//航路点是否在车前
                     {
                         bool _isWayPtAwayFromLfwDist = isWayPtAwayFromLfwDist(odom_path_wayPt,carPose_pos);//输入航路点和车坐标 返回是否能直接到达（是否在转弯的盲区）
-                        if(_isWayPtAwayFromLfwDist)
+                        if(_isWayPtAwayFromLfwDist)//长度是否满足要求
                         {
                             forwardPt = odom_path_wayPt;//将可行的航路点存入forwardPt
                             last_forwardPt=forwardPt;
                             foundForwardPt = true;
                             break;
                         }
-                        // else
-                        // {
-                        //     forwardPt=last_forwardPt;
-                        //     foundForwardPt = true;
-                        // }
+                        else
+                        {
+                            forwardPt=last_forwardPt;
+                            foundForwardPt = true;
+                        }
                     }
+                    else
+                        foundForwardPt=false;
                 }
                 catch(tf::TransformException &ex)
                 {
@@ -386,8 +388,8 @@ namespace rsband_local_planner
 
         double eta = getEta(carPose);
         double errofangle = GetErrOfAngle(carPose);
-        ROS_INFO("ERR_Angle = %.2f", errofangle);
-        ROS_INFO("Angle = %.2f", eta);
+        // ROS_INFO("ERR_Angle = %.2f", errofangle);
+        // ROS_INFO("Angle = %.2f", eta);
         if(goal_received)//取得目标
         {
              
@@ -415,8 +417,8 @@ namespace rsband_local_planner
                         return false;
                     }
 
-                    cmd.linear.x=map(cmd.linear.x,0,5,1550,1640);
-                    ROS_INFO("cmd.linear.x=%.2f",cmd.linear.x);
+                    cmd.linear.x=map(cmd.linear.x,0,5,1550,baseSpeed);
+                    // ROS_INFO("cmd.linear.x=%.2f",cmd.linear.x);
                     // if (!ptc_->computeVelocityCommands(a,b,c,d, Lfw,cmd))
                     // {
                     //     ROS_ERROR("Path tracking controller failed to produce command");
@@ -480,7 +482,7 @@ namespace rsband_local_planner
                             
                         }
 
-                        ROS_INFO("Angle_2 = %.2f", angel);
+                        // ROS_INFO("Angle_2 = %.2f", angel);
                         return err_angle;
                     }
                 }
@@ -623,7 +625,7 @@ namespace rsband_local_planner
     {
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
-        vel.linear.x=1.5*(0.0348*pwm.linear.x-54.1109);//转移
+        vel.linear.x=1.7*(0.0348*pwm.linear.x-54.1109);//转移
         vel.linear.z=pwm.linear.z;//
         vel.angular.z=pwm.angular.z;
         return vel;
@@ -805,7 +807,7 @@ namespace rsband_local_planner
         }
 
 
-        //ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+        ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
         err_pub.publish(Err);
         return Err;
