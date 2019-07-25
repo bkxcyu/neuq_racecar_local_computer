@@ -216,8 +216,8 @@ ROS_INFO("-----------   6  ------------");
     integrallError_->setName("IntegrallErr");
     integrallError_->setRange(0, 100.0);
     integrallError_->addTerm(new fl::Trapezoid("Low_i",    0.0, 0.0, 5.0, 7.0));
-    integrallError_->addTerm(new fl::Trapezoid("Medium_i", 7.0, 10,  25,  30));
-    integrallError_->addTerm(new fl::Trapezoid("High_i",    25,  30, 100, 100));
+    integrallError_->addTerm(new fl::Trapezoid("Medium_i", 7.0, 10,  20,  25));
+    integrallError_->addTerm(new fl::Trapezoid("High_i",    20, 25, 100, 100));
     engine_->addInputVariable(integrallError_);
 ROS_INFO("-----------   7  ------------");
     // currantSpeed_ error input variable initialization
@@ -228,10 +228,10 @@ ROS_INFO("-----------   7  ------------");
     currantSpeed_->addTerm(new fl::Trapezoid("LLLow_c", 0.0, 0.0, 0.5, 0.9));
     currantSpeed_->addTerm(new fl::Trapezoid("LLow_c",  0.5, 0.9, 1.2, 1.6));
     currantSpeed_->addTerm(new fl::Trapezoid("Low_c",   1.2, 1.6, 1.9, 2.3));
-    currantSpeed_->addTerm(new fl::Trapezoid("Medium_c",1.9, 2.3, 2.6, 3.0));
-    currantSpeed_->addTerm(new fl::Trapezoid("Fast_c",  2.6, 3.0, 3.3, 3.7));
-    currantSpeed_->addTerm(new fl::Trapezoid("FFast_c", 3.3, 3.7, 4.0, 4.4));
-    currantSpeed_->addTerm(new fl::Trapezoid("FFFast_c",4.0, 4.4, 5.0, 5.0));
+    currantSpeed_->addTerm(new fl::Trapezoid("Medium_c",1.9, 2.3, 2.6, 3.5));
+    currantSpeed_->addTerm(new fl::Trapezoid("Fast_c",  2.6, 3.5, 3.7, 4.0));
+    currantSpeed_->addTerm(new fl::Trapezoid("FFast_c", 3.7, 4.0, 4.2, 4.4));
+    currantSpeed_->addTerm(new fl::Trapezoid("FFFast_c",4.2, 4.4, 5.0, 5.0));
     engine_->addInputVariable(currantSpeed_);
 
     //========================= OUTPUT VARIABLES ===============================
@@ -268,9 +268,9 @@ ROS_INFO("-----------   9  ------------");
     Lfw_->setDefaultValue(1.0);
     Lfw_->setLockPreviousValue(true);
     Lfw_->setLockValueInRange(false);
-    Lfw_->addTerm(new fl::Constant("SShort_L", 0.8));
-    Lfw_->addTerm(new fl::Constant("Short_L",  1.5));
-    Lfw_->addTerm(new fl::Constant("Medium_L", 2.0));
+    Lfw_->addTerm(new fl::Constant("SShort_L", 0.5));
+    Lfw_->addTerm(new fl::Constant("Short_L",  1.2));
+    Lfw_->addTerm(new fl::Constant("Medium_L", 1.8));
     Lfw_->addTerm(new fl::Constant("Long_L",   2.5));
     Lfw_->addTerm(new fl::Constant("LLong_L",  3.0));
     engine_->addOutputVariable(Lfw_);
