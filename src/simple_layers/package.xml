@@ -59,6 +59,8 @@
   <exec_depend>dynamic_reconfigure</exec_depend>
   <exec_depend>roscpp</exec_depend>
 
+  <depend>visualization_msgs</depend>
+  <depend>tf</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

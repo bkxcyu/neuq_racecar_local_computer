@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   costmap_2d
   dynamic_reconfigure
   roscpp
+  visualization_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -210,3 +212,4 @@ catkin_package(
 
 include_directories(${catkin_INCLUDE_DIRS} include)
 add_library(simple_layer src/simple_layer.cpp)
+add_definitions(-std=c++11)

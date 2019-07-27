@@ -5,6 +5,11 @@
 #include <costmap_2d/layered_costmap.h>
 #include <costmap_2d/GenericPluginConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include <visualization_msgs/Marker.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_datatypes.h>
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace simple_layer_namespace
 {
@@ -24,6 +29,11 @@ private:
 
   double mark_x_, mark_y_;
   dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
+
+  void obstCB(const visualization_msgs::Marker& _obst);
+  std::vector<geometry_msgs::PointStamped> obst;
+  ros::Subscriber obst_sub;
+  tf::TransformListener tf_listener;
 };
 }
 #endif
