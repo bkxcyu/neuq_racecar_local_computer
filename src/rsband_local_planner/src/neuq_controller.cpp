@@ -116,6 +116,7 @@ namespace rsband_local_planner
         goal_circle.color.b = 0.0;
         goal_circle.color.a = 0.5;
     }
+    
 
 
     void L1Controller::obstCB(const visualization_msgs::Marker& obstMsg)
@@ -462,8 +463,8 @@ namespace rsband_local_planner
                         foundForwardPt_1 = true;
                         double derta_x;
                         double derta_y;
-                        derta_x = odom_path_wayPt_1.x - odom_path_wayPt_2.x;
-                        derta_y = odom_path_wayPt_1.y - odom_path_wayPt_2.y;
+                        derta_x = odom_path_wayPt_2.x - odom_path_wayPt_1.x;
+                        derta_y = odom_path_wayPt_2.y - odom_path_wayPt_1.y;
                         err_angle = atan2(derta_y,derta_x)-ETA;
                         return err_angle;
                     }
