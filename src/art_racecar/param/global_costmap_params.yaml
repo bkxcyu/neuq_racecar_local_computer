@@ -20,7 +20,7 @@ global_costmap:
         - {name: static,    type: "costmap_2d::StaticLayer"}            
         - {name: sensor,    type: "costmap_2d::ObstacleLayer"}
         - {name: inflation, type: "costmap_2d::InflationLayer"}
-    #     - {name: obstacles, type: "costmap_2d::VoxelLayer"}
+        - {name: add_obstacles, type: "simple_layer_namespace::SimpleLayer"}
 
     # obstacles:
     #     observation_sources: base_scan

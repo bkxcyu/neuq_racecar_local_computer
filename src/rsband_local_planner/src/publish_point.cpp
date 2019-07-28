@@ -54,15 +54,15 @@
         // int k =0;
         // while (k<20)
         // {
-            each_Obstr_marker.header.frame_id =  "odom";
+            each_Obstr_marker.header.frame_id =  "map";
             each_Obstr_marker.ns =  "Markers";
             each_Obstr_marker.action = visualization_msgs::Marker::ADD;
             each_Obstr_marker.pose.orientation.w  = 1.0;
             each_Obstr_marker.id = 0;
             each_Obstr_marker.type = visualization_msgs::Marker::POINTS;
             // obstr markers use x and y scale for width/height respectively
-            each_Obstr_marker.scale.x = 4;
-            each_Obstr_marker.scale.y = 4;
+            each_Obstr_marker.scale.x = 0.1;
+            each_Obstr_marker.scale.y = 0.1;
             // each_Obstr_marker.scale.z=4; 
             // obstr are green
             each_Obstr_marker.color.g = 1.0f;

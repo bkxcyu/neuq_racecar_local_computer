@@ -36,16 +36,16 @@ void SimpleLayer::obstCB(const visualization_msgs::MarkerArray& _obst)
     each_pointSt.header.frame_id=each_marker.header.frame_id;;
     each_pointSt.header.stamp = ros::Time();
     each_pointSt.point=each_marker.points.front();
-    try
-    {
-    geometry_msgs::PointStamped map_point;
-    tf_listener.transformPoint("/map", each_pointSt, map_point);
-    obst.push_back(map_point);
-    }
-    catch(tf::TransformException& ex)
-    {
-      ROS_ERROR("tf err in simple layer: %s", ex.what());
-    }
+    // try
+    // {
+    // geometry_msgs::PointStamped map_point;
+    // tf_listener.transformPoint("/map", each_pointSt, map_point);
+    obst.push_back(each_pointSt);
+    // }
+    // catch(tf::TransformException& ex)
+    // {
+    //   ROS_ERROR("tf err in simple layer: %s", ex.what());
+    // }
   }
 }
 
