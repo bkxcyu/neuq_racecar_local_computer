@@ -118,6 +118,7 @@ namespace rsband_local_planner
         goal_circle.color.b = 0.0;
         goal_circle.color.a = 0.5;
     }
+    
 
 
     void L1Controller::obstCB(const visualization_msgs::Marker& obstMsg)
@@ -473,6 +474,7 @@ namespace rsband_local_planner
                         double derta_y;
                         derta_x = odom_path_wayPt_2.x - odom_path_wayPt_1.x;
                         derta_y = odom_path_wayPt_2.y - odom_path_wayPt_1.y;
+
                         double angel = atan2(derta_y,derta_x);
                         err_angle = 57.29*atan2(derta_y,derta_x)-57.29*ETA;
                         double ferr_angle = fabs(err_angle);
@@ -483,6 +485,7 @@ namespace rsband_local_planner
                         }
 
                         // ROS_INFO("Angle_2 = %.2f", angel);
+
                         return err_angle;
                     }
                 }

@@ -68,10 +68,10 @@
         <rosparam file="$(find art_racecar)/param/base_global_planner_params.yaml" command="load"/>
         <rosparam file="$(find art_racecar)/param/move_base_params.yaml" command="load"/>
         <remap from="/odom" to="/odometry/filtered"/>
-        
-       
     </node>
-
+     <!--RVIZ 可视化-->
+    <node pkg="rsband_local_planner" type="publish_point.cpp" name="point" output="screen">
+    </node>
 
     <!-- Rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find art_racecar)/rviz/amcl.rviz" if="$(arg use_rviz)" />
