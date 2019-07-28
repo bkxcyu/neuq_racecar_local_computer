@@ -70,7 +70,7 @@
         <remap from="/odom" to="/odometry/filtered"/>
     </node>
      <!--RVIZ 可视化-->
-    <node pkg="rsband_local_planner" type="publish_point.cpp" name="point">
+    <node pkg="rsband_local_planner" type="publish_point.cpp" name="point" output="screen">
     </node>
 
     <!-- Rviz -->

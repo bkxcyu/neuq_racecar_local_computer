@@ -33,17 +33,17 @@
         
     
     private:
-       void obstrCB(const geometry_msgs::PointStamped& obstrMsg);
+       void obstrCB(const geometry_msgs::PointStamped::ConstPtr& obstrMsg);
        ros::NodeHandle _n;
        ros::Subscriber obstr_sub;
-       ros::Publisher obstr_marker;
+       ros::Publisher obst_marker_pub_;
        geometry_msgs::PointStamped obstr;
        visualization_msgs::Marker Obstr;
     };
     OBSTR::OBSTR()
     {
         obstr_sub = _n.subscribe("/clicked_point", 20, &OBSTR::obstrCB, this);  
-        // obst_marker_pub_ = _n.advertise<visualization_msgs::Marker>("obst_markers", 20);
+        obst_marker_pub_ = _n.advertise<visualization_msgs::Marker>("obst_markers", 10);
         initMarker();
     }
    
@@ -54,22 +54,24 @@
         Obstr.action = visualization_msgs::Marker::ADD;
         Obstr.pose.orientation.w  = 1.0;
         Obstr.id = 0;
-        Obstr.type = visualization_msgs::Marker::CUBE;
+        Obstr.type = visualization_msgs::Marker::POINTS;
         // obstr markers use x and y scale for width/height respectively
-        Obstr.scale.x = 0.4;
-        Obstr.scale.y = 0.4; 
+        Obstr.scale.x = 4;
+        Obstr.scale.y = 4;
+        // Obstr.scale.z=4; 
         // obstr are green
         Obstr.color.g = 1.0f;
         Obstr.color.a = 1.0;
 
     }
-    void OBSTR::obstrCB(const geometry_msgs::PointStamped& obstrMsg)
+    void OBSTR::obstrCB(const geometry_msgs::PointStamped::ConstPtr& obstrMsg)
     {
-        obstr = obstrMsg;
+        obstr = *obstrMsg;
+        ROS_INFO("RECEIVE:%.2f %.2f %.2f",obstr.point.x,obstr.point.y,obstr.point.z);
         // obstr_marker_pub_.publish(ObstacleMarker);
         //可视化在这里实现
-        Obstr.pose.position = obstr.point;
-        obstr_marker.publish(Obstr);
+        Obstr.points.push_back(obstr.point);
+        obst_marker_pub_.publish(Obstr);
     }
     int main(int argc, char** argv)
     {
