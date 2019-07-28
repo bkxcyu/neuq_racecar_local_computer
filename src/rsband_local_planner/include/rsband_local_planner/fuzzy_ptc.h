@@ -85,8 +85,9 @@ namespace rsband_local_planner
        * @return true if a command was produced successfully
        */
       bool computeVelocityCommands(
-        const std::vector<geometry_msgs::PoseStamped>& path,
-        geometry_msgs::Twist& cmd);
+        const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,const double& CURRANT_SPEED,
+        double& output_Lfw,
+        double& cmd);
 
       /**
        * @brief Checks if the goal position and orientation have been reached
@@ -196,7 +197,7 @@ namespace rsband_local_planner
       RearSteeringMode rearSteeringMode_;
 
       //! the robot wheelbase
-      double wheelbase_;
+      double SMOOTHNESS;
       //! the max steering angle of the virtual middle wheel
       double maxSteeringAngle_;
       //! max speed
@@ -221,32 +222,24 @@ namespace rsband_local_planner
       //! position FLC engine
       fl::Engine* engine_;
 
-      //! direction (forwards/backwards) input variable
-      fl::InputVariable* direction_;
-      //! robot to goal direction orientation error input variable
+      fl::InputVariable* smoothness_;
       fl::InputVariable* angularDeviationError_;
-      //! robot to final goal orientation error input variable
       fl::InputVariable* orientationError_;
-      //! robot to goal distance error input variable
-      fl::InputVariable* positionError_;
-      //! lateral deviation error
-      fl::InputVariable* lateralDeviationError_;
-      //! steering angle output variable 1
-      fl::OutputVariable* frontSteeringAngle_;
-      //! rear steering deviation angle output variable
-      fl::OutputVariable* rearSteeringDeviationAngle_;
-      //! speed output variable
+      fl::InputVariable* orientationError__;
+      fl::InputVariable* integrallError_;
+      fl::InputVariable* currantSpeed_;
+
+      fl::OutputVariable* steeringAngle_;
+      fl::OutputVariable* Lfw_;
       fl::OutputVariable* speed_;
 
       //! flc rule block
       fl::RuleBlock* ruleBlock_;
 
-      //! speed rules
+      //! rules 
       std::vector<std::string> speedRules_;
-      //! front steering rules
-      std::vector<std::string> frontSteeringRules_;
-      //! rear steering deviation rules
-      std::vector<std::string> rearSteeringDeviationRules_;
+      std::vector<std::string> Lfw_rules_;
+      std::vector<std::string> SteeringRules_;
 
   };
 

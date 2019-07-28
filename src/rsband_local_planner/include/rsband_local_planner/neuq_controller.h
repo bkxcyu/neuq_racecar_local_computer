@@ -23,6 +23,8 @@
 #include <tf_conversions/tf_eigen.h>
 //rsband
 #include "rsband_local_planner/RSBandPlannerConfig.h"
+//fuzzy control
+#include "rsband_local_planner/fuzzy_ptc.h"
 
 
 #define PI 3.14159265358979
@@ -110,6 +112,9 @@ namespace rsband_local_planner
             double GetErrOfAngle(const geometry_msgs::Pose& carPose);
 
             void BackOff();
+
+            boost::shared_ptr<FuzzyPTC> ptc_;
+            double a,b,c,d;
 
     }; // end of class
 }

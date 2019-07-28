@@ -15,6 +15,7 @@ oscillation_distance: 0.2
 
 clearing_rotation_allowed: false
 
+
 # recovery_behaviors:
 #   - name: 'conservative_reset'
 #     type: 'clear_costmap_recovery/ClearCostmapRecovery'
