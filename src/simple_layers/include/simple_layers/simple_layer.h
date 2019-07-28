@@ -6,6 +6,7 @@
 #include <costmap_2d/GenericPluginConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 #include <boost/bind.hpp>
@@ -30,7 +31,7 @@ private:
   double mark_x_, mark_y_;
   dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
 
-  void obstCB(const visualization_msgs::Marker& _obst);
+  void obstCB(const visualization_msgs::MarkerArray& _obst);
   std::vector<geometry_msgs::PointStamped> obst;
   ros::Subscriber obst_sub;
   tf::TransformListener tf_listener;

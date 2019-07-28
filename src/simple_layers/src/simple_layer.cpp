@@ -20,22 +20,22 @@ void SimpleLayer::onInitialize()
       &SimpleLayer::reconfigureCB, this, _1, _2);
   dsrv_->setCallback(cb);
 
-  obst_sub = nh.subscribe("/obst", 1, &SimpleLayer::obstCB, this);//visualization_msgs::Marker
+  obst_sub = nh.subscribe("obst_markers", 1, &SimpleLayer::obstCB, this);//visualization_msgs::Marker
 
 }
 
 
 
-void SimpleLayer::obstCB(const visualization_msgs::Marker& _obst)
+void SimpleLayer::obstCB(const visualization_msgs::MarkerArray& _obst)
 {
-  std::vector<geometry_msgs::Point> obst_buffer;
-  obst_buffer=_obst.points;
-  for(geometry_msgs::Point each_point:obst_buffer)
+  // std::vector<geometry_msgs::Point> obst_buffer;
+  // obst_buffer=_obst.points;
+  for(visualization_msgs::Marker each_marker:_obst.markers)
   {
     geometry_msgs::PointStamped each_pointSt;
-    each_pointSt.header.frame_id=_obst.header.frame_id;;
+    each_pointSt.header.frame_id=each_marker.header.frame_id;;
     each_pointSt.header.stamp = ros::Time();
-    each_pointSt.point=each_point;
+    each_pointSt.point=each_marker.points.front();
     try
     {
     geometry_msgs::PointStamped map_point;
