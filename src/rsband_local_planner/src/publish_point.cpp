@@ -38,30 +38,37 @@
        ros::Subscriber obstr_sub;
        ros::Publisher obst_marker_pub_;
        geometry_msgs::PointStamped obstr;
-       visualization_msgs::Marker Obstr;
+       visualization_msgs::Marker each_Obstr_marker;
+       visualization_msgs::MarkerArray obst_markers_array;
+       
     };
     OBSTR::OBSTR()
     {
         obstr_sub = _n.subscribe("/clicked_point", 20, &OBSTR::obstrCB, this);  
-        obst_marker_pub_ = _n.advertise<visualization_msgs::Marker>("obst_markers", 10);
+        obst_marker_pub_ = _n.advertise<visualization_msgs::MarkerArray>("obst_markers", 20);
         initMarker();
     }
    
     void OBSTR::initMarker()
     {
-        Obstr.header.frame_id =  "odom";
-        Obstr.ns =  "Markers";
-        Obstr.action = visualization_msgs::Marker::ADD;
-        Obstr.pose.orientation.w  = 1.0;
-        Obstr.id = 0;
-        Obstr.type = visualization_msgs::Marker::POINTS;
-        // obstr markers use x and y scale for width/height respectively
-        Obstr.scale.x = 4;
-        Obstr.scale.y = 4;
-        // Obstr.scale.z=4; 
-        // obstr are green
-        Obstr.color.g = 1.0f;
-        Obstr.color.a = 1.0;
+        // int k =0;
+        // while (k<20)
+        // {
+            each_Obstr_marker.header.frame_id =  "odom";
+            each_Obstr_marker.ns =  "Markers";
+            each_Obstr_marker.action = visualization_msgs::Marker::ADD;
+            each_Obstr_marker.pose.orientation.w  = 1.0;
+            each_Obstr_marker.id = 0;
+            each_Obstr_marker.type = visualization_msgs::Marker::POINTS;
+            // obstr markers use x and y scale for width/height respectively
+            each_Obstr_marker.scale.x = 4;
+            each_Obstr_marker.scale.y = 4;
+            // each_Obstr_marker.scale.z=4; 
+            // obstr are green
+            each_Obstr_marker.color.g = 1.0f;
+            each_Obstr_marker.color.a = 1.0;
+            // k++;
+        // }
 
     }
     void OBSTR::obstrCB(const geometry_msgs::PointStamped::ConstPtr& obstrMsg)
@@ -70,8 +77,11 @@
         ROS_INFO("RECEIVE:%.2f %.2f %.2f",obstr.point.x,obstr.point.y,obstr.point.z);
         // obstr_marker_pub_.publish(ObstacleMarker);
         //可视化在这里实现
-        Obstr.points.push_back(obstr.point);
-        obst_marker_pub_.publish(Obstr);
+        each_Obstr_marker.points.clear();
+        each_Obstr_marker.points.push_back(obstr.point);
+        each_Obstr_marker.id++;
+        obst_markers_array.markers.push_back(each_Obstr_marker);
+        obst_marker_pub_.publish(obst_markers_array);
     }
     int main(int argc, char** argv)
     {
