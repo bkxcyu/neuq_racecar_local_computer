@@ -54,7 +54,7 @@
         // int k =0;
         // while (k<20)
         // {
-            each_Obstr_marker.header.frame_id =  "map";
+            each_Obstr_marker.header.frame_id =  "/map";
             each_Obstr_marker.ns =  "Markers";
             each_Obstr_marker.action = visualization_msgs::Marker::ADD;
             each_Obstr_marker.pose.orientation.w  = 1.0;

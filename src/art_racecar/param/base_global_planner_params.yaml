@@ -7,7 +7,7 @@ GlobalPlanner:
 #    use_grid_path: true         #如果为true，沿着栅格边界创建路径。 否则，使用梯度下降的方法。
 #    old_navfn_behavior: true    #如果你想要global_planner准确反映navfn的行为，此项设置为true。
 
-#    lethal_cost: 25
+#    lethal_cost: 253
 #    neutral_cost: 50
 #    cost_factor: 3
 #    publish_potential: True

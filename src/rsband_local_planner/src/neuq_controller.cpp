@@ -629,6 +629,7 @@ namespace rsband_local_planner
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
         vel.linear.x=1.7*(0.0348*pwm.linear.x-54.1109);//转移
+        ROS_INFO("currant_vel:%f\n",vel.linear.x);
         vel.linear.z=pwm.linear.z;//
         vel.angular.z=pwm.angular.z;
         return vel;
