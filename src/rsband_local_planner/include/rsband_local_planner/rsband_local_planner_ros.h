@@ -178,7 +178,7 @@ namespace rsband_local_planner
 
       bool initialized_;
 
-      int re_adjust_servo();
+      double re_adjust_servo();
       point_list whosyourdaddy;
 
       costmap_2d::Costmap2D* costmap_;

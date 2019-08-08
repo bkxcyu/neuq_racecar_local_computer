@@ -53,12 +53,12 @@ namespace rsband_local_planner
     // set initilized
     initialized_ = true;
 
-    
+    //创建链表
     whosyourdaddy.warning_point = whosyourdaddy.creatlist();
 
     ROS_DEBUG("Local Planner Plugin Initialized!");
   }
-
+  
   void RSBandPlannerROS::reconfigureCallback(RSBandPlannerConfig& config,
     uint32_t level)
   {
@@ -101,6 +101,10 @@ namespace rsband_local_planner
       ROS_ERROR("Path tracking controller failed to produce command");
       return false;
     }
+    
+    double _adjust_angular;
+    _adjust_angular=re_adjust_servo();
+    // cmd.angular.z+=_adjust_angular;
 
     return true;
   }
@@ -138,9 +142,10 @@ namespace rsband_local_planner
   }
 
 
-  int RSBandPlannerROS::re_adjust_servo()
+  double RSBandPlannerROS::re_adjust_servo()
   {
-      int adjust_pwm;
+      double adjust_angular;
+      //get robot pose 
       PoseSE2 robot_pose_;
       tf::Stamped<tf::Pose> robot_pose;
       if (!costmapROS_->getRobotPose(robot_pose))
@@ -149,22 +154,27 @@ namespace rsband_local_planner
         return false;
       }
       robot_pose_ = PoseSE2(robot_pose);
+      //get robot orientation vector
+      Eigen::Vector2d robot_orient = robot_pose_.orientationUnitVec();
 
       whosyourdaddy.clearlist(whosyourdaddy.warning_point);
-
-      Eigen::Vector2d robot_orient = robot_pose_.orientationUnitVec();
+      //scan local costmap to find obstacle point
       for (unsigned int i=0; i<costmap_->getSizeInCellsX()-1; ++i)
       {
         for (unsigned int j=0; j<costmap_->getSizeInCellsY()-1; ++j)
-        {
+        { 
+          //find one of the obstacles
           if (costmap_->getCost(i,j) == costmap_2d::LETHAL_OBSTACLE)
           {
+            //transform obstacle  of costmap frame into local_map(/odom) frame and get it's direction
             Eigen::Vector2d obs;
             costmap_->mapToWorld(i,j,obs.coeffRef(0), obs.coeffRef(1));
             Eigen::Vector2d obs_dir = obs-robot_pose_.position();
            //obs_dir是odom坐标系下 扫描到的障碍物与机器人位置的差向量
            //robot_orient是机器人的方向向量
           /*---------------------------------------------------*/
+            //get distance between obstacle and robot
+            //get angular between robot orientation and obstacle direction
             float dis,ang;
             dis=obs_dir.norm();
             ang=acos(obs_dir.dot(robot_orient)/(obs_dir.norm()*robot_orient.norm()));
@@ -177,6 +187,8 @@ namespace rsband_local_planner
           }
         }
       }
+
+      //finally output a vector called whosyourdaddy.out_point ? how to transform it into adjust_angular?
       whosyourdaddy.sortlist(whosyourdaddy.warning_point);
       whosyourdaddy.last_point = whosyourdaddy.getlastnode(whosyourdaddy.warning_point);
       if(whosyourdaddy.last_point->distance == LINK_HEAD_D || whosyourdaddy.last_point->distance == LINK_HEAD_A) 
@@ -186,9 +198,7 @@ namespace rsband_local_planner
       	whosyourdaddy.v_vector(whosyourdaddy.last_point);
       }
 
-      //output vector is whosyourdaddy.out_point
-
-      return adjust_pwm;
+      return adjust_angular;
       
   }
 
