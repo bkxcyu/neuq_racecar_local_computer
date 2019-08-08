@@ -53,6 +53,9 @@ namespace rsband_local_planner
     // set initilized
     initialized_ = true;
 
+    
+    whosyourdaddy.warning_point = whosyourdaddy.creatlist();
+
     ROS_DEBUG("Local Planner Plugin Initialized!");
   }
 
@@ -147,6 +150,8 @@ namespace rsband_local_planner
       }
       robot_pose_ = PoseSE2(robot_pose);
 
+      whosyourdaddy.clearlist(whosyourdaddy.warning_point);
+
       Eigen::Vector2d robot_orient = robot_pose_.orientationUnitVec();
       for (unsigned int i=0; i<costmap_->getSizeInCellsX()-1; ++i)
       {
@@ -160,11 +165,29 @@ namespace rsband_local_planner
            //obs_dir是odom坐标系下 扫描到的障碍物与机器人位置的差向量
            //robot_orient是机器人的方向向量
           /*---------------------------------------------------*/
-          /*----------------WORK SHOULD DONE HERE--------------*/
+            float dis,ang;
+            dis=obs_dir.norm();
+            ang=acos(obs_dir.dot(robot_orient)/(obs_dir.norm()*robot_orient.norm()));
+            if(dis<0.2)
+            {
+              whosyourdaddy.append(whosyourdaddy.warning_point,dis,ang);
+              // show_obst(obs.coeffRef(0),obs.coeffRef(1));//odom
+            }
           /*---------------------------------------------------*/
           }
         }
       }
+      whosyourdaddy.sortlist(whosyourdaddy.warning_point);
+      whosyourdaddy.last_point = whosyourdaddy.getlastnode(whosyourdaddy.warning_point);
+      if(whosyourdaddy.last_point->distance == LINK_HEAD_D || whosyourdaddy.last_point->distance == LINK_HEAD_A) 
+      	printf("null\n");
+      else
+      {
+      	whosyourdaddy.v_vector(whosyourdaddy.last_point);
+      }
+
+      //output vector is whosyourdaddy.out_point
+
       return adjust_pwm;
       
   }

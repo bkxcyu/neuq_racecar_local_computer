@@ -54,6 +54,7 @@
 #include <boost/bind.hpp>
 
 #include "rsband_local_planner/neuq_controller.h"
+#include "rsband_local_planner/auto_correct.h"
 
 namespace rsband_local_planner
 {
@@ -178,6 +179,8 @@ namespace rsband_local_planner
       bool initialized_;
 
       int re_adjust_servo();
+      point_list whosyourdaddy;
+
       costmap_2d::Costmap2D* costmap_;
   };
 
