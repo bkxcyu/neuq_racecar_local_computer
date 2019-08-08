@@ -62,8 +62,14 @@ namespace rsband_local_planner
   void RSBandPlannerROS::reconfigureCallback(RSBandPlannerConfig& config,
     uint32_t level)
   {
-    xyGoalTolerance_ = config.xy_goal_tolerance;
-    yawGoalTolerance_ = config.yaw_goal_tolerance;
+    // xyGoalTolerance_ = config.xy_goal_tolerance;
+    // yawGoalTolerance_ = config.yaw_goal_tolerance;
+    whosyourdaddy.gain_angle=config.gain_angle;
+    whosyourdaddy.unit_distance=config.unit_distance;
+    whosyourdaddy.warning_distance=config.warning_distance;
+    whosyourdaddy.limit_distance=config.limit_distance;
+    whosyourdaddy.angle_max=config.angle_max;
+    whosyourdaddy.angle_min=whosyourdaddy.angle_min;
 
     if (L1_)
       L1_->reconfigure(config);
@@ -102,9 +108,9 @@ namespace rsband_local_planner
       return false;
     }
     
-    double _adjust_angular;
-    _adjust_angular=re_adjust_servo();
-    // cmd.angular.z+=_adjust_angular;
+    double _rectified_angular;
+    _rectified_angular=rectifyAngularVel();
+    // cmd.angular.z+=_rectified_angular;
 
     return true;
   }
@@ -142,9 +148,9 @@ namespace rsband_local_planner
   }
 
 
-  double RSBandPlannerROS::re_adjust_servo()
+  double RSBandPlannerROS::rectifyAngularVel()
   {
-      double adjust_angular;
+      double rectified_angular;
       //get robot pose 
       PoseSE2 robot_pose_;
       tf::Stamped<tf::Pose> robot_pose;
@@ -198,7 +204,7 @@ namespace rsband_local_planner
       	whosyourdaddy.v_vector(whosyourdaddy.last_point);
       }
 
-      return adjust_angular;
+      return rectified_angular;
       
   }
 

@@ -35,7 +35,7 @@ class point_list
 		struct Obs_point *warning_point;
     	struct Obs_point *last_point;
     	struct Out_point out_point;//������� 
-	private:
+	
 		float pi;
 		int gain_angle;//�Ƕ����� 
 		int unit_distance;//��λ���� 
@@ -44,5 +44,6 @@ class point_list
 		int angle_max;
 		int angle_min; 	
 
+	private:
 
 };

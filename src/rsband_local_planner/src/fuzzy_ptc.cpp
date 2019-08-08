@@ -130,18 +130,18 @@ namespace rsband_local_planner
 
   void FuzzyPTC::reconfigure(RSBandPlannerConfig& config)
   {
-    wheelbase_ = config.wheelbase;
-    maxSteeringAngle_ = config.max_steering_angle;
-    maxSpeed_ = config.max_speed;
-    xyGoalTolerance_ = config.xy_goal_tolerance;
-    yawGoalTolerance_ = config.yaw_goal_tolerance;
-    latDevTolerance_ = config.lateral_deviation_tolerance;
-    updateSubGoalDistThreshold_ = config.update_sub_goal_dist_threshold;
-    goalDistThreshold_ = config.goal_dist_threshold;
-    displayControllerIO_ = config.display_controller_io;
-    stop_ = config.stop;
-    rearSteeringMode_ =
-      static_cast<RearSteeringMode>(config.rear_steering_mode);
+    // wheelbase_ = config.wheelbase;
+    // maxSteeringAngle_ = config.max_steering_angle;
+    // maxSpeed_ = config.max_speed;
+    // xyGoalTolerance_ = config.xy_goal_tolerance;
+    // yawGoalTolerance_ = config.yaw_goal_tolerance;
+    // latDevTolerance_ = config.lateral_deviation_tolerance;
+    // updateSubGoalDistThreshold_ = config.update_sub_goal_dist_threshold;
+    // goalDistThreshold_ = config.goal_dist_threshold;
+    // displayControllerIO_ = config.display_controller_io;
+    // stop_ = config.stop;
+    // rearSteeringMode_ =
+    //   static_cast<RearSteeringMode>(config.rear_steering_mode);
 
     // reinitialize fuzzy engine with the updated parameters
     initializeFuzzyEngine();
