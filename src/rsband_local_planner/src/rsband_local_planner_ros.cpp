@@ -42,6 +42,8 @@ namespace rsband_local_planner
 
     ros::NodeHandle pnh("~/" + name);
 
+    obst_pub = _n_.advertise<visualization_msgs::Marker>("obst", 10);
+
     L1_ = boost::shared_ptr<L1Controller>(new L1Controller(name));
 
     // create and initialize dynamic reconfigure
@@ -58,7 +60,31 @@ namespace rsband_local_planner
 
     ROS_DEBUG("Local Planner Plugin Initialized!");
   }
-  
+  void RSBandPlannerROS::show_obst(float x,float y)
+  {
+    geometry_msgs::Point POINT;
+    visualization_msgs::Marker points;
+    POINT.x = x;
+    POINT.y = y;
+    points.points.push_back(POINT);
+    obst_pub.publish(points); 
+  }
+  void RSBandPlannerROS::initMarker()
+  {
+    //initpoint
+    points.header.frame_id = "odom";
+    points.ns = "Markers";
+    points.action =  visualization_msgs::Marker::ADD;
+    points.pose.orientation.w =1.0;
+    points.id = 0;
+    points.type = visualization_msgs::Marker::POINTS;
+    // POINTS markers use x and y scale for width/height respectively
+    points.scale.x = 0.2;
+    points.scale.y = 0.2;
+    // Points are green
+    points.color.g = 1.0f;
+    points.color.a = 1.0; 
+  }
   void RSBandPlannerROS::reconfigureCallback(RSBandPlannerConfig& config,
     uint32_t level)
   {
@@ -187,7 +213,8 @@ namespace rsband_local_planner
             if(dis<0.2)
             {
               whosyourdaddy.append(whosyourdaddy.warning_point,dis,ang);
-              // show_obst(obs.coeffRef(0),obs.coeffRef(1));//odom
+              ///////
+              show_obst(obs.coeffRef(0),obs.coeffRef(1));//odom
             }
           /*---------------------------------------------------*/
           }

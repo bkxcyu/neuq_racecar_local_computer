@@ -85,7 +85,7 @@ namespace rsband_local_planner
        */
       void initialize(std::string name, tf::TransformListener* tfListener,
         costmap_2d::Costmap2DROS* costmapROS);
-
+      void initMarker();
       /**
        * @brief Sets the global plan to be followed by this planner
        * @param globalPlan: The plan to follow
@@ -150,11 +150,12 @@ namespace rsband_local_planner
 
       //! eband to reeds shepp band conversion strategy
       EbandToRSStrategy ebandToRSStrategy_;
-
+      visualization_msgs::Marker points;
       //!< determines whether emergency planning will be used in case of failure
       bool emergencyPlanning_;
       //!< emergency mode
       bool emergencyMode_;
+      void show_obst(float x,float y);
       //!< emergency plan poses
       std::vector<geometry_msgs::PoseStamped> emergencyPoses_;
 
@@ -167,6 +168,8 @@ namespace rsband_local_planner
       ros::Publisher ebandPlanPub_;
       //! rs plan publisher
       ros::Publisher rsPlanPub_;
+      ros::NodeHandle _n_;
+      ros::Publisher obst_pub; 
 
       //! global plan
       std::vector<geometry_msgs::PoseStamped> globalPlan_;
