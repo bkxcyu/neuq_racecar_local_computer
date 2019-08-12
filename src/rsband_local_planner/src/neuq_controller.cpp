@@ -713,7 +713,7 @@ namespace rsband_local_planner
         Err=computeIntegralErr();
         slow_down_vel=switchErrIntoVel(Err);
 
-        ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
+        // ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
         return slow_down_vel;
     }
 

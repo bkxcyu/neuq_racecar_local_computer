@@ -50,11 +50,16 @@
 #include <dynamic_reconfigure/server.h>
 #include "rsband_local_planner/RSBandPlannerConfig.h"
 
+#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 
 #include "rsband_local_planner/neuq_controller.h"
 #include "rsband_local_planner/auto_correct.h"
+
+#include"rsband_local_planner/pose_se2.h"
 
 namespace rsband_local_planner
 {
@@ -140,6 +145,7 @@ namespace rsband_local_planner
 
       //! path tracking controller ptr
       boost::shared_ptr<L1Controller> L1_;
+      boost::shared_ptr<point_list> whosyourdaddy;//point_list whosyourdaddy;
 
       //! distance to goal tolerance
       double xyGoalTolerance_;
@@ -155,7 +161,8 @@ namespace rsband_local_planner
       bool emergencyPlanning_;
       //!< emergency mode
       bool emergencyMode_;
-      void show_obst(float x,float y);
+      void show_obst(float x,float y,const PoseSE2& carPose);
+      void show_obst();
       //!< emergency plan poses
       std::vector<geometry_msgs::PoseStamped> emergencyPoses_;
 
@@ -168,9 +175,8 @@ namespace rsband_local_planner
       ros::Publisher ebandPlanPub_;
       //! rs plan publisher
       ros::Publisher rsPlanPub_;
-      ros::NodeHandle _n_;
       ros::Publisher obst_pub; 
-
+      ros::NodeHandle _n_;
       //! global plan
       std::vector<geometry_msgs::PoseStamped> globalPlan_;
       //! transformed plan
@@ -182,7 +188,7 @@ namespace rsband_local_planner
       bool initialized_;
 
       double rectifyAngularVel();
-      point_list whosyourdaddy;
+      
 
       costmap_2d::Costmap2D* costmap_;
   };

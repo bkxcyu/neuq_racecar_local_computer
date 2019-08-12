@@ -139,16 +139,18 @@ int main(int argc, char** argv)
             {
                 std_msgs::Float64 currant_vel;
                 /*--------------校验------------*/
-                uint8_t DATA1,DATA2,JY;
+                uint8_t DATA,DATA1,DATA2,DATA3,JY;
                 DATA1=data_raw[1];
                 DATA2=data_raw[2];
-                JY=DATA1%7+DATA1/7;
-                if(JY == DATA2)
+                DATA2=data_raw[3];
+                DATA=DATA1*255+DATA2;
+                JY=DATA%7+DATA/7;
+                if(JY == DATA3)
                 {
                 /*--------------读数------------*/
                 // ROS_INFO("DATA:%d\n",DATA1);
-                currant_vel.data=(std::float_t)DATA1;
-                currant_vel.data=currant_vel.data/51;
+                currant_vel.data=(std::float_t)DATA;
+                currant_vel.data=currant_vel.data/(51*255);
                 ROS_INFO("currant_vel:%f\n",currant_vel.data);
                 }
                 /*--------------发布------------*/

@@ -1,16 +1,17 @@
 #include"rsband_local_planner/auto_correct.h"
 
 
-
+namespace rsband_local_planner{
 point_list::point_list()
 {
 	pi=3.1415926;
-	gain_angle = 1;//�Ƕ����� 
-	unit_distance = 100;//��λ���� 
-	warning_distance = 2000;//Ԥ������ 
-	limit_distance = 1000;//���޾��� 
+	gain_angle = 1;
+	unit_distance = 100;
+	warning_distance = 2;
+	limit_distance = 1;
 	angle_max = pi;
 	angle_min = 0; 	
+	creatlist();
 }
 
 // int main()
@@ -207,3 +208,5 @@ struct Obs_point *point_list::sortlist(struct Obs_point *head)
     }
     return head;
 }
+
+}//end namespace
