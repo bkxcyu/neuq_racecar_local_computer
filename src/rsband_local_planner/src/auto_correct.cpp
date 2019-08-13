@@ -185,7 +185,7 @@ void point_list::v_vector(struct Obs_point *head)
 		else if(out_point.ang <= angle_min)
 			out_point.ang = angle_min;
 
-		printf(" %f\t | %f\n",p->distance,p->angle);
+		// printf(" %f\t | %f\n",p->distance,p->angle);
 
 		out_point.dis =  unit_distance;
 		

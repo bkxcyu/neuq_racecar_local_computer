@@ -72,7 +72,7 @@ namespace rsband_local_planner
     points.id= 0;
     line_strip.id = 1;
     points.type = visualization_msgs::Marker::POINTS;
-    points.type = visualization_msgs::Marker::LINE_STRIP;
+    line_strip.type = visualization_msgs::Marker::LINE_STRIP;
     // POINTS markers use x and y scale for width/height respectively
 
     points.scale.x = 0.1;
@@ -83,9 +83,10 @@ namespace rsband_local_planner
     points.color.b = 0.0;
     points.color.a = 0.8;
 
-    line_strip.color.b = 1.0;
+    line_strip.scale.x = 0.05;
+    line_strip.scale.y = 0.05;
+    line_strip.color.r = 1.0;
     line_strip.color.a = 1.0;
-    line_strip.scale.x = 0.1;
   }
   void RSBandPlannerROS::show_obst(float x,float y,const PoseSE2& carPose)
   {
@@ -126,6 +127,7 @@ namespace rsband_local_planner
 
     // ROS_INFO("get point");
     obst_pub.publish(points);
+    obst_pub.publish(line_strip);
     //obst_pub = _n_.advertise<visualization_msgs::Marker>("POINT", 10);
   }
   void RSBandPlannerROS::addVizPoint(float x,float y)
@@ -199,7 +201,8 @@ namespace rsband_local_planner
     
     double _rectified_angular;
     _rectified_angular=rectifyAngularVel();
-    cmd.angular.z+=_rectified_angular;
+    cmd.angular.z=_rectified_angular;////
+    ROS_INFO("output pwm=%.2f",cmd.angular.z);
 
     return true;
   }
@@ -283,7 +286,7 @@ namespace rsband_local_planner
             dis=obs_dir.norm();
             //ROS_INFO("in dis=%.2f,ang=%.2f",dis,ang);
             
-            if(dis<1 && ang>-0.85 && ang<0.85)
+            if(dis<whosyourdaddy.warning_distance && ang>-0.85 && ang<0.85)
             {
               whosyourdaddy.append(whosyourdaddy.warning_point,dis,ang);
               addVizPoint(obs.coeffRef(0),obs.coeffRef(1));
@@ -304,6 +307,8 @@ namespace rsband_local_planner
       point_of_carframe.header.frame_id="base_footprint";
       geometry_msgs::PoseStamped car_of_carframe;
       car_of_carframe.header.frame_id="base_footprint";
+
+      point_of_odomframe.header.stamp=car_of_odom_frame.header.stamp=point_of_carframe.header.stamp=car_of_carframe.header.stamp=ros::Time::now();  
       try
       {
           point_of_carframe.pose.position.x=1*cos(whosyourdaddy.out_point.ang);//the point in car_frame that should be visualized
@@ -331,16 +336,19 @@ namespace rsband_local_planner
       whosyourdaddy.sortlist( whosyourdaddy.warning_point);
       whosyourdaddy.last_point = whosyourdaddy.getlastnode( whosyourdaddy.warning_point);
       if( whosyourdaddy.last_point->distance == LINK_HEAD_D || whosyourdaddy.last_point->distance == LINK_HEAD_A) 
-        printf("null\n");
+       {
+         printf("null\n");whosyourdaddy.out_point.ang=0;
+       }
       else
       {
         whosyourdaddy.v_vector( whosyourdaddy.last_point);
       }
       //whosyourdaddy.output( whosyourdaddy.warning_point);
       
-
-      float out_ang=0.0;
-      rectified_angular=map(out_ang,-1.58,1.58,900,2100);
+      ROS_INFO("output angle=%.2f",whosyourdaddy.out_point.ang);
+      float out_ang=whosyourdaddy.out_point.ang;
+      rectified_angular=map(out_ang,-1.58,1.58,45,145);
+      
       return rectified_angular;
       
   }
