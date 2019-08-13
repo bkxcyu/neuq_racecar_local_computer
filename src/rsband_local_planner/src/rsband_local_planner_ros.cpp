@@ -136,7 +136,7 @@ namespace rsband_local_planner
     
     double _rectified_angular;
     _rectified_angular=rectifyAngularVel();
-    // cmd.angular.z+=_rectified_angular;
+    cmd.angular.z+=_rectified_angular;
 
     return true;
   }
@@ -173,7 +173,10 @@ namespace rsband_local_planner
     return false;
   }
 
-
+  float map(float value, float istart, float istop, float ostart, float ostop)
+  {
+	  return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+  }
   double RSBandPlannerROS::rectifyAngularVel()
   {
       double rectified_angular;
@@ -230,7 +233,8 @@ namespace rsband_local_planner
       {
       	whosyourdaddy.v_vector(whosyourdaddy.last_point);
       }
-
+      float out_ang=0.0;
+      rectified_angular=map(out_ang,-1.58,1.58,900,2100);
       return rectified_angular;
       
   }
