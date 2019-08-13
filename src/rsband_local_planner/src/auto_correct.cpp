@@ -9,9 +9,9 @@ point_list::point_list()
 	unit_distance = 100;
 	warning_distance = 2;
 	limit_distance = 1;
-	angle_max = pi;
-	angle_min = 0; 	
-	creatlist();
+	angle_max = 1.57;
+	angle_min = -1.57; 	
+	// creatlist();
 }
 
 // int main()
@@ -78,17 +78,16 @@ void point_list::v_vector(struct Obs_point *head)
 	//Ԥ������ 
 	if(p->distance < warning_distance && p->distance > limit_distance)
 	{
-		//ȷ���Ƕ� 
 		if(p->angle > 0.5*pi)
 			out_point.ang = p->angle - 0.5*pi;
 		else if(p->angle <= 0.5*pi)
 			out_point.ang = p->angle + 0.5*pi;
-		//�޷� 
+
 		if(out_point.ang > angle_max)
 			out_point.ang = angle_max;
 		else if(out_point.ang <= angle_min)
 			out_point.ang = angle_min;
-		//ȷ�����루��λ���룩
+
 		out_point.dis =  unit_distance;
 		
 	} 
@@ -144,7 +143,7 @@ int point_list::append(struct Obs_point *head,float dis,float ang)
 	p1->distance = dis;
 	p1->angle = ang;
 
-	//û�����Ϊɶ����Ҫ��ôд 
+	
 	p2->next=p1;
 	p2=p1;
 	p1=(struct Obs_point *)malloc(POINTLEN);
@@ -207,6 +206,24 @@ struct Obs_point *point_list::sortlist(struct Obs_point *head)
         }
     }
     return head;
+}
+
+
+
+void point_list::simple_vec(float angle)
+{
+	if(angle > 0)
+		out_point.ang = angle - 1.57;
+	else if(angle <= 0)
+		out_point.ang = angle + 1.57;
+
+	if(out_point.ang > angle_max)
+		out_point.ang = angle_max;
+	else if(out_point.ang <= angle_min)
+		out_point.ang = angle_min;
+
+	out_point.dis =  unit_distance;
+
 }
 
 }//end namespace
