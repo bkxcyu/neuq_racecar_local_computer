@@ -6,7 +6,7 @@ using namespace std;
 #define POINTLEN sizeof(struct Obs_point)
 #define LINK_HEAD_D 99999
 #define LINK_HEAD_A 99999
-
+namespace rsband_local_planner{
 struct Obs_point
 {
 	float distance;
@@ -31,6 +31,7 @@ class point_list
 		struct Obs_point *sortlist(struct Obs_point *head);//�������� 
 		struct Obs_point *getlastnode(struct Obs_point *head);//�õ����������һ�����
 		void v_vector(struct Obs_point *head);
+		void simple_vec(float angle);
 		//���б��� 
 		struct Obs_point *warning_point;
     	struct Obs_point *last_point;
@@ -41,9 +42,10 @@ class point_list
 		int unit_distance;//��λ���� 
 		int warning_distance;//Ԥ������ 
 		int limit_distance;//���޾��� 
-		int angle_max;
-		int angle_min; 	
+		float angle_max;
+		float angle_min; 	
 
 	private:
 
 };
+}//end namespace
