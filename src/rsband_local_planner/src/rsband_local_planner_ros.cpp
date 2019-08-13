@@ -261,12 +261,12 @@ namespace rsband_local_planner
             dis=obs_dir.norm();
             //ROS_INFO("in dis=%.2f,ang=%.2f",dis,ang);
             
-            if(dis<0.6)
+            if(dis<1 && ang>-0.85 && ang<0.85)
             {
-              //whosyourdaddy.append(whosyourdaddy.warning_point,dis,ang);
+              whosyourdaddy.append(whosyourdaddy.warning_point,dis,ang);
               addVizPoint(obs.coeffRef(0),obs.coeffRef(1));
-              whosyourdaddy.simple_vec(ang);
-              ROS_INFO("in dis=%.2f,ang=%.2f",dis,ang);
+              //whosyourdaddy.simple_vec(ang);
+              //ROS_INFO("in dis=%.2f,ang=%.2f",dis,ang);
             }
           /*---------------------------------------------------*/
           }
@@ -293,16 +293,16 @@ namespace rsband_local_planner
       show_obst();
       points.points.clear();
 
-      //finally output a vector called whosyourdaddy.out_point ? how to transform it into adjust_angular?
-    //whosyourdaddy.output( whosyourdaddy.warning_point);
-    //   whosyourdaddy.sortlist( whosyourdaddy.warning_point);
-    //   whosyourdaddy.last_point = whosyourdaddy.getlastnode( whosyourdaddy.warning_point);
-    //   if( whosyourdaddy.last_point->distance == LINK_HEAD_D || whosyourdaddy.last_point->distance == LINK_HEAD_A) 
-    //  ;// 	printf("null\n");
-    //    else
-    //   {
-    //   	 whosyourdaddy.v_vector( whosyourdaddy.last_point);
-    //   }
+    //finally output a vector called whosyourdaddy.out_point ? how to transform it into adjust_angular?
+      whosyourdaddy.sortlist( whosyourdaddy.warning_point);
+      whosyourdaddy.last_point = whosyourdaddy.getlastnode( whosyourdaddy.warning_point);
+      if( whosyourdaddy.last_point->distance == LINK_HEAD_D || whosyourdaddy.last_point->distance == LINK_HEAD_A) 
+        printf("null\n");
+      else
+      {
+        whosyourdaddy.v_vector( whosyourdaddy.last_point);
+      }
+      //whosyourdaddy.output( whosyourdaddy.warning_point);
       
 
       return rectified_angular;
