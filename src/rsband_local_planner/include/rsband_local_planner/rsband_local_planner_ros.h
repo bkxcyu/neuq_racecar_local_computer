@@ -157,7 +157,7 @@ namespace rsband_local_planner
 
       //! eband to reeds shepp band conversion strategy
       EbandToRSStrategy ebandToRSStrategy_;
-      visualization_msgs::Marker points;
+      visualization_msgs::Marker points,line_strip;
       //!< determines whether emergency planning will be used in case of failure
       bool emergencyPlanning_;
       //!< emergency mode
@@ -194,6 +194,8 @@ namespace rsband_local_planner
 
       costmap_2d::Costmap2D* costmap_;
       tf::TransformListener tf_listener;
+
+      void addVizLine(float xstart,float ystart,float xend,float yend);
   };
 
 }  // namespace rsband_local_planner

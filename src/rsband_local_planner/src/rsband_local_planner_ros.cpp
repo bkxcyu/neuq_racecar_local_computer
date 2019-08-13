@@ -65,20 +65,27 @@ namespace rsband_local_planner
   void RSBandPlannerROS::initMarker()
   {
     //initpoint
-    points.header.frame_id = "odom";
-    points.ns = "Markers";
-    points.action =  visualization_msgs::Marker::ADD;
-    points.pose.orientation.w =1.0;
-    points.id = 0;
+    points.header.frame_id =line_strip.header.frame_id = "odom";
+    points.ns=line_strip.ns = "Markers";
+    points.action=line_strip.action =  visualization_msgs::Marker::ADD;
+    points.pose.orientation.w=line_strip.pose.orientation.w =1.0;
+    points.id= 0;
+    line_strip.id = 1;
     points.type = visualization_msgs::Marker::POINTS;
+    points.type = visualization_msgs::Marker::LINE_STRIP;
     // POINTS markers use x and y scale for width/height respectively
+
     points.scale.x = 0.1;
     points.scale.y = 0.1;
     // Points are green
     points.color.r = 1.0;
-    points.color.g = 1.0;
+    points.color.g = 0.0;
     points.color.b = 0.0;
-    points.color.a = 0.5;
+    points.color.a = 0.8;
+
+    line_strip.color.b = 1.0;
+    line_strip.color.a = 1.0;
+    line_strip.scale.x = 0.1;
   }
   void RSBandPlannerROS::show_obst(float x,float y,const PoseSE2& carPose)
   {
@@ -128,6 +135,18 @@ namespace rsband_local_planner
     vis_obst.y=y;   
     points.points.push_back(vis_obst);
   }
+  void RSBandPlannerROS::addVizLine(float xstart,float ystart,float xend,float yend)
+  {
+    line_strip.points.clear();
+    geometry_msgs::Point startPoint;
+    startPoint.x=xstart;
+    startPoint.y=ystart;
+    geometry_msgs::Point endPoint;
+    endPoint.x=xend;
+    endPoint.y=yend;
+    line_strip.points.push_back(startPoint);
+    line_strip.points.push_back(endPoint);
+  }
   
   void RSBandPlannerROS::reconfigureCallback(RSBandPlannerConfig& config,
     uint32_t level)
@@ -172,15 +191,15 @@ namespace rsband_local_planner
       return false;
     }
 
-    if (!L1_->computeVelocityCommands(cmd))
-    {
-      ROS_ERROR("Path tracking controller failed to produce command");
-      return false;
-    }
+    // if (!L1_->computeVelocityCommands(cmd))
+    // {
+    //   ROS_ERROR("Path tracking controller failed to produce command");
+    //   return false;
+    // }
     
     double _rectified_angular;
     _rectified_angular=rectifyAngularVel();
-    // cmd.angular.z+=_rectified_angular;
+    cmd.angular.z+=_rectified_angular;
 
     return true;
   }
@@ -217,7 +236,10 @@ namespace rsband_local_planner
     return false;
   }
 
-
+  float map(float value, float istart, float istop, float ostart, float ostop)
+  {
+	  return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+  }
   double RSBandPlannerROS::rectifyAngularVel()
   {
       double rectified_angular;
@@ -275,21 +297,33 @@ namespace rsband_local_planner
       //visualization
       geometry_msgs::PoseStamped point_of_odomframe;
       point_of_odomframe.header.frame_id="odom";
+      geometry_msgs::PoseStamped car_of_odom_frame;
+      car_of_odom_frame.header.frame_id="odom";
+
       geometry_msgs::PoseStamped point_of_carframe;
       point_of_carframe.header.frame_id="base_footprint";
+      geometry_msgs::PoseStamped car_of_carframe;
+      car_of_carframe.header.frame_id="base_footprint";
       try
       {
           point_of_carframe.pose.position.x=1*cos(whosyourdaddy.out_point.ang);//the point in car_frame that should be visualized
           point_of_carframe.pose.position.y=1*sin(whosyourdaddy.out_point.ang);//
           point_of_carframe.pose.orientation.w=1.0;
           tf_listener.transformPose("odom", ros::Time(0) , point_of_carframe, "base_footprint" ,point_of_odomframe);
+          
+          car_of_carframe.pose.position.x=0;//the point in car_frame that should be visualized
+          car_of_carframe.pose.position.y=0;//
+          car_of_carframe.pose.orientation.w=1.0;
+          tf_listener.transformPose("odom", ros::Time(0) , car_of_carframe, "base_footprint" ,car_of_odom_frame);
+          
       }
       catch(tf::TransformException &ex)
       {
           ROS_ERROR("%s tf error in rsband",ex.what());
           ros::Duration(1.0).sleep();
       }
-      addVizPoint(point_of_odomframe.pose.position.x,point_of_odomframe.pose.position.y);
+      addVizLine(car_of_odom_frame.pose.position.x,car_of_odom_frame.pose.position.y,point_of_odomframe.pose.position.x,point_of_odomframe.pose.position.y);
+      // addVizPoint(point_of_odomframe.pose.position.x,point_of_odomframe.pose.position.y);
       show_obst();
       points.points.clear();
 
@@ -305,6 +339,8 @@ namespace rsband_local_planner
       //whosyourdaddy.output( whosyourdaddy.warning_point);
       
 
+      float out_ang=0.0;
+      rectified_angular=map(out_ang,-1.58,1.58,900,2100);
       return rectified_angular;
       
   }
