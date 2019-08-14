@@ -126,25 +126,29 @@ int main(int argc, char** argv)
     double vyaw_bias = 0;
     pub = n.advertise<std_msgs::Float64>("/currant_vel", 1);
 
-    ROS_WARN("Streaming Data...");
+    ROS_WARN("Streaming Ecoder Data...");
+
+    ros::Rate r(100);
 
     while (n.ok())
     {
         read(fd_, tmp, sizeof(uint8_t) * data_length);
         memcpy(data_raw, tmp, sizeof(uint8_t) * data_length);
-
+        // ROS_INFO("working \n");
         bool found = false;
 
             if(data_raw[0]== 0x00)//帧头
             {
                 std_msgs::Float64 currant_vel;
                 /*--------------校验------------*/
-                uint8_t DATA,DATA1,DATA2,DATA3,JY;
+                uint8_t DATA1,DATA2,DATA3,JY;
+                uint32_t DATA;
                 DATA1=data_raw[1];
                 DATA2=data_raw[2];
-                DATA2=data_raw[3];
+                DATA3=data_raw[3];
                 DATA=DATA1*255+DATA2;
                 JY=DATA%7+DATA/7;
+                ROS_INFO("DATA1:%d| DATA2:%d |DATA3: %d",DATA1,DATA2,DATA);
                 if(JY == DATA3)
                 {
                 /*--------------读数------------*/
@@ -157,6 +161,8 @@ int main(int argc, char** argv)
                 pub.publish(currant_vel);
                 found = true;
             }
+            ros::spinOnce();                   // Handle ROS events
+            r.sleep();
     }
 
     // Stop continous and close device

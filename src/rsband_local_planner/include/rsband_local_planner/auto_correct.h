@@ -1,51 +1,39 @@
 
 #include <stdio.h>
-#include <malloc.h>
-#include <iostream>
-using namespace std; 
-#define POINTLEN sizeof(struct Obs_point)
-#define LINK_HEAD_D 99999
-#define LINK_HEAD_A 99999
+//#include "iostream"
+#include "vector"
+#include <ros/ros.h>
+
+using namespace std;
+
 namespace rsband_local_planner{
+
 struct Obs_point
 {
-	float distance;
-	float angle;
-	struct Obs_point *next;
-};
-
-struct Out_point
-{
-	float dis;
-	float ang;	
+    float distance;
+    float angle;
 };
 
 class point_list
 {
 	public:
-		point_list();
-		struct Obs_point *creatlist();//�����ǿ����� 
-		int append(struct Obs_point *head,float dis,float ang);//��������������input 
-		void output(struct Obs_point *head);//������� 
-		struct Obs_point *clearlist(struct Obs_point *head);//�������������ͷ 
-		struct Obs_point *sortlist(struct Obs_point *head);//�������� 
-		struct Obs_point *getlastnode(struct Obs_point *head);//�õ����������һ�����
-		void v_vector(struct Obs_point *head);
-		void simple_vec(float angle);
-		//���б��� 
-		struct Obs_point *warning_point;
-    	struct Obs_point *last_point;
-    	struct Out_point out_point;//������� 
-	
+		point_list();		
+		void append(float dis,float ang);
+		void output();
+		void clearlist();
+		void sortlist(); 	
+		void v_vector(float add);
+    	struct Obs_point out_point;
+    	vector<struct Obs_point> warning_point;
+    	
 		float pi;
-		int gain_angle;//�Ƕ����� 
-		int unit_distance;//��λ���� 
-		int warning_distance;//Ԥ������ 
-		int limit_distance;//���޾��� 
+		float gain_angle;
+		float unit_distance;
+		float warning_distance;
+		float limit_distance; 
 		float angle_max;
 		float angle_min; 	
-
+		
 	private:
-
 };
 }//end namespace

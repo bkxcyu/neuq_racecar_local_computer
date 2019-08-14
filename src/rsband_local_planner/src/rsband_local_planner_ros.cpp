@@ -46,6 +46,7 @@ namespace rsband_local_planner
 
     L1_ = boost::shared_ptr<L1Controller>(new L1Controller(name));
 
+    angry_car=boost::shared_ptr<point_list>(new point_list);
     // create and initialize dynamic reconfigure
     drs_.reset(new drs(pnh));
     drs::CallbackType cb =
@@ -56,9 +57,6 @@ namespace rsband_local_planner
     initialized_ = true;
     initMarker();
 
-    //创建链表
-    // whosyourdaddy=boost::shared_ptr<point_list>(new point_list());
-    whosyourdaddy.warning_point = whosyourdaddy.creatlist();
 
     ROS_DEBUG("Local Planner Plugin Initialized!");
   }
@@ -137,6 +135,32 @@ namespace rsband_local_planner
     vis_obst.y=y;   
     points.points.push_back(vis_obst);
   }
+
+  void RSBandPlannerROS::addVizPoint(geometry_msgs::Point point)
+  {
+    geometry_msgs::PoseStamped point_of_odomframe;
+    point_of_odomframe.header.frame_id="odom";
+
+    geometry_msgs::PoseStamped point_of_carframe;
+    point_of_carframe.header.frame_id="base_footprint";
+
+    point_of_odomframe.header.stamp=point_of_carframe.header.stamp=ros::Time::now();  
+    try
+    {
+        point_of_carframe.pose.position.x=point.x;//the point in car_frame that should be visualized
+        point_of_carframe.pose.position.y=point.y;//
+        point_of_carframe.pose.orientation.w=1.0;
+        tf_listener.transformPose("odom", ros::Time(0) , point_of_carframe, "base_footprint" ,point_of_odomframe);
+        
+    }
+    catch(tf::TransformException &ex)
+    {
+        ROS_ERROR("%s tf error in rsband",ex.what());
+        ros::Duration(1.0).sleep();
+    }
+    addVizPoint(point_of_odomframe.pose.position.x,point_of_odomframe.pose.position.y);
+  }
+
   void RSBandPlannerROS::addVizLine(float xstart,float ystart,float xend,float yend)
   {
     line_strip.points.clear();
@@ -150,17 +174,79 @@ namespace rsband_local_planner
     line_strip.points.push_back(endPoint);
   }
   
+  void RSBandPlannerROS::addVizLine(geometry_msgs::Point point)
+  {
+    geometry_msgs::PoseStamped point_of_odomframe;
+      point_of_odomframe.header.frame_id="odom";
+      geometry_msgs::PoseStamped car_of_odom_frame;
+      car_of_odom_frame.header.frame_id="odom";
+
+      geometry_msgs::PoseStamped point_of_carframe;
+      point_of_carframe.header.frame_id="base_footprint";
+      geometry_msgs::PoseStamped car_of_carframe;
+      car_of_carframe.header.frame_id="base_footprint";
+
+      point_of_odomframe.header.stamp=car_of_odom_frame.header.stamp=point_of_carframe.header.stamp=car_of_carframe.header.stamp=ros::Time::now();  
+      try
+      {
+          point_of_carframe.pose.position.x=point.x;//the point in car_frame that should be visualized
+          point_of_carframe.pose.position.y=point.y;//
+          point_of_carframe.pose.orientation.w=1.0;
+          tf_listener.transformPose("odom", ros::Time(0) , point_of_carframe, "base_footprint" ,point_of_odomframe);
+          
+          car_of_carframe.pose.position.x=0;//the point in car_frame that should be visualized
+          car_of_carframe.pose.position.y=0;//
+          car_of_carframe.pose.orientation.w=1.0;
+          tf_listener.transformPose("odom", ros::Time(0) , car_of_carframe, "base_footprint" ,car_of_odom_frame);
+          
+      }
+      catch(tf::TransformException &ex)
+      {
+          ROS_ERROR("%s tf error in rsband",ex.what());
+          ros::Duration(1.0).sleep();
+      }
+      addVizLine(car_of_odom_frame.pose.position.x,car_of_odom_frame.pose.position.y,point_of_odomframe.pose.position.x,point_of_odomframe.pose.position.y);
+     
+  }
+
+  geometry_msgs::Point RSBandPlannerROS::tf_odom2car(float inx,float iny)
+  {
+    geometry_msgs::PoseStamped point_of_odomframe;
+    point_of_odomframe.header.frame_id="odom";
+
+    geometry_msgs::PoseStamped point_of_carframe;
+    point_of_carframe.header.frame_id="base_footprint";
+
+    point_of_odomframe.header.stamp=point_of_carframe.header.stamp=ros::Time::now();  
+    try
+    {
+        point_of_odomframe.pose.position.x=inx;//the point in car_frame that should be visualized
+        point_of_odomframe.pose.position.y=iny;//
+        point_of_odomframe.pose.orientation.w=1.0;
+        tf_listener.transformPose("base_footprint", ros::Time(0) , point_of_odomframe, "odom" ,point_of_carframe);
+    }
+    catch(tf::TransformException &ex)
+    {
+        ROS_ERROR("%s tf error in rsband",ex.what());
+        ros::Duration(1.0).sleep();
+    }
+    geometry_msgs::Point outPoint;
+    outPoint.x=point_of_carframe.pose.position.x;
+    outPoint.y=point_of_carframe.pose.position.y;
+    return outPoint;
+  }
+  
   void RSBandPlannerROS::reconfigureCallback(RSBandPlannerConfig& config,
     uint32_t level)
   {
     // xyGoalTolerance_ = config.xy_goal_tolerance;
     // yawGoalTolerance_ = config.yaw_goal_tolerance;
-    whosyourdaddy.gain_angle=config.gain_angle;
-    whosyourdaddy.unit_distance=config.unit_distance;
-    whosyourdaddy.warning_distance=config.warning_distance;
-    whosyourdaddy.limit_distance=config.limit_distance;
-    whosyourdaddy.angle_max=config.angle_max;
-    whosyourdaddy.angle_min=config.angle_min;
+    angry_car->gain_angle=config.gain_angle;
+    angry_car->unit_distance=config.unit_distance;
+    angry_car->warning_distance=config.warning_distance;
+    angry_car->limit_distance=config.limit_distance;
+    angry_car->angle_max=config.angle_max;
+    angry_car->angle_min=config.angle_min;
 
     if (L1_)
       L1_->reconfigure(config);
@@ -199,10 +285,12 @@ namespace rsband_local_planner
     //   return false;
     // }
     
+    ROS_INFO("computeVelocityCommands spining");
+
     double _rectified_angular;
     _rectified_angular=rectifyAngularVel();
     cmd.angular.z=_rectified_angular;////
-    ROS_INFO("output pwm=%.2f",cmd.angular.z);
+    // ROS_INFO("output pwm=%.2f",cmd.angular.z);
 
     return true;
   }
@@ -258,7 +346,7 @@ namespace rsband_local_planner
       //get robot orientation vector
       Eigen::Vector2d robot_orient = robot_pose_.orientationUnitVec();
 
-      whosyourdaddy.clearlist( whosyourdaddy.warning_point);
+      angry_car->clearlist();
       //scan local costmap to find obstacle point
       for (unsigned int i=0; i<costmap_->getSizeInCellsX()-1; ++i)
       {
@@ -278,75 +366,53 @@ namespace rsband_local_planner
            //robot_orient是机器人的方向向量
           /*---------------------------------------------------*/
             //switch  data in rectangular coordinates to polar coordinates
+            geometry_msgs::Point obsOfCar;
+            obsOfCar=tf_odom2car(obs.coeffRef(0),obs.coeffRef(1));
+
             float dis,ang;
-            float alph,beta;
-            alph=atan2(robot_orient.coeffRef(1),robot_orient.coeffRef(0));
-            beta=atan2(obs.coeffRef(1),obs.coeffRef(0));
-            ang=beta-alph;
+            ang=atan2(obsOfCar.y,obsOfCar.x);
             dis=obs_dir.norm();
-            //ROS_INFO("in dis=%.2f,ang=%.2f",dis,ang);
+            // ROS_INFO("scan dis=%.2f,ang=%.2f",dis,ang);
             
-            if(dis<whosyourdaddy.warning_distance && ang>-0.85 && ang<0.85)
+            if(dis<angry_car->warning_distance&& ang>-1.57 && ang<1.57)// && ang>-1.57 && ang<1.57
             {
-              whosyourdaddy.append(whosyourdaddy.warning_point,dis,ang);
+              angry_car->append(dis,ang);
               addVizPoint(obs.coeffRef(0),obs.coeffRef(1));
-              //whosyourdaddy.simple_vec(ang);
               //ROS_INFO("in dis=%.2f,ang=%.2f",dis,ang);
             }
           /*---------------------------------------------------*/
           }
         }
       }
-      //visualization
-      geometry_msgs::PoseStamped point_of_odomframe;
-      point_of_odomframe.header.frame_id="odom";
-      geometry_msgs::PoseStamped car_of_odom_frame;
-      car_of_odom_frame.header.frame_id="odom";
-
-      geometry_msgs::PoseStamped point_of_carframe;
-      point_of_carframe.header.frame_id="base_footprint";
-      geometry_msgs::PoseStamped car_of_carframe;
-      car_of_carframe.header.frame_id="base_footprint";
-
-      point_of_odomframe.header.stamp=car_of_odom_frame.header.stamp=point_of_carframe.header.stamp=car_of_carframe.header.stamp=ros::Time::now();  
-      try
-      {
-          point_of_carframe.pose.position.x=1*cos(whosyourdaddy.out_point.ang);//the point in car_frame that should be visualized
-          point_of_carframe.pose.position.y=1*sin(whosyourdaddy.out_point.ang);//
-          point_of_carframe.pose.orientation.w=1.0;
-          tf_listener.transformPose("odom", ros::Time(0) , point_of_carframe, "base_footprint" ,point_of_odomframe);
-          
-          car_of_carframe.pose.position.x=0;//the point in car_frame that should be visualized
-          car_of_carframe.pose.position.y=0;//
-          car_of_carframe.pose.orientation.w=1.0;
-          tf_listener.transformPose("odom", ros::Time(0) , car_of_carframe, "base_footprint" ,car_of_odom_frame);
-          
-      }
-      catch(tf::TransformException &ex)
-      {
-          ROS_ERROR("%s tf error in rsband",ex.what());
-          ros::Duration(1.0).sleep();
-      }
-      addVizLine(car_of_odom_frame.pose.position.x,car_of_odom_frame.pose.position.y,point_of_odomframe.pose.position.x,point_of_odomframe.pose.position.y);
-      // addVizPoint(point_of_odomframe.pose.position.x,point_of_odomframe.pose.position.y);
-      show_obst();
-      points.points.clear();
+      
+      
 
     //finally output a vector called whosyourdaddy.out_point ? how to transform it into adjust_angular?
-      whosyourdaddy.sortlist( whosyourdaddy.warning_point);
-      whosyourdaddy.last_point = whosyourdaddy.getlastnode( whosyourdaddy.warning_point);
-      if( whosyourdaddy.last_point->distance == LINK_HEAD_D || whosyourdaddy.last_point->distance == LINK_HEAD_A) 
+      angry_car->sortlist();
+      if(angry_car->warning_point.empty())
        {
-         printf("null\n");whosyourdaddy.out_point.ang=0;
+         printf("null\n");angry_car->out_point.angle=0;
        }
       else
       {
-        whosyourdaddy.v_vector( whosyourdaddy.last_point);
+         add_angle = base_angle * angry_car->gain_angle;
+         angry_car->v_vector(add_angle);
       }
-      //whosyourdaddy.output( whosyourdaddy.warning_point);
-      
-      ROS_INFO("output angle=%.2f",whosyourdaddy.out_point.ang);
-      float out_ang=whosyourdaddy.out_point.ang;
+
+      angry_car->output();
+
+      geometry_msgs::Point vizpoint;
+      vizpoint.x=angry_car->warning_point[0].distance*cos(angry_car->warning_point[0].angle);
+      vizpoint.y=angry_car->warning_point[0].distance*sin(angry_car->warning_point[0].angle);
+      addVizPoint(vizpoint);
+      vizpoint.x=cos(angry_car->out_point.angle);
+      vizpoint.y=sin(angry_car->out_point.angle);
+      addVizLine(vizpoint);
+      show_obst();
+      points.points.clear();
+      //ROS_INFO("in dis=%.2f,ang=%.2f",angry_car->warning_point[0].distance,angry_car->warning_point[0].angle);
+      //ROS_INFO("output angle=%.2f",angry_car->out_point.angle);
+      float out_ang=angry_car->out_point.angle;
       rectified_angular=map(out_ang,-1.58,1.58,45,145);
       
       return rectified_angular;

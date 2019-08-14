@@ -145,8 +145,8 @@ namespace rsband_local_planner
 
       //! path tracking controller ptr
       boost::shared_ptr<L1Controller> L1_;
-      // boost::shared_ptr<point_list> whosyourdaddy;//point_list whosyourdaddy;
-      point_list whosyourdaddy;
+      boost::shared_ptr<point_list> angry_car;
+      // point_list angry_car;
       
       //! distance to goal tolerance
       double xyGoalTolerance_;
@@ -165,6 +165,8 @@ namespace rsband_local_planner
       void show_obst(float x,float y,const PoseSE2& carPose);
       void show_obst();
       void addVizPoint(float x,float y);
+      void addVizPoint(geometry_msgs::Point point);
+      void addVizLine(geometry_msgs::Point point);
       //!< emergency plan poses
       std::vector<geometry_msgs::PoseStamped> emergencyPoses_;
 
@@ -196,6 +198,11 @@ namespace rsband_local_planner
       tf::TransformListener tf_listener;
 
       void addVizLine(float xstart,float ystart,float xend,float yend);
+      geometry_msgs::Point tf_odom2car(float inx,float iny);
+
+      float base_angle = 1.4;
+      float add_angle = 1;
+      
   };
 
 }  // namespace rsband_local_planner

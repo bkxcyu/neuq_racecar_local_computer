@@ -2,224 +2,110 @@
 
 
 namespace rsband_local_planner{
+
 point_list::point_list()
 {
 	pi=3.1415926;
 	gain_angle = 1;
 	unit_distance = 100;
-	warning_distance = 2;
-	limit_distance = 1;
+	warning_distance = 2; 
+	limit_distance = 0.2;
 	angle_max = 1.57;
 	angle_min = -1.57; 	
-	// creatlist();
 }
 
-// int main()
-// {
-//     int choice;
-// 	bool next;
-// 	point_list whosyourdaddy;
-    
-//     whosyourdaddy.warning_point = whosyourdaddy.creatlist();
-    
-//     do
-//     {
-//     	whosyourdaddy.sortlist(whosyourdaddy.warning_point);//���� 
-//     	printf("ѡ��1�����  ѡ��2������  ѡ��3�����  ѡ��4�����ĵ�  ѡ��5���������\n - ");
-//     	scanf("%d",&choice);
-// 		switch(choice)	
-// 		{
-// 			case 1:
-// 				printf("\nOUTPUT:\n"); 
-// 				whosyourdaddy.output(whosyourdaddy.warning_point);
-// 				break;
-// 			case 2:
-// 				float dis,ang;
-// 				printf("����:\n");
-// 				scanf("%f %f",&dis,&ang);
-// 				whosyourdaddy.append(whosyourdaddy.warning_point,dis,ang);
-// 				break;
-// 			case 3:
-// 				whosyourdaddy.clearlist(whosyourdaddy.warning_point);
-// 				whosyourdaddy.output(whosyourdaddy.warning_point);
-// 				break;
-// 			case 4:
-// 				whosyourdaddy.last_point = whosyourdaddy.getlastnode(whosyourdaddy.warning_point);
-// 				whosyourdaddy.output(whosyourdaddy.last_point);
-// 				break;
-// 			case 5:
-// 				whosyourdaddy.last_point = whosyourdaddy.getlastnode(whosyourdaddy.warning_point);
-// 				//�ж��Ƿ�Ϊ��ͷ 
-// 				if(whosyourdaddy.last_point->distance == LINK_HEAD_D || whosyourdaddy.last_point->distance == LINK_HEAD_A) 
-// 					printf("null\n");
-// 				else
-// 				{
-// 					whosyourdaddy.v_vector(whosyourdaddy.last_point);
-// 					whosyourdaddy.output(whosyourdaddy.last_point);
-// 					printf("the OUT:\n");
-// 					printf("dis:%f\t | ang:%f\n",whosyourdaddy.out_point.dis,whosyourdaddy.out_point.ang);
-// 				}
-// 				break;
-// 			default:
-//             	printf("OUTPUT:\n"); 
-// 				whosyourdaddy.output(whosyourdaddy.warning_point);
-//             	break;
-// 		}	
-//         printf("\nnext? (Yes:1,No:0) ");
-// 		scanf("%d",&next);
-// 		fflush(stdin);
-//     } while (next);
-// }
 
 
-struct Obs_point *point_list::creatlist()
+void point_list::output()
 {
-	struct Obs_point *p1,*p2,*head=NULL;
-	p2=p1=(struct Obs_point *)malloc(POINTLEN);
-	p1->distance=LINK_HEAD_D;
-	p1->angle=LINK_HEAD_A;
-	head=p1;
-	p2->next=NULL;
-	return(head);
-} 
-
-void point_list::output(struct Obs_point *head)
-{
-	struct Obs_point *p;
-	int num=1;
-	p=head;
-	printf("|distance\t\t|angle\n");
-	while(p!=NULL)
+	if(warning_point.empty())
+		printf("null\n");
+	else
 	{
-		printf("%3d | %f\t | %f\n",num++,p->distance,p->angle);
-		p=p->next;
+		int count = warning_point.size();
+    	for (int i = 0;i<count;i++)
+    	{
+			ROS_INFO("in dis=%.2f,ang=%.2f",warning_point[i].distance,warning_point[i].angle);
+    		//printf("dis:%f\t | ang:%f\n",warning_point[i].distance,warning_point[i].angle);
+    	}	
+	} 
+}
+
+
+void point_list::append(float dis,float ang)
+{
+	struct Obs_point in;
+	in.distance=dis;
+	in.angle=ang;
+	warning_point.push_back(in);	
+}
+
+
+void point_list::clearlist()
+{
+	warning_point.clear();
+}
+
+
+    
+void point_list::sortlist()
+{
+	if(warning_point.empty())
+		;
+	else
+	{
+		int count = warning_point.size();
+   		for(int i=0;i<count-1;i++)
+    	{
+        	for(int j=0;j<count-i-1;j++)
+        	{
+        		if(warning_point[j].distance > warning_point[j+1].distance)
+				{
+					float temp_d = warning_point[j].distance;
+					warning_point[j].distance = warning_point[j+1].distance;
+					warning_point[j+1].distance = temp_d;
+				
+					float temp_a = warning_point[j].angle;
+					warning_point[j].angle = warning_point[j+1].angle;
+					warning_point[j+1].angle = temp_a;
+				}
+        	}
+    	}
+	} 
+}
+
+
+
+
+void point_list::v_vector(float add)
+{
+ 
+	if(warning_point[0].distance < warning_distance && warning_point[0].distance > limit_distance)
+	{
+		if(warning_point[0].angle > 0)
+			out_point.angle = warning_point[0].angle - add;
+		else if(warning_point[0].angle <= 0)
+			out_point.angle = warning_point[0].angle + add;
+			
+		if(out_point.angle > angle_max)
+			out_point.angle = angle_max;
+		else if(out_point.angle <= angle_min)
+			out_point.angle = angle_min;
+			
+		out_point.distance =  unit_distance;
+	} 
+	
+
+	else if(warning_point[0].distance <= limit_distance && warning_point[0].distance >= 0)
+	{
+		if(warning_point[0].angle > 0)
+			out_point.angle = angle_min;
+		else if(warning_point[0].angle <= 0)
+			out_point.angle = angle_max;
+	
+		out_point.distance = unit_distance;		
 	}
-	printf("\n");
 }
 
-int point_list::append(struct Obs_point *head,float dis,float ang)
-{
-	struct Obs_point *p1,*p2;
-	for(p1=head;p1->next!=NULL;p1=p1->next);
-	p2->next=p1;
-	p2=p1;
-	p1=(struct Obs_point *)malloc(POINTLEN);
-	p1->distance = dis;
-	p1->angle = ang;
-
-	p2->next=p1;
-	p2=p1;
-	p1=(struct Obs_point *)malloc(POINTLEN);
-	p1->distance = 0;
-	p1->angle = 0;
-
-	p2->next=NULL;
-} 
-
-
-
-struct Obs_point *point_list::clearlist(struct Obs_point *head)  
-{  
-    struct Obs_point *p,*q;  
-    if(head==NULL)  
-        return (head);  
-    p=head->next;  
-    while(p!=NULL)  
-    {  
-        q=p->next;  
-        free(p);  
-        p=q;  
-    }  
-    head->next=NULL;  
-    return (head);  
-} 
-
-
-
-struct Obs_point *point_list::getlastnode(struct Obs_point *head)
-{
-    struct Obs_point *p = head;
-    while(p->next!=NULL)
-    {
-        p=p->next;
-    }
-    return p;
-}
-    
-
-struct Obs_point *point_list::sortlist(struct Obs_point *head)
-{
-    struct Obs_point *p1 = head;
-    struct Obs_point *p2 = head;
-    if(head == NULL)
-        return NULL;
-    for(;p1->next!=NULL;p1=p1->next)
-    {
-        for(p2=head;p2->next!=NULL;p2=p2->next)
-        {
-            if(p2->distance < p2->next->distance)
-            { 
-                float temp_d = p2->distance; 		float temp_a = p2->angle;
-                p2->distance = p2->next->distance; 	p2->angle = p2->next->angle;
-                p2->next->distance = temp_d; 		p2->next->angle = temp_a;
-            }
-        }
-    }
-    return head;
-}
-
-
-void point_list::v_vector(struct Obs_point *head)
-{
-	struct Obs_point *p;
-
-	//if(p->distance < warning_distance && p->distance > limit_distance)
-	//{
-		if(p->angle > 0)
-			out_point.ang = p->angle - 1;
-		else if(p->angle <= 0)
-			out_point.ang = p->angle + 1;
-
-		if(out_point.ang > angle_max)
-			out_point.ang = angle_max;
-		else if(out_point.ang <= angle_min)
-			out_point.ang = angle_min;
-
-		// printf(" %f\t | %f\n",p->distance,p->angle);
-
-		out_point.dis =  unit_distance;
-		
-	//} 
-	/*
-	else if(p->distance <= limit_distance && p->distance >= 0)
-	{
-		if(p->angle > 0.5*pi)
-		{
-			out_point.ang = angle_max;
-			out_point.dis = unit_distance;
-		}
-		else if(p->angle <= 0.5*pi)
-		{
-			out_point.ang = angle_min;
-			out_point.dis = unit_distance;
-		}		
-	}*/
-}
-
-void point_list::simple_vec(float angle)
-{
-	if(angle > 0)
-		out_point.ang = angle - 1;
-	else if(angle <= 0)
-		out_point.ang = angle + 1;
-
-	if(out_point.ang > angle_max)
-		out_point.ang = angle_max;
-	else if(out_point.ang <= angle_min)
-		out_point.ang = angle_min;
-
-	out_point.dis =  unit_distance;
-
-}
 
 }//end namespace
