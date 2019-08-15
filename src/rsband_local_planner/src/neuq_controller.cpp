@@ -33,7 +33,7 @@ namespace rsband_local_planner
 
         pn.param("GasGain", Gas_gain, 3.0);//电机输出增益（系数P）
         pn.param("baseSpeed", baseSpeed, 1600);//基速度
-        pn.param("baseAngle", baseAngle, 83.0);//基角度
+        pn.param("baseAngle", baseAngle, 90.0);//基角度
         pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 10.0);
         pn.param("qujian_min", qujian_min, 7.0);
         pn.param("qujian_max", qujian_max, 20.0);
@@ -541,7 +541,7 @@ namespace rsband_local_planner
     {
         if(map_path.poses.size()<RUSH_POINT)
         {
-            ROS_INFO("Wanring!Ready To Rush");
+            // ROS_INFO("Wanring!Ready To Rush");
             return true;
         }
         else
@@ -807,7 +807,7 @@ namespace rsband_local_planner
         }
 
 
-        ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+        // ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
         err_pub.publish(Err);
         return Err;
@@ -822,7 +822,7 @@ namespace rsband_local_planner
         Err=computeIntegralErr();
         slow_down_vel=switchErrIntoVel(Err);
 
-        ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
+        // ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
         return slow_down_vel;
     }
 

@@ -62,6 +62,7 @@ add_library(${PROJECT_NAME}
   src/fuzzy_ptc.cpp
   src/neuq_controller.cpp
   src/reeds_shepp_planner.cpp
+  src/auto_correct.cpp
 )
 
 target_link_libraries(

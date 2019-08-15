@@ -131,6 +131,7 @@ namespace rsband_local_planner
 
   void FuzzyPTC::reconfigure(RSBandPlannerConfig& config)
   {
+
        SMOOTHNESS = config.SMOOTHNESS;
     // maxSteeringAngle_ = config.max_steering_angle;
     // maxSpeed_ = config.max_speed;
