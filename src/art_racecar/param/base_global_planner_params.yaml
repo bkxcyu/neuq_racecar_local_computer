@@ -12,6 +12,5 @@ GlobalPlanner:
     cost_factor: 3
     publish_potential: True
 
-
 NavfnROS:
     allow_unknown: false

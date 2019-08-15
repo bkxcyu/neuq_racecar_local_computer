@@ -20,7 +20,7 @@ global_costmap:
         - {name: static,    type: "costmap_2d::StaticLayer"}            
         - {name: sensor,    type: "costmap_2d::ObstacleLayer"}
         - {name: inflation, type: "costmap_2d::InflationLayer"}
-    #     - {name: obstacles, type: "costmap_2d::VoxelLayer"}
+        - {name: add_obstacles, type: "simple_layer_namespace::SimpleLayer"}
 
     # obstacles:
     #     observation_sources: base_scan
@@ -40,4 +40,3 @@ global_costmap:
         cost_scaling_factor: 4.5 #default:8.0 #这个值越大 表示膨胀层的值下降得越快 A scaling factor to apply to cost values during inflation. The cost function is computed as follows for all cells in the costmap further than the inscribed radius distance and closer than the inflation radius distance away from an actual obstacle: 
         # exp(-1.0 * cost_scaling_factor * (distance_from_obstacle - inscribed_radius)) * (costmap_2d::INSCRIBED_INFLATED_OBSTACLE - 1)
         # where costmap_2d::INSCRIBED_INFLATED_OBSTACLE is currently 254. NOTE: since the cost_scaling_factor is multiplied by a negative in the formula, increasing the factor will decrease the resulting cost values.
-

@@ -65,6 +65,9 @@ add_library(${PROJECT_NAME}
   src/auto_correct.cpp
 )
 
+add_executable(publish_point.cpp src/publish_point.cpp)
+target_link_libraries(publish_point.cpp ${catkin_LIBRARIES})
+
 target_link_libraries(
   ${PROJECT_NAME}
   ${OMPL_LIBRARIES}

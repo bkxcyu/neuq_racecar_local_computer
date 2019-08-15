@@ -152,13 +152,13 @@ int main(int argc, char** argv)
                 if(JY == DATA3)
                 {
                 /*--------------读数------------*/
-                // ROS_INFO("DATA:%d\n",DATA1);
                 currant_vel.data=(std::float_t)DATA;
                 currant_vel.data=currant_vel.data/(51*255);
                 ROS_INFO("currant_vel:%f\n",currant_vel.data);
                 }
                 /*--------------发布------------*/
                 pub.publish(currant_vel);
+                
                 found = true;
             }
             ros::spinOnce();                   // Handle ROS events
