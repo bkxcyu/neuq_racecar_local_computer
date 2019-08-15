@@ -31,7 +31,7 @@ namespace rsband_local_planner
 
         pn.param("GasGain", Gas_gain, 3.0);//电机输出增益（系数P）
         pn.param("baseSpeed", baseSpeed, 1600);//基速度
-        pn.param("baseAngle", baseAngle, 77.0);//基角度
+        pn.param("baseAngle", baseAngle, 90.0);//基角度
         pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 10.0);
         pn.param("qujian_min", qujian_min, 7.0);
         pn.param("qujian_max", qujian_max, 20.0);

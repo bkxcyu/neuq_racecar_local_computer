@@ -51,9 +51,7 @@ void point_list::clearlist()
     
 void point_list::sortlist()
 {
-	if(warning_point.empty())
-		;
-	else
+	if(!warning_point.empty())
 	{
 		int count = warning_point.size();
    		for(int i=0;i<count-1;i++)
@@ -80,31 +78,34 @@ void point_list::sortlist()
 
 void point_list::v_vector(float add)
 {
- 
-	if(warning_point[0].distance < warning_distance && warning_point[0].distance > limit_distance)
+	out_point.distance =  unit_distance;
+	if(warning_point.empty())
 	{
-		if(warning_point[0].angle > 0)
-			out_point.angle = warning_point[0].angle - add;
-		else if(warning_point[0].angle <= 0)
-			out_point.angle = warning_point[0].angle + add;
+		out_point.angle=0;
+	}
+	else
+	{
+		if(warning_point[0].distance < warning_distance && warning_point[0].distance > limit_distance)
+		{
+			if(warning_point[0].angle > 0)
+				out_point.angle = warning_point[0].angle - add;
+			else if(warning_point[0].angle <= 0)
+				out_point.angle = warning_point[0].angle + add;
 			
-		if(out_point.angle > angle_max)
-			out_point.angle = angle_max;
-		else if(out_point.angle <= angle_min)
-			out_point.angle = angle_min;
-			
-		out_point.distance =  unit_distance;
-	} 
-	
+			if(out_point.angle > angle_max)
+				out_point.angle = angle_max;
+			else if(out_point.angle <= angle_min)
+				out_point.angle = angle_min;
+		} 
+		
 
-	else if(warning_point[0].distance <= limit_distance && warning_point[0].distance >= 0)
-	{
-		if(warning_point[0].angle > 0)
-			out_point.angle = angle_min;
-		else if(warning_point[0].angle <= 0)
-			out_point.angle = angle_max;
-	
-		out_point.distance = unit_distance;		
+		else if(warning_point[0].distance <= limit_distance && warning_point[0].distance >= 0)
+		{
+			if(warning_point[0].angle > 0)
+				out_point.angle = angle_min;
+			else if(warning_point[0].angle <= 0)
+				out_point.angle = angle_max;
+		}
 	}
 }
 

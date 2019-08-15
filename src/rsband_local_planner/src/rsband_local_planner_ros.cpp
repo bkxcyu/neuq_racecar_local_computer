@@ -156,7 +156,7 @@ namespace rsband_local_planner
     catch(tf::TransformException &ex)
     {
         ROS_ERROR("%s tf error in rsband",ex.what());
-        ros::Duration(1.0).sleep();
+        // ros::Duration(1.0).sleep();
     }
     addVizPoint(point_of_odomframe.pose.position.x,point_of_odomframe.pose.position.y);
   }
@@ -289,7 +289,15 @@ namespace rsband_local_planner
     double _rectified_angular;
     _rectified_angular=rectifyAngularVel();
     // ROS_INFO("origin:%.2f",cmd.angular.z);
-    cmd.angular.z+=_rectified_angular*angry_car->gain_angle * (1/angry_car->warning_point[0].distance);////
+
+    if(!angry_car->warning_point.empty())
+    {
+      cmd.angular.z+=_rectified_angular*angry_car->gain_angle * (1/angry_car->warning_point[0].distance);////
+    }
+    else
+      cmd.angular.z+=0 ;////
+
+
     // ROS_INFO("add:%.2f output=%.2f",_rectified_angular,cmd.angular.z);
     if(cmd.angular.z<0)
       cmd.angular.z=0;
@@ -378,7 +386,7 @@ namespace rsband_local_planner
             dis=obs_dir.norm();
             // ROS_INFO("scan dis=%.2f,ang=%.2f",dis,ang);
             
-            if(dis<angry_car->warning_distance&& ang>-1.57 && ang<1.57)// && ang>-1.57 && ang<1.57
+            if(dis<angry_car->warning_distance && ang>-1.57 && ang<1.57)// && ang>-1.57 && ang<1.57
             {
               angry_car->append(dis,ang);
               addVizPoint(obs.coeffRef(0),obs.coeffRef(1));
@@ -391,41 +399,53 @@ namespace rsband_local_planner
       
       
 
-    //finally output a vector called whosyourdaddy.out_point ? how to transform it into adjust_angular?
-      angry_car->sortlist();
 
-      int point_count = angry_car->warning_point.size();
       if(angry_car->warning_point.empty())
        {
          //printf("null\n");
          angry_car->out_point.angle=0;
+         angry_car->out_point.distance =  100;
        }
-      else if(point_count <= 1)
-      {
-         //printf("one point\n");
-         angry_car->out_point.angle=0;
-      }
       else
       {
-         //add_angle = base_angle * angry_car->gain_angle * (1/angry_car->warning_point[0].distance);
+        angry_car->sortlist();
+        int point_count = angry_car->warning_point.size();
+        if(point_count <= 1)
+        {
+          //printf("one point\n");
+          angry_car->out_point.angle=0;
+          angry_car->out_point.distance =  100;
+        }
+        else
+        {
+          //add_angle = base_angle * angry_car->gain_angle * (1/angry_car->warning_point[0].distance);
          angry_car->v_vector(base_angle);
          //angry_car->output();
+        }
       }
 
       geometry_msgs::Point vizpoint;
+
+      if(!angry_car->warning_point.empty())
+      {
       vizpoint.x=angry_car->warning_point[0].distance*cos(angry_car->warning_point[0].angle);
       vizpoint.y=angry_car->warning_point[0].distance*sin(angry_car->warning_point[0].angle);
+      }
+
+
       addVizPoint(vizpoint);
       vizpoint.x=cos(angry_car->out_point.angle);
       vizpoint.y=sin(angry_car->out_point.angle);
       addVizLine(vizpoint);
       show_obst();
       points.points.clear();
+
       //ROS_INFO("in dis=%.2f,ang=%.2f",angry_car->warning_point[0].distance,angry_car->warning_point[0].angle);
       //ROS_INFO("output angle=%.2f",angry_car->out_point.angle);
       float out_ang=angry_car->out_point.angle;
       rectified_angular=map(out_ang,-1.58,1.58,-50,50);
       
+
       return rectified_angular;
       
   }
