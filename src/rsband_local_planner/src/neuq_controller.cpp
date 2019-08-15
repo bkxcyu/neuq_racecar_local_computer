@@ -432,7 +432,7 @@ namespace rsband_local_planner
     {
         if(map_path.poses.size()<RUSH_POINT)
         {
-            ROS_INFO("Wanring!Ready To Rush");
+            // ROS_INFO("Wanring!Ready To Rush");
             return true;
         }
         else

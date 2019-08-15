@@ -8,8 +8,8 @@ point_list::point_list()
 	pi=3.1415926;
 	gain_angle = 1;
 	unit_distance = 100;
-	warning_distance = 2; 
-	limit_distance = 0.2;
+	warning_distance = 1.0; 
+	limit_distance = 0.4;
 	angle_max = 1.57;
 	angle_min = -1.57; 	
 }
@@ -18,6 +18,7 @@ point_list::point_list()
 
 void point_list::output()
 {
+	ROS_INFO("The warning point list:");
 	if(warning_point.empty())
 		printf("null\n");
 	else

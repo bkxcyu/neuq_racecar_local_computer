@@ -26,13 +26,13 @@ class point_list
     	struct Obs_point out_point;
     	vector<struct Obs_point> warning_point;
     	
-		float pi;
-		float gain_angle;
-		float unit_distance;
-		float warning_distance;
-		float limit_distance; 
-		float angle_max;
-		float angle_min; 	
+		double pi;
+		double gain_angle;
+		double unit_distance;
+		double warning_distance;
+		double limit_distance; 
+		double angle_max;
+		double angle_min; 	
 		
 	private:
 };

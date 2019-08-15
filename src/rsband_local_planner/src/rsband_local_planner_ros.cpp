@@ -279,18 +279,22 @@ namespace rsband_local_planner
       return false;
     }
 
-    // if (!L1_->computeVelocityCommands(cmd))
-    // {
-    //   ROS_ERROR("Path tracking controller failed to produce command");
-    //   return false;
-    // }
+    if (!L1_->computeVelocityCommands(cmd))
+    {
+      ROS_ERROR("Path tracking controller failed to produce command");
+      return false;
+    }
     
-    ROS_INFO("computeVelocityCommands spining");
 
     double _rectified_angular;
     _rectified_angular=rectifyAngularVel();
-    cmd.angular.z=_rectified_angular;////
-    // ROS_INFO("output pwm=%.2f",cmd.angular.z);
+    ROS_INFO("origin:%.2f",cmd.angular.z);
+    cmd.angular.z+=_rectified_angular*angry_car->gain_angle * (1/angry_car->warning_point[0].distance);////
+    ROS_INFO("add:%.2f output=%.2f",_rectified_angular,cmd.angular.z);
+    if(cmd.angular.z<0)
+      cmd.angular.z=0;
+    if(cmd.angular.z>180)
+      cmd.angular.z=180;
 
     return true;
   }
@@ -389,17 +393,24 @@ namespace rsband_local_planner
 
     //finally output a vector called whosyourdaddy.out_point ? how to transform it into adjust_angular?
       angry_car->sortlist();
+
+      int point_count = angry_car->warning_point.size();
       if(angry_car->warning_point.empty())
        {
-         printf("null\n");angry_car->out_point.angle=0;
+         //printf("null\n");
+         angry_car->out_point.angle=0;
        }
+      else if(point_count <= 1)
+      {
+         //printf("one point\n");
+         angry_car->out_point.angle=0;
+      }
       else
       {
-         add_angle = base_angle * angry_car->gain_angle;
-         angry_car->v_vector(add_angle);
+         //add_angle = base_angle * angry_car->gain_angle * (1/angry_car->warning_point[0].distance);
+         angry_car->v_vector(base_angle);
+         //angry_car->output();
       }
-
-      angry_car->output();
 
       geometry_msgs::Point vizpoint;
       vizpoint.x=angry_car->warning_point[0].distance*cos(angry_car->warning_point[0].angle);
@@ -413,7 +424,7 @@ namespace rsband_local_planner
       //ROS_INFO("in dis=%.2f,ang=%.2f",angry_car->warning_point[0].distance,angry_car->warning_point[0].angle);
       //ROS_INFO("output angle=%.2f",angry_car->out_point.angle);
       float out_ang=angry_car->out_point.angle;
-      rectified_angular=map(out_ang,-1.58,1.58,45,145);
+      rectified_angular=map(out_ang,-1.58,1.58,-50,50);
       
       return rectified_angular;
       
