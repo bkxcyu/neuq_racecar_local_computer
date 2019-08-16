@@ -239,8 +239,8 @@ namespace rsband_local_planner
   void RSBandPlannerROS::reconfigureCallback(RSBandPlannerConfig& config,
     uint32_t level)
   {
-    // xyGoalTolerance_ = config.xy_goal_tolerance;
-    // yawGoalTolerance_ = config.yaw_goal_tolerance;
+    xyGoalTolerance_ = config.xy_goal_tolerance;
+    yawGoalTolerance_ = config.yaw_goal_tolerance;
     angry_car->gain_angle=config.gain_angle;
     angry_car->unit_distance=config.unit_distance;
     angry_car->warning_distance=config.warning_distance;

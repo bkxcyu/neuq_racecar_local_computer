@@ -399,9 +399,10 @@ namespace rsband_local_planner
             return false;
         }
         /**********************/
+        eta=getEta(carPose);
         while(!foundForwardPt&&Lfw>0)
         {
-            ROS_INFO("can't get eta,maybe Lfw is too long,now cut it and compute eta again");
+            ROS_WARN("can't get eta,maybe Lfw is too long,now cut it and compute eta again");
             Lfw-=0.1;
             eta=getEta(carPose);
         }            
