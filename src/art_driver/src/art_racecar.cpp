@@ -11,7 +11,7 @@
 geometry_msgs::Twist vel2pwm(geometry_msgs::Twist vel)
 {
     geometry_msgs::Twist pwm;
-    pwm.linear.x=(vel.linear.x/1.7+54.1109)/0.0348;
+    pwm.linear.x=(vel.linear.x/1.0+46.6909)/0.0301;
     pwm.linear.z=vel.linear.z;
     pwm.angular.z=vel.angular.z;
     return pwm;
@@ -67,7 +67,7 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     ros::Subscriber sub = n.subscribe("/cmd_vel",1,TwistCallback);
-    ros::Subscriber sub1 = n.subscribe("/car/cmd_vel",1,TwistCallback1);
+    // ros::Subscriber sub1 = n.subscribe("/car/cmd_vel",1,TwistCallback1);
 
 
 

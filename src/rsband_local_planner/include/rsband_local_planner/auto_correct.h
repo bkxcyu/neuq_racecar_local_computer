@@ -32,7 +32,9 @@ class point_list
 		double warning_distance;
 		double limit_distance; 
 		double angle_max;
-		double angle_min; 	
+		double angle_min; 
+		float signal_intensity_left;
+		float signal_intensity_right;	
 		
 	private:
 };

@@ -212,6 +212,13 @@ namespace rsband_local_planner
 
       float base_angle = 1.4;
       float add_angle = 1;
+
+      void TwistCallback(const geometry_msgs::Twist& twist);
+
+      geometry_msgs::Twist keyBoredCmd;
+      geometry_msgs::Twist getCmdFromKeyBored();
+
+      ros::Subscriber sub_keybored;
       
   };
 

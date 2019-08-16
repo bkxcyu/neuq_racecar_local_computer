@@ -57,8 +57,29 @@ namespace rsband_local_planner
     initialized_ = true;
     initMarker();
 
+    sub_keybored = _n_.subscribe("/car/cmd_vel",1,&RSBandPlannerROS::TwistCallback,this);
+
 
     ROS_DEBUG("Local Planner Plugin Initialized!");
+  }
+
+  void RSBandPlannerROS::TwistCallback(const geometry_msgs::Twist& twist)
+  {
+    keyBoredCmd=twist;
+  }
+  geometry_msgs::Twist pwm2vel(geometry_msgs::Twist pwm)
+  {
+        geometry_msgs::Twist vel;
+        //codes that travel pwm to vel should be write here
+        vel.linear.x=1.0*(0.0301*pwm.linear.x-46.6909);//转移
+        // ROS_INFO("currant_vel:%f\n",vel.linear.x);
+        vel.linear.z=pwm.linear.z;//
+        vel.angular.z=pwm.angular.z;
+        return vel;
+  }
+  geometry_msgs::Twist RSBandPlannerROS::getCmdFromKeyBored()
+  {
+    return pwm2vel(keyBoredCmd);
   }
   void RSBandPlannerROS::initMarker()
   {
@@ -285,6 +306,7 @@ namespace rsband_local_planner
       return false;
     }
     
+    // cmd=getCmdFromKeyBored();
 
     double _rectified_angular;
     _rectified_angular=rectifyAngularVel();
@@ -292,10 +314,11 @@ namespace rsband_local_planner
 
     if(!angry_car->warning_point.empty())
     {
-      cmd.angular.z+=_rectified_angular*angry_car->gain_angle * (1/angry_car->warning_point[0].distance);////
+      cmd.angular.z+=_rectified_angular;//*angry_car->gain_angle * (1/angry_car->warning_point[0].distance);////
     }
     else
       cmd.angular.z+=0 ;////
+
 
 
     // ROS_INFO("add:%.2f output=%.2f",_rectified_angular,cmd.angular.z);
@@ -358,7 +381,9 @@ namespace rsband_local_planner
       //get robot orientation vector
       Eigen::Vector2d robot_orient = robot_pose_.orientationUnitVec();
 
+      //clear
       angry_car->clearlist();
+      
       //scan local costmap to find obstacle point
       for (unsigned int i=0; i<costmap_->getSizeInCellsX()-1; ++i)
       {
@@ -402,34 +427,24 @@ namespace rsband_local_planner
 
       if(angry_car->warning_point.empty())
        {
-         //printf("null\n");
          angry_car->out_point.angle=0;
          angry_car->out_point.distance =  100;
        }
       else
       {
         angry_car->sortlist();
-        int point_count = angry_car->warning_point.size();
-        if(point_count <= 1)
-        {
-          //printf("one point\n");
-          angry_car->out_point.angle=0;
-          angry_car->out_point.distance =  100;
-        }
-        else
-        {
-          //add_angle = base_angle * angry_car->gain_angle * (1/angry_car->warning_point[0].distance);
-         angry_car->v_vector(base_angle);
-         //angry_car->output();
-        }
+        add_angle = base_angle * angry_car->gain_angle * (1/angry_car->warning_point[0].distance);
+        ROS_INFO("add_angle=%.2f",add_angle);
+        angry_car->v_vector(add_angle);
       }
+
 
       geometry_msgs::Point vizpoint;
 
       if(!angry_car->warning_point.empty())
       {
-      vizpoint.x=angry_car->warning_point[0].distance*cos(angry_car->warning_point[0].angle);
-      vizpoint.y=angry_car->warning_point[0].distance*sin(angry_car->warning_point[0].angle);
+        vizpoint.x=angry_car->warning_point[0].distance*cos(angry_car->warning_point[0].angle);
+        vizpoint.y=angry_car->warning_point[0].distance*sin(angry_car->warning_point[0].angle);
       }
 
 
@@ -443,7 +458,8 @@ namespace rsband_local_planner
       //ROS_INFO("in dis=%.2f,ang=%.2f",angry_car->warning_point[0].distance,angry_car->warning_point[0].angle);
       //ROS_INFO("output angle=%.2f",angry_car->out_point.angle);
       float out_ang=angry_car->out_point.angle;
-      rectified_angular=map(out_ang,-1.58,1.58,-50,50);
+      rectified_angular=map(out_ang,angry_car->angle_min,angry_car->angle_max,-180,180);
+      
       
 
       return rectified_angular;
