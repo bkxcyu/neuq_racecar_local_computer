@@ -37,7 +37,7 @@ odom_ecoder::odom_ecoder()
     current_time = ros::Time::now();
     last_time = ros::Time::now();
 
-    odom_pub = n.advertise<nav_msgs::Odometry>("/odom1", 50);  
+    odom_pub = n.advertise<nav_msgs::Odometry>("/odom1", 10);  
     odom_sub = n.subscribe("/currant_vel", 1, &odom_ecoder::velCB, this); 
 }
 

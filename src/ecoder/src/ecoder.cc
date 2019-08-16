@@ -124,7 +124,7 @@ int main(int argc, char** argv)
     int kk = 0;
     double vyaw_sum = 0;
     double vyaw_bias = 0;
-    pub = n.advertise<std_msgs::Float64>("/currant_vel", 50);
+    pub = n.advertise<std_msgs::Float64>("/currant_vel", 10);
 
     ROS_WARN("Streaming Ecoder Data...");
 
