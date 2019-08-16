@@ -7,8 +7,12 @@ namespace rsband_local_planner
     L1Controller::L1Controller(std::string name)
     {
 
+        ptc_ = boost::shared_ptr<FuzzyPTC>(new FuzzyPTC(name));
+
         last_cmd_vel.linear.x=Vcmd;
         last_cmd_vel.angular.z=0;
+
+        useLastCmd=false;
         
         odom_helper_.setOdomTopic("/odometry/filtered");
 
@@ -31,7 +35,7 @@ namespace rsband_local_planner
 
         pn.param("GasGain", Gas_gain, 3.0);//电机输出增益（系数P）
         pn.param("baseSpeed", baseSpeed, 1600);//基速度
-        pn.param("baseAngle", baseAngle, 77.0);//基角度
+        pn.param("baseAngle", baseAngle, 90.0);//基角度
         pn.param("MAX_SLOW_DOWN", MAX_SLOW_DOWN, 10.0);
         pn.param("qujian_min", qujian_min, 7.0);
         pn.param("qujian_max", qujian_max, 20.0);
@@ -52,7 +56,7 @@ namespace rsband_local_planner
 
         //Timer 定时中断
         // timer1 = n_.createTimer(ros::Duration((1.0)/controller_freq), &L1Controller::controlLoopCB, this); // Duration(0.05) -> 20Hz//根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-        // timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
+        timer2 = n_.createTimer(ros::Duration((0.5)/controller_freq), &L1Controller::goalReachingCB, this); // Duration(0.05) -> 20Hz//判断是否到达目标位置
         
         //Init variables
         Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
@@ -116,6 +120,7 @@ namespace rsband_local_planner
         goal_circle.color.b = 0.0;
         goal_circle.color.a = 0.5;
     }
+    
 
 
     void L1Controller::obstCB(const visualization_msgs::Marker& obstMsg)
@@ -205,6 +210,7 @@ namespace rsband_local_planner
         geometry_msgs::Point carPose_pos = carPose.position;//车的位置重映射
         double carPose_yaw = getYawFromPose(carPose);//从车的姿态（四元数）计算固有转向角（舵机打角）
         geometry_msgs::Point forwardPt;
+        static geometry_msgs::Point last_forwardPt;
         geometry_msgs::Point odom_car2WayPtVec;
         foundForwardPt = false;
 
@@ -220,16 +226,24 @@ namespace rsband_local_planner
                     geometry_msgs::Point odom_path_wayPt = odom_path_pose.pose.position;//规划的路径坐标信息（航路点）存入odom_path_wayPt
                     bool _isForwardWayPt = isForwardWayPt(odom_path_wayPt,carPose);//输入航路点的坐标和车的坐标 返回前方是否有航路点 即是否能到达该坐标
 
-                    if(_isForwardWayPt)//如果没有可行航路点怎么办？？？  航路点太超前怎么办？？？
+                    if(_isForwardWayPt)//航路点是否在车前
                     {
                         bool _isWayPtAwayFromLfwDist = isWayPtAwayFromLfwDist(odom_path_wayPt,carPose_pos);//输入航路点和车坐标 返回是否能直接到达（是否在转弯的盲区）
-                        if(_isWayPtAwayFromLfwDist)
+                        if(_isWayPtAwayFromLfwDist)//长度是否满足要求
                         {
                             forwardPt = odom_path_wayPt;//将可行的航路点存入forwardPt
+                            last_forwardPt=forwardPt;
                             foundForwardPt = true;
                             break;
                         }
+                        else
+                        {
+                            forwardPt=last_forwardPt;
+                            foundForwardPt = true;
+                        }
                     }
+                    else
+                        foundForwardPt=false;
                 }
                 catch(tf::TransformException &ex)
                 {
@@ -371,68 +385,148 @@ namespace rsband_local_planner
     {
         geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
         geometry_msgs::Twist carVel = odom.twist.twist;//速度
-        cmd_vel.linear.x = 1500;
-        cmd_vel.angular.z = baseAngle;
+        cmd.linear.x = 1500;
+        cmd.angular.z = baseAngle;
+        double steeringAngle=baseAngle;
+        double eta;
 
-        Lfw =  getL1Distance();
-
-        if(goal_received)//取得目标
+        /**********************/
+        float currant_vel =  getCurrantVel();
+        /**********************/
+        if (!ptc_->computeVelocityCommands(currant_vel, Lfw))
         {
-            double eta = getEta(carPose); 
+            ROS_ERROR("Fuzzy controller failed to produce Lfw");
+            return false;
+        }
+        /**********************/
+        eta=getEta(carPose);
+        while(!foundForwardPt&&Lfw>0)
+        {
+            ROS_WARN("can't get eta,maybe Lfw is too long,now cut it and compute eta again");
+            Lfw-=0.1;
+            eta=getEta(carPose);
+        }            
+        if(Lfw<=0)
+        {
+            ROS_ERROR("can't fint wayPt foward,now use last cmd");
+            useLastCmd=true;
+        }
+        else
+        {
+            useLastCmd=false;
+        }
+        /**********************/
+        if(!useLastCmd)
+        {
+            steeringAngle=getSteeringAngle(eta);
+            err_sum=err_sum+baseAngle;
+            cmd.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error);
+            last_error=steeringAngle; 
+            last_cmd_vel.angular.z=cmd.angular.z;
+        }
+        else
+        {
+            cmd.angular.z=(last_cmd_vel.angular.z-baseAngle)*2+baseAngle;
+        }
+        if(cmd.angular.z>180)
+            cmd.angular.z=180;
+        if(cmd.angular.z<0)
+            cmd.angular.z=0;
+        /**********************/
+        double errofangle = GetErrOfAngle(carPose);
+        double orientationErr=errofangle;               
+        /**********************/
+        std_msgs::Float64 IntegralErr_;
+        IntegralErr_=computeIntegralErr();
+        double IntegralErr=IntegralErr_.data;
+        /**********************/ 
+        if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,cmd.linear.x))
+        {
+            ROS_ERROR("Fuzzy controller failed to produce vel");
+            return false;
+        }
 
-            std_msgs::Float64 slow_down_vel;
-            slow_down_vel=computeSlowDownVel();
-            if(slow_down_vel.data<0)
+        if(foundForwardPt)
+        {   
+            if(!goal_reached)
             {
-                slow_down_vel.data=0;
-                ROS_ERROR("slow_down_vel<0,CHECK!");
-            }
 
-            if(foundForwardPt)
-            {
-                double steeringAngle;
-                steeringAngle=getSteeringAngle(eta);
-                err_sum=err_sum+baseAngle;
-                cmd_vel.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error)+KI*err_sum;
-                last_error=steeringAngle;
-                /*Estimate Gas Input*/
-                if(!goal_reached)
+                cmd.linear.x=map(cmd.linear.x,0,5,1550,baseSpeed);
+                if(reset_flag)
                 {
-                    cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
-
-                    if (ReadyToLastRush())
-                        cmd_vel.linear.x = RUSH_VEL;
-                    if (MaxPointNumber - CurrantPointNumber < BLOOM_START_POINT)
-                    {
-                        cmd_vel.linear.x = BLOOM_START_VEL;
-                        cmd_vel.linear.z = 1;
-                        cmd_vel.angular.z = baseAngle + 0.5*KP*steeringAngle;
-                    }
-                    else
-                        cmd_vel.linear.z = 0;
-
-                    if(reset_flag)
-                    {
-                        cmd_vel.linear.x = 1500;
-                        ROS_WARN("CAR IS STOPED MANUALY");
-                        goal_received=false;
-                    }
-                       
-                }
+                    cmd.linear.x = 1500;
+                    ROS_WARN("CAR IS STOPED MANUALY");
+                }           
             }
         }
-        cmd_vel=pwm2vel(cmd_vel);
-        last_cmd_vel=cmd_vel;
-        cmd=cmd_vel;
+    
+        cmd=pwm2vel(cmd);
         return true;
 
     }        
     
+     double L1Controller::GetErrOfAngle(const geometry_msgs::Pose& carPose)
+     {
+        // geometry_msgs::Pose carPose = odom.pose.pose;
+        geometry_msgs::Point carPose_pos = carPose.position;
+        geometry_msgs::Point forwardPt_1;
+        geometry_msgs::Point forwardPt_2;
+        geometry_msgs::Point odom_car2WayPtVec_1;
+        geometry_msgs::Point odom_car2WayPtVec_2;
+        bool foundForwardPt_1 = false;
+        bool foundForwardPt_2 = false;
+        double ETA = getYawFromPose(carPose);   
+        double err_angle;
+        if(!goal_reached)
+        {
+            for(int i =0; i< map_path.poses.size(); i++)
+            {
+                geometry_msgs::PoseStamped map_path_pose_1 = map_path.poses[i];//路径信息重映射
+                geometry_msgs::PoseStamped odom_path_pose_1;
+                geometry_msgs::PoseStamped map_path_pose_2 = map_path.poses[i+1];//路径信息重映射
+                geometry_msgs::PoseStamped odom_path_pose_2;
+                tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_1, "map" ,odom_path_pose_1);
+                tf_listener.transformPose("odom", ros::Time(0) , map_path_pose_2, "map" ,odom_path_pose_2);
+                geometry_msgs::Point odom_path_wayPt_1= odom_path_pose_1.pose.position;
+                geometry_msgs::Point odom_path_wayPt_2= odom_path_pose_2.pose.position;
+                bool _isForwardWayPt_1 = isForwardWayPt(odom_path_wayPt_1,carPose);
+                if(_isForwardWayPt_1)
+                {
+                    bool _isWayPtAwayFromLfwDist_1 = isWayPtAwayFromLfwDist(odom_path_wayPt_1,carPose_pos);
+                    if(_isWayPtAwayFromLfwDist_1)
+                    {
+                        forwardPt_1 = odom_path_wayPt_1;
+                        foundForwardPt_1 = true;
+                        double derta_x;
+                        double derta_y;
+                        derta_x = odom_path_wayPt_2.x - odom_path_wayPt_1.x;
+                        derta_y = odom_path_wayPt_2.y - odom_path_wayPt_1.y;
+
+                        double angel = atan2(derta_y,derta_x);
+                        err_angle = 57.29*atan2(derta_y,derta_x)-57.29*ETA;
+                        double ferr_angle = fabs(err_angle);
+                        if(ferr_angle>200)
+                        {
+                            err_angle = 360 - ferr_angle;
+                            
+                        }
+
+                        // ROS_INFO("Angle_2 = %.2f", angel);
+
+                        return err_angle;
+                    }
+                }
+            }
+        }
+        
+
+     }
+
     bool L1Controller::ReadyToLastRush()
     {
         if(map_path.poses.size()<RUSH_POINT)
         {
-            ROS_INFO("Wanring!Ready To Rush");
+            // ROS_INFO("Wanring!Ready To Rush");
             return true;
         }
         else
@@ -461,62 +555,15 @@ namespace rsband_local_planner
 
     }
     
-    void L1Controller::controlLoopCB(const ros::TimerEvent&)
-    {   //根据实时位置信息和导航堆栈更新舵机角度和电机速度，存在cmd_vel话题里
-    //     geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
-    //     geometry_msgs::Twist carVel = odom.twist.twist;//速度
-    //     cmd_vel.linear.x = 1500;
-    //     cmd_vel.angular.z = baseAngle;
-
-        
-    // /*>>>>>>>>>>>>>>>>>>>>   Lfw_REMAP   >>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-    //     // getCurrantVel();
-    //     // ROS_INFO("SPEED_X:%f Z:%f",currant_vel_from_odom.linear.x ,currant_vel_from_odom.angular.z );
-    //     Lfw = goalRadius = getL1Distance();
-    // /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-    //     if(goal_received)//取得目标
-    //     {
-    //         /*Estimate Steering Angle*///估计转向角
-    //         double eta = getEta(carPose); //基于车体的动力学模型和导航堆栈计算出转向角    这部分参考群里两篇论文 ：KuwataTCST09.pdf   KuwataGNC08.pdf
-    // /*>>>>>>>>>>>>>>>>>>   SLOW_down feature >>>>>>>>>>>>>>>>>>>>>>>>*/
-    //         std_msgs::Float64 slow_down_vel;
-    //         slow_down_vel=computeSlowDownVel();
-    //         if(slow_down_vel.data<0)
-    //         {
-    //             slow_down_vel.data=0;
-    //             ROS_ERROR("slow_down_vel<0,CHECK!");
-    //         }
-    // /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
-    //         if(foundForwardPt)//是否存在可行航路点
-    //         {
-    //         //  cmd_vel.angular.z = baseAngle + getSteeringAngle(eta)*Angle_gain;//将转向角存入cmd-vel
-    //             //   cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error);
-    //         //    last_error=getSteeringAngle(eta);
-    //         err_sum=err_sum+baseAngle;
-    //             cmd_vel.angular.z = baseAngle + KP*getSteeringAngle(eta)+KD*(getSteeringAngle(eta)-last_error)+KI*err_sum;
-    //             last_error=getSteeringAngle(eta);
-    //             /*Estimate Gas Input*/
-    //             if(!goal_reached)//如果沒有到達目標點则继续以基速度行驶
-    //             {
-    //                 //double u = getGasInput(carVel.linear.x);
-    //                 //cmd_vel.linear.x = baseSpeed - u;
-    //                 cmd_vel.linear.x = baseSpeed-slow_down_vel.data;
-    //                 //  ROS_INFO("\nGas = %.2f\nSteering angle = %.2f",cmd_vel.linear.x,cmd_vel.angular.z);
-    //             }
-    //         }
-    //     }
-    //     last_cmd_vel=cmd_vel;
-    //     // pub_.publish(cmd_vel);//发布控制指令 ：包含转向角和 期望速度
-    //     // if (ReadyToLastRush())
-    //     // cmd_vel.linear.x = 1680;
-    }
+    void L1Controller::controlLoopCB(const ros::TimerEvent&){}
     /*---------------------------------------------------------------------------------------*/
 
     geometry_msgs::Twist L1Controller::pwm2vel(geometry_msgs::Twist pwm)
     {
         geometry_msgs::Twist vel;
         //codes that travel pwm to vel should be write here
-        vel.linear.x=1.5*(0.0348*pwm.linear.x-54.1109);//转移
+        vel.linear.x=1.7*(0.0348*pwm.linear.x-54.1109);//转移
+        // ROS_INFO("currant_vel:%f\n",vel.linear.x);
         vel.linear.z=pwm.linear.z;//
         vel.angular.z=pwm.angular.z;
         return vel;
@@ -698,7 +745,7 @@ namespace rsband_local_planner
         }
 
 
-        //ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
+        // ROS_INFO("\n --- loop once finallly output ---\n err=%f ",Err.data);
 
         err_pub.publish(Err);
         return Err;
@@ -713,18 +760,14 @@ namespace rsband_local_planner
         Err=computeIntegralErr();
         slow_down_vel=switchErrIntoVel(Err);
 
-        ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
+        // ROS_INFO("slow_down_vel=%f",slow_down_vel.data);
         return slow_down_vel;
     }
 
     void L1Controller::reconfigure(RSBandPlannerConfig& config)
     {//Angle_gain baseSpeed baseAngle MAX_SLOW_DOWN qujian_min qujian_max TRAVERSAL_POINT KP KD
-        Angle_gain=config.Angle_gain;
+    //computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,currant_vel, Lfw,cmd))
         baseSpeed=config.baseSpeed;
-        baseAngle=config.baseAngle;
-        MAX_SLOW_DOWN=config.MAX_SLOW_DOWN;
-        qujian_min=config.qujian_min;
-        qujian_max=config.qujian_max;
         TRAVERSAL_POINT=config.TRAVERSAL_POINT;
         KP=config.KP;
         KD=config.KD;
@@ -738,6 +781,15 @@ namespace rsband_local_planner
         reset_flag=config.reset;
         v1=config.v1;
         v2=config.v2;
+        a=config.steeringAngle;
+        b=config.orientationErr;
+        c=config.IntegralErr;
+        d=config.currant_vel;
+
+        
+
+        if (ptc_)
+             ptc_->reconfigure(config);
         // ROS_INFO("baseSpeed IS SET TO %d",baseSpeed);
     }
 
@@ -754,6 +806,5 @@ namespace rsband_local_planner
     //     ros::spin();//循环执行
     //     return 0;
     // }
-
 
 }

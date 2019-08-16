@@ -13,9 +13,11 @@
     <!-- IMU 陀螺仪-->
     <include file="$(find art_imu)/launch/imu.launch" />
     <!-- Car 底盘驱动-->
-    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" output="screen"/>
+    <node pkg="art_driver" type="art_driver_node" name="art_driver_node" />
     <!-- 电机反馈速度-->
+
     <include file="$(find ecoder)/launch/ecoder.launch"/>
+
 
 	
       <!-- Rviz -->
@@ -29,7 +31,7 @@
     <arg name="init_a" default="0.0" />
 
     <!-- Map server -->
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find art_racecar)/map/mymap.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find art_racecar)/map/8F.yaml"/>
 
    
 
@@ -55,7 +57,7 @@
 
     <!-- Navstack 导航堆栈-->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" >
-        <!--  planner -->
+        <!--  planner navfn/NavfnROS-->
         <param name="base_global_planner" value="navfn/NavfnROS"/>  
         <param name="base_local_planner" value="rsband_local_planner/RSBandPlannerROS"/>  
         <!-- costmap layers -->    
@@ -66,10 +68,10 @@
         <rosparam file="$(find art_racecar)/param/base_global_planner_params.yaml" command="load"/>
         <rosparam file="$(find art_racecar)/param/move_base_params.yaml" command="load"/>
         <remap from="/odom" to="/odometry/filtered"/>
-        
-       
     </node>
-
+     <!--RVIZ 可视化-->
+    <node pkg="rsband_local_planner" type="publish_point.cpp" name="point" output="screen">
+    </node>
 
     <!-- Rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find art_racecar)/rviz/amcl.rviz" if="$(arg use_rviz)" />

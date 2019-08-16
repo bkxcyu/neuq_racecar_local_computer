@@ -72,7 +72,7 @@ if __name__=="__main__":
     speed_start_value = 50 
     turn_start_value = 50
     speed_mid = 1500
-    turn_mid = 95
+    turn_mid = 90
     speed_bias = 0
     turn_bias = 0
     speed_add_once = 5

@@ -50,10 +50,16 @@
 #include <dynamic_reconfigure/server.h>
 #include "rsband_local_planner/RSBandPlannerConfig.h"
 
+#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 
 #include "rsband_local_planner/neuq_controller.h"
+#include "rsband_local_planner/auto_correct.h"
+
+#include"rsband_local_planner/pose_se2.h"
 
 namespace rsband_local_planner
 {
@@ -84,7 +90,7 @@ namespace rsband_local_planner
        */
       void initialize(std::string name, tf::TransformListener* tfListener,
         costmap_2d::Costmap2DROS* costmapROS);
-
+      void initMarker();
       /**
        * @brief Sets the global plan to be followed by this planner
        * @param globalPlan: The plan to follow
@@ -139,7 +145,9 @@ namespace rsband_local_planner
 
       //! path tracking controller ptr
       boost::shared_ptr<L1Controller> L1_;
-
+      boost::shared_ptr<point_list> angry_car;
+      // point_list angry_car;
+      
       //! distance to goal tolerance
       double xyGoalTolerance_;
       //! angular deviation from goal pose tolerance
@@ -149,13 +157,22 @@ namespace rsband_local_planner
 
       //! eband to reeds shepp band conversion strategy
       EbandToRSStrategy ebandToRSStrategy_;
-
+      visualization_msgs::Marker points,line_strip;
+// =======
+//       visualization_msgs::Marker points;
+// >>>>>>> click_point_pugin
       //!< determines whether emergency planning will be used in case of failure
       bool emergencyPlanning_;
       //!< emergency mode
       bool emergencyMode_;
+      void show_obst(float x,float y,const PoseSE2& carPose);
+      void show_obst();
+      void addVizPoint(float x,float y);
+      void addVizPoint(geometry_msgs::Point point);
+      void addVizLine(geometry_msgs::Point point);
       //!< emergency plan poses
       std::vector<geometry_msgs::PoseStamped> emergencyPoses_;
+      void show_obst(float x,float y);
 
 
       //! global plan publisher
@@ -166,7 +183,14 @@ namespace rsband_local_planner
       ros::Publisher ebandPlanPub_;
       //! rs plan publisher
       ros::Publisher rsPlanPub_;
+// <<<<<<< HEAD
+//       ros::Publisher obst_pub; 
+//       ros::NodeHandle _n_;
+// =======
+      ros::NodeHandle _n_;
+      ros::Publisher obst_pub; 
 
+// >>>>>>> click_point_pugin
       //! global plan
       std::vector<geometry_msgs::PoseStamped> globalPlan_;
       //! transformed plan
@@ -176,6 +200,19 @@ namespace rsband_local_planner
       std::vector<int> planStartEndCounters_;
 
       bool initialized_;
+
+      double rectifyAngularVel();
+      
+
+      costmap_2d::Costmap2D* costmap_;
+      tf::TransformListener tf_listener;
+
+      void addVizLine(float xstart,float ystart,float xend,float yend);
+      geometry_msgs::Point tf_odom2car(float inx,float iny);
+
+      float base_angle = 1.4;
+      float add_angle = 1;
+      
   };
 
 }  // namespace rsband_local_planner
