@@ -286,16 +286,16 @@ namespace rsband_local_planner
     }
     
 
-    double _rectified_angular;
-    _rectified_angular=rectifyAngularVel();
-    // ROS_INFO("origin:%.2f",cmd.angular.z);
+    // double _rectified_angular;
+    // _rectified_angular=rectifyAngularVel();
+    // // ROS_INFO("origin:%.2f",cmd.angular.z);
 
-    if(!angry_car->warning_point.empty())
-    {
-      cmd.angular.z+=_rectified_angular*angry_car->gain_angle * (1/angry_car->warning_point[0].distance);////
-    }
-    else
-      cmd.angular.z+=0 ;////
+    // if(!angry_car->warning_point.empty())
+    // {
+    //   cmd.angular.z+=_rectified_angular*angry_car->gain_angle * (1/angry_car->warning_point[0].distance);////
+    // }
+    // else
+    //   cmd.angular.z+=0 ;////
 
 
     // ROS_INFO("add:%.2f output=%.2f",_rectified_angular,cmd.angular.z);

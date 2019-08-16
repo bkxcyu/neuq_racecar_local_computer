@@ -50,7 +50,7 @@ namespace rsband_local_planner
         odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
         path_sub = n_.subscribe("/move_base/NavfnROS/plan", 1, &L1Controller::pathCB, this);//订阅导航堆栈信息         注意回调函数
         goal_sub = n_.subscribe("/move_base_simple/goal", 1, &L1Controller::goalCB, this);//订阅位置（目标位置）信息          注意回调函数
-        vel_sub  = n_.subscribe("/currant_vel", 1,&L1Controller::velCB, this);
+        vel_sub  = n_.subscribe("/currant_vel", 10,&L1Controller::velCB, this);
         marker_pub = n_.advertise<visualization_msgs::Marker>("car_path", 10);//创建发布控制命令的发布者
         // pub_ = n_.advertise<geometry_msgs::Twist>("car/cmd_vel", 1);//角速度 先速度
         err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
@@ -580,6 +580,7 @@ namespace rsband_local_planner
     }
     double L1Controller::getCurrantVelFromEcoder()
     {
+        ROS_INFO("get vel form ecoder %.2f",velFromEcoder.data);
         return velFromEcoder.data;
     }
 
