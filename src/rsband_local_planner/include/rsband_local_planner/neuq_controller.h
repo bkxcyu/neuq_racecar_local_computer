@@ -61,13 +61,13 @@ namespace rsband_local_planner
             std_msgs::Float64 computeIntegralErr();
             std_msgs::Float64 switchErrIntoVel(std_msgs::Float64 Err);
             geometry_msgs::Point get_odom_car2WayPtVec(const geometry_msgs::Pose& carPose);
-            visualization_msgs::Marker ObstacleMarker;
+            std_msgs::Float64 velFromEcoder;
             void reconfigure(RSBandPlannerConfig& config);
             geometry_msgs::Twist pwm2vel(geometry_msgs::Twist pwm);
 
         private:
             ros::NodeHandle n_;
-            ros::Subscriber odom_sub, path_sub, goal_sub,obst_sub;
+            ros::Subscriber odom_sub, path_sub, goal_sub,vel_sub;
             ros::Publisher pub_, marker_pub,err_pub,obst_marker_pub_;
             ros::Timer timer1, timer2;
             tf::TransformListener tf_listener;
@@ -85,6 +85,7 @@ namespace rsband_local_planner
             double RUSH_VEL;
             double MAX_SLOW_DOWN,Lfw_gain;
             double KD,KP,KI;
+            double getCurrantVelFromEcoder();
             double qujian_max,qujian_min;
             double Gas_gain, baseAngle, Angle_gain, goalRadius;
             double last_error,err_sum;
@@ -104,7 +105,7 @@ namespace rsband_local_planner
             void odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg);
             void pathCB(const nav_msgs::Path::ConstPtr& pathMsg);
             void goalCB(const geometry_msgs::PoseStamped::ConstPtr& goalMsg);
-            void obstCB(const visualization_msgs::Marker& obstMsg);
+            void velCB(const std_msgs::Float64& velMsg);
             void goalReachingCB(const ros::TimerEvent&);
             void controlLoopCB(const ros::TimerEvent&);
             bool ReadyToLastRush();
