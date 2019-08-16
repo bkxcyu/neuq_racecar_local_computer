@@ -102,7 +102,7 @@ void point_list::sortlist()
 
 void point_list::v_vector(float add)
 {
-	ROS_INFO("add=%.2f",add);
+	// ROS_INFO("add=%.2f",add);
 	out_point.distance =  unit_distance;
 	if(warning_point.empty())
 	{

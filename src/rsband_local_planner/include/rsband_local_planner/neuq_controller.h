@@ -112,6 +112,7 @@ namespace rsband_local_planner
             double GetErrOfAngle(const geometry_msgs::Pose& carPose);
 
             void BackOff();
+            bool useLastCmd;
 
             boost::shared_ptr<FuzzyPTC> ptc_;
             double a,b,c,d;

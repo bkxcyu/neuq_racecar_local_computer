@@ -219,6 +219,7 @@ namespace rsband_local_planner
       geometry_msgs::Twist getCmdFromKeyBored();
 
       ros::Subscriber sub_keybored;
+      bool use_rectify;
       
   };
 

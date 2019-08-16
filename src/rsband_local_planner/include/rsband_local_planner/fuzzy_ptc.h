@@ -85,10 +85,12 @@ namespace rsband_local_planner
        * @return true if a command was produced successfully
        */
       bool computeVelocityCommands(
-        const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,const double& CURRANT_SPEED,
-        double& output_Lfw,
-        double& cmd);
+      const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,
+      double& output_vel);
 
+      bool computeVelocityCommands(
+      const double& CURRANT_SPEED,
+      double& output_Lfw);
       /**
        * @brief Checks if the goal position and orientation have been reached
        * @param path: The path to follow
