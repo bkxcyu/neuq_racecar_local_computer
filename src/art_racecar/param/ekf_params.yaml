@@ -155,8 +155,8 @@ odom1_differential: true
 
 odom1_relative: false
 
-odom1_pose_rejection_threshold: 10
-odom1_twist_rejection_threshold: 10
+odom1_pose_rejection_threshold: 8
+odom1_twist_rejection_threshold: 0.75
 
 use_control: true
 stamped_control: false

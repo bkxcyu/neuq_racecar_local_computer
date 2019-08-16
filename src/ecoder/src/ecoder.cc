@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 
     ROS_WARN("Streaming Ecoder Data...");
 
-    ros::Rate r(100);
+    ros::Rate r(110);
 
     while (n.ok())
     {
@@ -148,13 +148,13 @@ int main(int argc, char** argv)
                 DATA3=data_raw[3];
                 DATA=DATA1*255+DATA2;
                 JY=DATA%7+DATA/7;
-                ROS_INFO("DATA1:%d| DATA2:%d |DATA3: %d",DATA1,DATA2,DATA);
+                // ROS_INFO("DATA1:%d| DATA2:%d |DATA3: %d",DATA1,DATA2,DATA);
                 if(JY == DATA3)
                 {
                 /*--------------读数------------*/
                 currant_vel.data=(std::float_t)DATA;
                 currant_vel.data=currant_vel.data/(51*255);
-                ROS_INFO("currant_vel:%f\n",currant_vel.data);
+                // ROS_INFO("currant_vel:%f\n",currant_vel.data);
                 }
                 /*--------------发布------------*/
                 pub.publish(currant_vel);

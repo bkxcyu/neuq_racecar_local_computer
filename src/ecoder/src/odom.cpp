@@ -61,24 +61,24 @@ void odom_ecoder::velCB(const std_msgs::Float64& currant_vel)
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
 
     //first, we'll publish the transform over tf
-    geometry_msgs::TransformStamped odom_trans;
-    odom_trans.header.stamp = current_time;
-    odom_trans.header.frame_id = "/odom1";
-    odom_trans.child_frame_id = "/base_footprint";
+    // geometry_msgs::TransformStamped odom_trans;
+    // odom_trans.header.stamp = current_time;
+    // odom_trans.header.frame_id = "/ecoder";
+    // odom_trans.child_frame_id = "/base_footprint";
 
-    odom_trans.transform.translation.x = x;
-    odom_trans.transform.translation.y = y;
-    odom_trans.transform.translation.z = 0.0;
-    odom_trans.transform.rotation = odom_quat;
+    // odom_trans.transform.translation.x = x;
+    // odom_trans.transform.translation.y = y;
+    // odom_trans.transform.translation.z = 0.0;
+    // odom_trans.transform.rotation = odom_quat;
 
     //send the transform
-    odom_broadcaster.sendTransform(odom_trans);
+    // odom_broadcaster.sendTransform(odom_trans);
 
     //next, we'll publish the odometry message over ROS
     nav_msgs::Odometry odom;
     odom.header.stamp = current_time;
-    odom.header.frame_id = "/odom1";
-    odom.child_frame_id = "/base_footprint";
+    odom.header.frame_id = "/ecoder";
+    // odom.child_frame_id = "/base_footprint";
 
     //set the position
     odom.pose.pose.position.x = x;
