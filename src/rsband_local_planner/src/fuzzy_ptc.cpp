@@ -325,25 +325,39 @@ ROS_INFO("-----------   16  ------------");
 
 
   bool FuzzyPTC::computeVelocityCommands(
-    const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,const double& CURRANT_SPEED,
-    double& output_Lfw,
-    double& output_vel)
+    const double& CURRANT_SPEED,
+    double& output_Lfw)
   {   
 
     smoothness_->setValue(SMOOTHNESS);
+    currantSpeed_->setValue(CURRANT_SPEED);
+
+    engine_->process();
+
+    output_Lfw = Lfw_->getValue();  
+
+    return true;
+  }
+
+  bool FuzzyPTC::computeVelocityCommands(
+    const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,
+    double& output_vel)
+  {   
+
+    // smoothness_->setValue(SMOOTHNESS);
     angularDeviationError_->setValue(ANGULAR_ERR);
     orientationError_->setValue(fabs(ORIENTATION_ERR));
     orientationError__->setValue(ORIENTATION_ERR);
     integrallError_->setValue(fabs(INTEGRALL_ERR));
-    currantSpeed_->setValue(CURRANT_SPEED);
+    // currantSpeed_->setValue(CURRANT_SPEED);
 
     // ROS_INFO("input/nANGULAR_ERR=%.2f  ORIENTATION_ERR=%.2f INTEGRALL_ERR=%.2f   CURRANT_SPEED=%.2f",ANGULAR_ERR,ORIENTATION_ERR,INTEGRALL_ERR,CURRANT_SPEED);
    
     engine_->process();
 
     output_vel= speed_->getValue();  
-    double output_angle = steeringAngle_->getValue(); 
-    output_Lfw = Lfw_->getValue();  
+    // double output_angle = steeringAngle_->getValue(); 
+    // output_Lfw = Lfw_->getValue();  
 
     // ROS_INFO("output_vel=%.2f  output_angle=%.2f output_lfw=%.2f",output_vel,output_angle,output_Lfw);
    
