@@ -67,7 +67,7 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     ros::Subscriber sub = n.subscribe("/cmd_vel",1,TwistCallback);
-    // ros::Subscriber sub1 = n.subscribe("/car/cmd_vel",1,TwistCallback1);
+    ros::Subscriber sub1 = n.subscribe("/car/cmd_vel",1,TwistCallback1);
 
 
 

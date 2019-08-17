@@ -1,7 +1,10 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <nav_msgs/Odometry.h>
 #include "std_msgs/Float64.h"
+#include <geometry_msgs/TransformStamped.h>
 
 class odom_ecoder
 {
@@ -34,7 +37,7 @@ odom_ecoder::odom_ecoder()
     current_time = ros::Time::now();
     last_time = ros::Time::now();
 
-    odom_pub = n.advertise<nav_msgs::Odometry>("/odom1", 50);  
+    odom_pub = n.advertise<nav_msgs::Odometry>("/odom1", 10);  
     odom_sub = n.subscribe("/currant_vel", 1, &odom_ecoder::velCB, this); 
 }
 
@@ -58,24 +61,24 @@ void odom_ecoder::velCB(const std_msgs::Float64& currant_vel)
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
 
     //first, we'll publish the transform over tf
-    geometry_msgs::TransformStamped odom_trans;
-    odom_trans.header.stamp = current_time;
-    odom_trans.header.frame_id = "/odom1";
-    odom_trans.child_frame_id = "/base_footprint";
+    // geometry_msgs::TransformStamped odom_trans;
+    // odom_trans.header.stamp = current_time;
+    // odom_trans.header.frame_id = "/ecoder";
+    // odom_trans.child_frame_id = "/base_footprint";
 
-    odom_trans.transform.translation.x = x;
-    odom_trans.transform.translation.y = y;
-    odom_trans.transform.translation.z = 0.0;
-    odom_trans.transform.rotation = odom_quat;
+    // odom_trans.transform.translation.x = x;
+    // odom_trans.transform.translation.y = y;
+    // odom_trans.transform.translation.z = 0.0;
+    // odom_trans.transform.rotation = odom_quat;
 
     //send the transform
-    odom_broadcaster.sendTransform(odom_trans);
+    // odom_broadcaster.sendTransform(odom_trans);
 
     //next, we'll publish the odometry message over ROS
     nav_msgs::Odometry odom;
     odom.header.stamp = current_time;
-    odom.header.frame_id = "/odom1";
-    odom.child_frame_id = "/base_footprint";
+    odom.header.frame_id = "/ecoder";
+    // odom.child_frame_id = "/base_footprint";
 
     //set the position
     odom.pose.pose.position.x = x;
