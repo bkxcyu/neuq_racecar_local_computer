@@ -12,6 +12,8 @@ namespace rsband_local_planner
         last_cmd_vel.linear.x=Vcmd;
         last_cmd_vel.angular.z=0;
 
+        velFromEcoder.data=0;
+
         useLastCmd=false;
         
         odom_helper_.setOdomTopic("/odometry/filtered");
@@ -48,8 +50,7 @@ namespace rsband_local_planner
         odom_sub = n_.subscribe("/odometry/filtered", 1, &L1Controller::odomCB, this);//订阅位置消息                       注意回调函数
         path_sub = n_.subscribe("/move_base/NavfnROS/plan", 1, &L1Controller::pathCB, this);//订阅导航堆栈信息         注意回调函数
         goal_sub = n_.subscribe("/move_base_simple/goal", 1, &L1Controller::goalCB, this);//订阅位置（目标位置）信息          注意回调函数
-        // obst_sub = n_.subscribe("teb_markers", 1, &L1Controller::obstCB, this);
-        // obst_marker_pub_ = n_.advertise<visualization_msgs::Marker>("obst_markers", 1000);
+        vel_sub  = n_.subscribe("/currant_vel", 10,&L1Controller::velCB, this);
         marker_pub = n_.advertise<visualization_msgs::Marker>("car_path", 10);//创建发布控制命令的发布者
         // pub_ = n_.advertise<geometry_msgs::Twist>("car/cmd_vel", 1);//角速度 先速度
         err_pub=n_.advertise<std_msgs::Float64>("car/err", 1);
@@ -123,10 +124,9 @@ namespace rsband_local_planner
     
 
 
-    void L1Controller::obstCB(const visualization_msgs::Marker& obstMsg)
+    void L1Controller::velCB(const std_msgs::Float64& velMsg)
     {
-        ObstacleMarker = obstMsg;
-        obst_marker_pub_.publish(ObstacleMarker);
+        velFromEcoder = velMsg;
     }
 
     void L1Controller::odomCB(const nav_msgs::Odometry::ConstPtr& odomMsg)
@@ -391,7 +391,7 @@ namespace rsband_local_planner
         double eta;
 
         /**********************/
-        float currant_vel =  getCurrantVel();
+        float currant_vel =  getCurrantVelFromEcoder();
         /**********************/
         if (!ptc_->computeVelocityCommands(currant_vel, Lfw))
         {
@@ -578,7 +578,11 @@ namespace rsband_local_planner
         currant_vel_from_odom.angular.z = tf::getYaw(robot_vel_tf.getRotation());
         return currant_vel_from_odom.linear.x;
     }
-
+    double L1Controller::getCurrantVelFromEcoder()
+    {
+        ROS_INFO("get vel form ecoder %.2f",velFromEcoder.data);
+        return velFromEcoder.data;
+    }
 
     float L1Controller::map(float value, float istart, float istop, float ostart, float ostop)
     {
