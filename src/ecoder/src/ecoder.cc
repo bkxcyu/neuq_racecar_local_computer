@@ -137,24 +137,21 @@ int main(int argc, char** argv)
         // ROS_INFO("working \n");
         bool found = false;
 
-            if(data_raw[0]== 0x00)//帧头
+            if(data_raw[0]== 0x00)//帧头jlj
             {
                 std_msgs::Float64 currant_vel;
                 /*--------------校验------------*/
-                uint8_t DATA1,DATA2,DATA3,JY;
-                uint32_t DATA;
-                DATA1=data_raw[1];
+                uint8_t DATA2,DATA,JY;
+                DATA=data_raw[1];
                 DATA2=data_raw[2];
-                DATA3=data_raw[3];
-                DATA=DATA1*255+DATA2;
                 JY=DATA%7+DATA/7;
-                // ROS_INFO("DATA1:%d| DATA2:%d |DATA3: %d",DATA1,DATA2,DATA);
-                if(JY == DATA3)
+                // ROS_INFO("JY:%d| DATA:%d ",DATA2,DATA);
+                if(JY == DATA2)
                 {
                 /*--------------读数------------*/
                 currant_vel.data=(std::float_t)DATA;
-                currant_vel.data=currant_vel.data/(51*255);
-                // ROS_INFO("currant_vel:%f\n",currant_vel.data);
+                currant_vel.data=currant_vel.data/(51);
+                ROS_INFO("currant_vel:%f\n",currant_vel.data);
                 }
                 /*--------------发布------------*/
                 pub.publish(currant_vel);

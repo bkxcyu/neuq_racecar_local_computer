@@ -391,7 +391,7 @@ namespace rsband_local_planner
         double eta;
 
         /**********************/
-        float currant_vel =  getCurrantVelFromEcoder();
+        float currant_vel =  getCurrantVel();//FromEcoder
         /**********************/
         if (!ptc_->computeVelocityCommands(currant_vel, Lfw))
         {

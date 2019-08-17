@@ -164,5 +164,5 @@ control_config: [true,  false, false,
                  false, false, false]
 acceleration_limits: [10.0, 0.0, 0.0,
                       0.0, 0.0, 0.0]
-acceleration_gains: [0.0, 0.0, 0.0,
+acceleration_gains: [0.8, 0.0, 0.0,
                       0.0, 0.0, 0.0]
