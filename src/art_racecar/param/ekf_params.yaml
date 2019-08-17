@@ -64,7 +64,7 @@ odom0_differential: true
 # for all future measurements. While you can achieve the same effect with the differential paremeter, the key
 # difference is that the relative parameter doesn't cause the measurement to be converted to a velocity before
 # integrating it. If you simply want your measurements to start at 0 for a given sensor, set this to true.
-odom0_relative: false
+odom0_relative: true
 
 # [ADVANCED] If your data is subject to outliers, use these threshold settings, expressed as Mahalanobis distances, to
 # control how far away from the current vehicle state a sensor measurement is permitted to be. Each defaults to
@@ -139,24 +139,24 @@ initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
 
-# odom1: /odom1
+odom1: /ecoder/odom1
 
-# odom1_config: [false, false, false,
-#                false, false, false,
-#                true, false, false,
-#                false, false, false,
-#                false, false, false]
+odom1_config: [false, false, false,
+               false, false, false,
+               true, false, false,
+               false, false, false,
+               false, false, false]
 
-# odom1_queue_size: 5
+odom1_queue_size: 5
 
-# odom1_nodelay: true
+odom1_nodelay: true
 
-# odom1_differential: true
+odom1_differential: true
 
-# odom1_relative: false
+odom1_relative: true
 
-# odom1_pose_rejection_threshold: 10
-# odom1_twist_rejection_threshold: 10
+odom1_pose_rejection_threshold: 10
+odom1_twist_rejection_threshold: 10
 
 use_control: true
 stamped_control: false
@@ -164,5 +164,5 @@ control_config: [true,  false, false,
                  false, false, false]
 acceleration_limits: [10.0, 0.0, 0.0,
                       0.0, 0.0, 0.0]
-acceleration_gains: [0.1, 0.0, 0.0,
+acceleration_gains: [0.0, 0.0, 0.0,
                       0.0, 0.0, 0.0]
