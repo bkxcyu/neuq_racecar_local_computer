@@ -44,6 +44,7 @@ odom_ecoder::odom_ecoder()
 void odom_ecoder::velCB(const std_msgs::Float64& currant_vel)
 {
     double vx=currant_vel.data;
+    ROS_INFO("GET VEL:%.2f",vx);
 
     current_time = ros::Time::now();
 
@@ -100,7 +101,7 @@ void odom_ecoder::velCB(const std_msgs::Float64& currant_vel)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "odom_ecoder");
+    ros::init(argc, argv, "ecoder");
     odom_ecoder _odom_ecoder;
     ros::spin();
     return 0;

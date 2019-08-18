@@ -16,7 +16,7 @@
         <param name="odom_topic" value="odom_rf2o" />              # topic where tu publish the odometry estimations
         <param name="publish_tf" value="true" />                   # wheter or not to publish the tf::transform (base->odom)
         <param name="odom_frame_id" value="odom" />                <!-- frame_id (tf) to publish the odometry estimations -->
-        <param name="freq" value="20.0"/>   
+        <param name="freq" value="50.0"/>   
         <param name="verbose" value="true" />                                  <!-- Execution frequency. See "Planar Odometry from a Radial Laser Scanner. A Range Flow-based Approach. ICRA'16"-->
     </node>
 

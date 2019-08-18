@@ -439,19 +439,19 @@ namespace rsband_local_planner
         std_msgs::Float64 IntegralErr_;
         IntegralErr_=computeIntegralErr();
         double IntegralErr=IntegralErr_.data;
-        /**********************/ 
-        if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,cmd.linear.x))
-        {
-            ROS_ERROR("Fuzzy controller failed to produce vel");
-            return false;
-        }
-
+        
         if(foundForwardPt)
         {   
             if(!goal_reached)
             {
+                /**********************/ 
+                if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,cmd.linear.x))
+                {
+                    ROS_ERROR("Fuzzy controller failed to produce vel");
+                    return false;
+                }
 
-                cmd.linear.x=map(cmd.linear.x,0,5,1550,baseSpeed);
+                // cmd.linear.x=map(cmd.linear.x,0,5,1550,baseSpeed);
                 if(reset_flag)
                 {
                     cmd.linear.x = 1500;
@@ -460,7 +460,7 @@ namespace rsband_local_planner
             }
         }
     
-        cmd=pwm2vel(cmd);
+        // cmd=pwm2vel(cmd);
         return true;
 
     }        

@@ -133,8 +133,9 @@ namespace rsband_local_planner
   {
 
        SMOOTHNESS = config.SMOOTHNESS;
+
     // maxSteeringAngle_ = config.max_steering_angle;
-    // maxSpeed_ = config.max_speed;
+    maxSpeed_ = config.max_speed;
     // xyGoalTolerance_ = config.xy_goal_tolerance;
     // yawGoalTolerance_ = config.yaw_goal_tolerance;
     // latDevTolerance_ = config.lateral_deviation_tolerance;
@@ -281,7 +282,7 @@ ROS_INFO("-----------   10  ------------");
     speed_->setEnabled(true);
     speed_->setName("Speed");
     speed_->setDefaultValue(0.0);
-    maxSpeed_=5;
+    // maxSpeed_=3;
     speed_->setRange(0.0, maxSpeed_);
     speed_->fuzzyOutput()->setAggregation(fl::null);
     speed_->setDefuzzifier(new fl::WeightedAverage("TakagiSugeno"));

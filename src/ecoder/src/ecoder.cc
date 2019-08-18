@@ -124,7 +124,7 @@ int main(int argc, char** argv)
     int kk = 0;
     double vyaw_sum = 0;
     double vyaw_bias = 0;
-    pub = n.advertise<std_msgs::Float64>("/currant_vel", 10);
+    pub = n.advertise<std_msgs::Float64>("/currant_vel", 50);
 
     ROS_WARN("Streaming Ecoder Data...");
 
@@ -151,10 +151,11 @@ int main(int argc, char** argv)
                 /*--------------读数------------*/
                 currant_vel.data=(std::float_t)DATA;
                 currant_vel.data=currant_vel.data/(51);
-                ROS_INFO("currant_vel:%f\n",currant_vel.data);
+                ROS_INFO("ecoder vel:%f\n",currant_vel.data);
+                pub.publish(currant_vel);
                 }
                 /*--------------发布------------*/
-                pub.publish(currant_vel);
+                
                 
                 found = true;
             }

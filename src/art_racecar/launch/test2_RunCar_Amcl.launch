@@ -57,7 +57,7 @@
     </include>
 
     <!-- Navstack 导航堆栈-->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" >
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" >
         <!--  planner navfn/NavfnROS-->
         <param name="base_global_planner" value="navfn/NavfnROS"/>  
         <param name="base_local_planner" value="rsband_local_planner/RSBandPlannerROS"/>  

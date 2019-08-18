@@ -306,7 +306,7 @@ namespace rsband_local_planner
       ROS_ERROR("Path tracking controller failed to produce command");
       return false;
     }
-    
+    // ROS_INFO("l1:vcmd.x=%.2f",cmd.linear.x);
     // cmd=getCmdFromKeyBored();
 
     if(use_rectify)

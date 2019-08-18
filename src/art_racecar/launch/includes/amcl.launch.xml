@@ -15,10 +15,10 @@
         <param name="kld_err" value="0.01"/> <!-- 误差 -->
         <param name="kld_z" value="0.99"/>
         <!-- translation std dev, m -->
-        <param name="odom_alpha1" value="0.008"/><!--机器人的转角分量运动噪声  增大该值 在小车旋转时会出现扇形粒子云 -->
-        <param name="odom_alpha2" value="0.040"/><!-- 横向运动噪声 -->
-        <param name="odom_alpha3" value="0.04"/><!-- 纵向分量噪声 -->
-        <param name="odom_alpha4" value="0.025"/><!-- 斜向分量噪声 -->
+        <param name="odom_alpha1" value="0.005"/><!--机器人的转角分量运动噪声  增大该值 在小车旋转时会出现扇形粒子云 -->
+        <param name="odom_alpha2" value="0.005"/><!-- 横向运动噪声 -->
+        <param name="odom_alpha3" value="0.15"/><!-- 纵向分量噪声 -->
+        <param name="odom_alpha4" value="0.2"/><!-- 斜向分量噪声 -->
         <param name="laser_z_hit" value="0.5"/>
         <param name="laser_z_short" value="0.05"/>
         <param name="laser_z_max" value="0.05"/>
@@ -32,7 +32,7 @@
         <param name="laser_likelihood_max_dist" value="2.0"/>
         <param name="update_min_d" value="0.01"/><!--向前运动0.1m就更新粒子  -->
         <param name="update_min_a" value="0.05"/>
-        <param name="resample_interval" value="1.6"/><!-- 对粒子样本重采样间隔 -->
+        <param name="resample_interval" value="1.5"/><!-- 对粒子样本重采样间隔 -->
         <param name="transform_tolerance" value="0.1"/><!--坐标变换的容忍度 由于坐标的变换必然存在延迟 此参数表示对多久之前的坐标转换接受 -->
         <param name="recovery_alpha_slow" value="0.001"/><!-- 当随机摆放小车时 amil会尝试对其进行重新定位 这个参数表示恢复定位的时间   Exponential decay rate for the slow average weight filter, used in deciding when to recover by adding random poses. A good value might be 0.001. -->
         <param name="recovery_alpha_fast" value="0.1"/><!-- Exponential decay rate for the fast average weight filter, used in deciding when to recover by adding random poses. A good value might be 0.1. -->

@@ -58,7 +58,7 @@ odom0_nodelay: true
 # data is converted to velocity data by differentiating the absolute pose measurements. These velocities are then
 # integrated as usual. NOTE: this only applies to sensors that provide pose measurements; setting differential to true
 # for twist measurements has no effect.
-odom0_differential: true
+odom0_differential: false
 
 # [ADVANCED] When the node starts, if this parameter is true, then the first measurement is treated as a "zero point"
 # for all future measurements. While you can achieve the same effect with the differential paremeter, the key
@@ -139,7 +139,7 @@ initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
 
-odom1: /ecoder/odom1
+odom1: /odom1
 
 odom1_config: [false, false, false,
                false, false, false,
@@ -151,12 +151,12 @@ odom1_queue_size: 5
 
 odom1_nodelay: true
 
-odom1_differential: true
+odom1_differential: false
 
 odom1_relative: true
 
-odom1_pose_rejection_threshold: 10
-odom1_twist_rejection_threshold: 10
+odom1_pose_rejection_threshold: 8
+odom1_twist_rejection_threshold: 8
 
 use_control: true
 stamped_control: false
