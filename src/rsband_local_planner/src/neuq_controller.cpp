@@ -398,17 +398,18 @@ namespace rsband_local_planner
             ROS_ERROR("Fuzzy controller failed to produce Lfw");
             return false;
         }
+        // Lfw=2;
         /**********************/
         eta=getEta(carPose);
         while(!foundForwardPt&&Lfw>0)
         {
-            ROS_WARN("can't get eta,maybe Lfw is too long,now cut it and compute eta again");
+            // ROS_WARN("can't get eta,maybe Lfw is too long,now cut it and compute eta again");
             Lfw-=0.1;
             eta=getEta(carPose);
         }            
         if(Lfw<=0)
         {
-            ROS_ERROR("can't fint wayPt foward,now use last cmd");
+            // ROS_ERROR("can't fint wayPt foward,now use last cmd");
             useLastCmd=true;
         }
         else
@@ -434,11 +435,13 @@ namespace rsband_local_planner
             cmd.angular.z=0;
         /**********************/
         double errofangle = GetErrOfAngle(carPose);
-        double orientationErr=errofangle;               
+        double orientationErr=errofangle;   
+        // ROS_INFO("orientationErr=%.2f",orientationErr) ;           
         /**********************/
         std_msgs::Float64 IntegralErr_;
         IntegralErr_=computeIntegralErr();
         double IntegralErr=IntegralErr_.data;
+        // ROS_INFO("IntegralErr=%.2f",IntegralErr) ; 
         
         if(foundForwardPt)
         {   
@@ -771,24 +774,24 @@ namespace rsband_local_planner
     void L1Controller::reconfigure(RSBandPlannerConfig& config)
     {//Angle_gain baseSpeed baseAngle MAX_SLOW_DOWN qujian_min qujian_max TRAVERSAL_POINT KP KD
     //computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,currant_vel, Lfw,cmd))
-        baseSpeed=config.baseSpeed;
+        // baseSpeed=config.baseSpeed;
         TRAVERSAL_POINT=config.TRAVERSAL_POINT;
         KP=config.KP;
         KD=config.KD;
-        MAX_1=config.MAX_1;
-        MAX_2=config.MAX_2;
-        MAX_3=config.MAX_3;
-        RUSH_VEL=config.RUSH_VEL;
-        RUSH_POINT=config.RUSH_POINT;
-        BLOOM_START_POINT=config.BLOOM_START_POINT;
-        BLOOM_START_VEL=config.BLOOM_START_VEL;
+        // MAX_1=config.MAX_1;
+        // MAX_2=config.MAX_2;
+        // MAX_3=config.MAX_3;
+        // RUSH_VEL=config.RUSH_VEL;
+        // RUSH_POINT=config.RUSH_POINT;
+        // BLOOM_START_POINT=config.BLOOM_START_POINT;
+        // BLOOM_START_VEL=config.BLOOM_START_VEL;
         reset_flag=config.reset;
-        v1=config.v1;
-        v2=config.v2;
-        a=config.steeringAngle;
-        b=config.orientationErr;
-        c=config.IntegralErr;
-        d=config.currant_vel;
+        // v1=config.v1;
+        // v2=config.v2;
+        // a=config.steeringAngle;
+        // b=config.orientationErr;
+        // c=config.IntegralErr;
+        // d=config.currant_vel;
 
         
 

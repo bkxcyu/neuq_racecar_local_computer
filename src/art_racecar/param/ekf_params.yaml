@@ -139,30 +139,30 @@ initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
 
-odom1: /odom1
+# odom1: /odom1
 
-odom1_config: [false, false, false,
-               false, false, false,
-               true, false, false,
-               false, false, false,
-               false, false, false]
+# odom1_config: [false, false, false,
+#                false, false, false,
+#                true, false, false,
+#                false, false, false,
+#                false, false, false]
 
-odom1_queue_size: 5
+# odom1_queue_size: 5
 
-odom1_nodelay: true
+# odom1_nodelay: true
 
-odom1_differential: false
+# odom1_differential: false
 
-odom1_relative: true
+# odom1_relative: true
 
-odom1_pose_rejection_threshold: 8
-odom1_twist_rejection_threshold: 8
+# odom1_pose_rejection_threshold: 8
+# odom1_twist_rejection_threshold: 8
 
-use_control: true
-stamped_control: false
-control_config: [true,  false, false,
-                 false, false, false]
-acceleration_limits: [10.0, 0.0, 0.0,
-                      0.0, 0.0, 0.0]
-acceleration_gains: [0.8, 0.0, 0.0,
-                      0.0, 0.0, 0.0]
+# use_control: true
+# stamped_control: false
+# control_config: [true,  false, false,
+#                  false, false, false]
+# acceleration_limits: [10.0, 0.0, 0.0,
+#                       0.0, 0.0, 0.0]
+# acceleration_gains: [0.8, 0.0, 0.0,
+#                       0.0, 0.0, 0.0]

@@ -203,7 +203,14 @@ namespace rsband_local_planner
       //! the max steering angle of the virtual middle wheel
       double maxSteeringAngle_;
       //! max speed
-      double maxSpeed_;
+      double topSpeed_;
+      double buttomSpeed_;
+
+      double L1t;
+      double L2t;
+      double L3t;
+      double L4t;
+      double L5t;
       //! xy goal tolerance threshold
       double xyGoalTolerance_;
       //! yaw goal tolerance
