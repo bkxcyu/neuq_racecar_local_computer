@@ -87,54 +87,54 @@ void SimpleLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int
     if(master_grid.worldToMap(each_point.point.x, each_point.point.y, mx, my))
     {
       master_grid.setCost(mx, my, LETHAL_OBSTACLE);
-        master_grid.setCost(mx-1, my+1, 253);
+        master_grid.setCost(mx-1, my+1, 254);
         master_grid.setCost(mx, my+1 ,LETHAL_OBSTACLE);
-        master_grid.setCost(mx+1, my+1, 253);
+        master_grid.setCost(mx+1, my+1, 254);
         master_grid.setCost(mx-1, my, LETHAL_OBSTACLE);
         master_grid.setCost(mx+1, my, LETHAL_OBSTACLE);
-        master_grid.setCost(mx-1, my-1, 253);
+        master_grid.setCost(mx-1, my-1, 254);
         master_grid.setCost(mx, my-1, LETHAL_OBSTACLE);
-        master_grid.setCost(mx+1, my-1, 253);
-          master_grid.setCost(mx-2, my+2, 253);
-          master_grid.setCost(mx-1, my+2, 253);
-          master_grid.setCost(mx, my+2, 253);
-          master_grid.setCost(mx+1, my+2, 253);
-          master_grid.setCost(mx+2, my+2, 253);
-          master_grid.setCost(mx-2, my+1, 253);
-          master_grid.setCost(mx+2, my+1, 253);
-          master_grid.setCost(mx-2, my, 253);
-          master_grid.setCost(mx+2, my, 253);
-          master_grid.setCost(mx-2, my-1, 253);
-          master_grid.setCost(mx+2, my-1, 253);
-          master_grid.setCost(mx-2, my-2, 253);
-          master_grid.setCost(mx-1, my-2, 253);
-          master_grid.setCost(mx, my-2, 253);
-          master_grid.setCost(mx+1, my-2, 253);
-          master_grid.setCost(mx+2, my-2, 128);
-            master_grid.setCost(mx-3, my+3, 253);
-            master_grid.setCost(mx-2, my+3, 253);
-            master_grid.setCost(mx-1, my+3, 253);
-            master_grid.setCost(mx, my+3, 253);
-            master_grid.setCost(mx+1, my+3, 253);
-            master_grid.setCost(mx+2, my+3,253);//
-            master_grid.setCost(mx+3, my+3, 253);
-            master_grid.setCost(mx+3, my+2, 253);
-            master_grid.setCost(mx+3, my+1, 128);
-            master_grid.setCost(mx+3, my, 253);
-            master_grid.setCost(mx+3, my-1, 128);
-            master_grid.setCost(mx+3, my-2, 253);//
-            master_grid.setCost(mx+3, my-3, 253);
-            master_grid.setCost(mx+2, my-3, 253);
-            master_grid.setCost(mx+1, my-3, 253);
-            master_grid.setCost(mx, my-3, 253);
-            master_grid.setCost(mx-1, my-3, 253);
-            master_grid.setCost(mx-2, my-3, 253);//
-            master_grid.setCost(mx-3, my-3, 253);
-            master_grid.setCost(mx-3, my-2, 253);
-            master_grid.setCost(mx-3, my-1, 253);
-            master_grid.setCost(mx-3, my, 253);
-            master_grid.setCost(mx-3, my+1, 253);
-            master_grid.setCost(mx-3, my+2, 253);//
+        master_grid.setCost(mx+1, my-1, 254);
+          master_grid.setCost(mx-2, my+2, 254);
+          master_grid.setCost(mx-1, my+2, 254);
+          master_grid.setCost(mx, my+2, 254);
+          master_grid.setCost(mx+1, my+2, 254);
+          master_grid.setCost(mx+2, my+2, 254);
+          master_grid.setCost(mx-2, my+1, 254);
+          master_grid.setCost(mx+2, my+1, 254);
+          master_grid.setCost(mx-2, my, 254);
+          master_grid.setCost(mx+2, my, 254);
+          master_grid.setCost(mx-2, my-1, 254);
+          master_grid.setCost(mx+2, my-1, 254);
+          master_grid.setCost(mx-2, my-2, 254);
+          master_grid.setCost(mx-1, my-2, 254);
+          master_grid.setCost(mx, my-2, 254);
+          master_grid.setCost(mx+1, my-2, 254);
+          master_grid.setCost(mx+2, my-2, 254);
+            master_grid.setCost(mx-3, my+3, 254);
+            master_grid.setCost(mx-2, my+3, 254);
+            master_grid.setCost(mx-1, my+3, 254);
+            master_grid.setCost(mx, my+3, 254);
+            master_grid.setCost(mx+1, my+3, 254);
+            master_grid.setCost(mx+2, my+3,254);//
+            master_grid.setCost(mx+3, my+3, 254);
+            master_grid.setCost(mx+3, my+2, 254);
+            master_grid.setCost(mx+3, my+1, 254);
+            master_grid.setCost(mx+3, my, 254);
+            master_grid.setCost(mx+3, my-1, 254);
+            master_grid.setCost(mx+3, my-2, 254);//
+            master_grid.setCost(mx+3, my-3, 254);
+            master_grid.setCost(mx+2, my-3, 254);
+            master_grid.setCost(mx+1, my-3, 254);
+            master_grid.setCost(mx, my-3, 254);
+            master_grid.setCost(mx-1, my-3, 254);
+            master_grid.setCost(mx-2, my-3, 254);//
+            master_grid.setCost(mx-3, my-3, 254);
+            master_grid.setCost(mx-3, my-2, 254);
+            master_grid.setCost(mx-3, my-1, 254);
+            master_grid.setCost(mx-3, my, 254);
+            master_grid.setCost(mx-3, my+1, 254);
+            master_grid.setCost(mx-3, my+2, 254);//
 
       // ROS_INFO("IN: %.2f %.2f  OUT:%d  %d",each_point.point.x,each_point.point.y,mx,my);
     }
