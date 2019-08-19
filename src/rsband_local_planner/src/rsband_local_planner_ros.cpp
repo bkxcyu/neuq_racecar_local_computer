@@ -417,7 +417,7 @@ namespace rsband_local_planner
             dis=obs_dir.norm();
             // ROS_INFO("scan dis=%.2f,ang=%.2f",dis,ang);s
             
-            if(dis<angry_car->warning_distance && ( (ang>-1 && ang<-0.3)||(ang>0.3 && ang<1) ) )// && ang>-1.57 && ang<1.57
+            if(dis<angry_car->warning_distance && ( (ang>-0.6 && ang<-0.3)||(ang>0.3 && ang<0.6) ) )// && ang>-1.57 && ang<1.57
             {
               angry_car->append(dis,ang);
               addVizPoint(obs.coeffRef(0),obs.coeffRef(1));
