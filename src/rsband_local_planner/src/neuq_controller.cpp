@@ -368,7 +368,7 @@ namespace rsband_local_planner
         {
             double car2goal_dist = getCar2GoalDist();//获取车到目标点的距离
             //相对位置小于预瞄距离 则认为到达
-            if(car2goal_dist < goalRadius)
+            if(car2goal_dist < goalRadius||reset_flag)
             {
                 goal_reached = true;
                 goal_received = false;
@@ -455,11 +455,11 @@ namespace rsband_local_planner
                 }
 
                 // cmd.linear.x=map(cmd.linear.x,0,5,1550,baseSpeed);
-                if(reset_flag)
-                {
-                    cmd.linear.x = 1500;
-                    ROS_WARN("CAR IS STOPED MANUALY");
-                }           
+                // if(reset_flag)
+                // {
+                //     cmd.linear.x = 1500;
+                //     ROS_WARN("CAR IS STOPED MANUALY");
+                // }           
             }
         }
     

@@ -340,27 +340,32 @@ namespace rsband_local_planner
       return false;
     }
 
-    tf::Stamped<tf::Pose> robotPose;
-    if (!costmapROS_->getRobotPose(robotPose))
-    {
-      ROS_ERROR("Could not get robot pose!");
-      return false;
-    }
-
-    geometry_msgs::PoseStamped goal = globalPlan_.back();
-
-    double dist = base_local_planner::getGoalPositionDistance(
-      robotPose, goal.pose.position.x, goal.pose.position.y);
-    double yawDiff = base_local_planner::getGoalOrientationAngleDifference(
-      robotPose, tf::getYaw(goal.pose.orientation));
-
-    if (dist < xyGoalTolerance_ && fabs(yawDiff) < yawGoalTolerance_)
-    {
-      ROS_INFO("Goal Reached!");
+    if(L1_->isGoalReached())
       return true;
-    }
+    else 
+      return false;
 
-    return false;
+    // tf::Stamped<tf::Pose> robotPose;
+    // if (!costmapROS_->getRobotPose(robotPose))
+    // {
+    //   ROS_ERROR("Could not get robot pose!");
+    //   return false;
+    // }
+
+    // geometry_msgs::PoseStamped goal = globalPlan_.back();
+
+    // double dist = base_local_planner::getGoalPositionDistance(
+    //   robotPose, goal.pose.position.x, goal.pose.position.y);
+    // double yawDiff = base_local_planner::getGoalOrientationAngleDifference(
+    //   robotPose, tf::getYaw(goal.pose.orientation));
+
+    // if (dist < xyGoalTolerance_ && fabs(yawDiff) < yawGoalTolerance_)
+    // {
+    //   ROS_INFO("Goal Reached!");
+    //   return true;
+    // }
+
+    // return false;
   }
 
   float map(float value, float istart, float istop, float ostart, float ostop)

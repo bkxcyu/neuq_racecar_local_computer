@@ -11,6 +11,12 @@
 geometry_msgs::Twist vel2pwm(geometry_msgs::Twist vel)
 {
     geometry_msgs::Twist pwm;
+    if(vel.linear.x==0&&vel.angular.z==0)
+    {
+        pwm.linear.x=1500;
+        pwm.angular.z=1500;
+        return pwm;
+    }
     pwm.linear.x=(vel.linear.x/1.0+46.6909)/0.0301;
     pwm.linear.z=vel.linear.z;
     pwm.angular.z=vel.angular.z;
