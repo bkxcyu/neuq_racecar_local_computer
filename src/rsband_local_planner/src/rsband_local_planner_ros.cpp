@@ -420,7 +420,7 @@ namespace rsband_local_planner
             dis=obs_dir.norm();
             // ROS_INFO("scan dis=%.2f,ang=%.2f",dis,ang);s
             
-            if(dis<angry_car->warning_distance && ( (ang>-0.8 && ang<-0.3)||(ang>0.3 && ang<0.8) ) )// && ang>-1.57 && ang<1.57
+            if(dis<angry_car->warning_distance && ( (ang>-0.85 && ang<-0.09)||(ang>0.15 && ang<0.09) ) )// && ang>-1.57 && ang<1.57
             {
               angry_car->append(dis,ang);
               addVizPoint(obs.coeffRef(0),obs.coeffRef(1));
@@ -442,9 +442,10 @@ namespace rsband_local_planner
       else
       {
         angry_car->sortlist();
-        add_angle = base_angle * angry_car->gain_angle * (1/angry_car->warning_point[0].distance);
-        // ROS_INFO("add_angle=%.2f",add_angle);
-        angry_car->v_vector(add_angle);
+        //add_angle = base_angle * angry_car->gain_angle ;//* (1/angry_car->warning_point[0].distance);
+        //ROS_INFO("add_angle=%.2f",add_angle);
+        //angry_car->v_vector(add_angle);
+        angry_car->v_vector(angry_car->gain_angle);
       }
 
 
@@ -468,6 +469,7 @@ namespace rsband_local_planner
       //ROS_INFO("output angle=%.2f",angry_car->out_point.angle);
       float out_ang=angry_car->out_point.angle;
       rectified_angular=map(out_ang,angry_car->angle_min,angry_car->angle_max,-180,180);
+      // ROS_INFO("output angle=%.2f",rectified_angular);
       
       
 

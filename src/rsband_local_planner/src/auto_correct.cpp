@@ -113,17 +113,22 @@ void point_list::v_vector(float add)
 		if(warning_point[0].distance < warning_distance && warning_point[0].distance > limit_distance)
 		{
 			if(warning_point[0].angle > 0)
+				out_point.angle = (warning_point[0].angle-1.57)*add*signal_intensity_left;
+
+			else if(warning_point[0].angle <= 0)
+				out_point.angle = (warning_point[0].angle+1.57)*add*signal_intensity_right;
+
+			/*
+			if(warning_point[0].angle > 0)
 				out_point.angle = warning_point[0].angle - add*signal_intensity_left;
 			else if(warning_point[0].angle <= 0)
 				out_point.angle = warning_point[0].angle + add*signal_intensity_right;
-			
+			*/
 			if(out_point.angle > angle_max)
 				out_point.angle = angle_max;
 			else if(out_point.angle <= angle_min)
 				out_point.angle = angle_min;
 		} 
-		
-
 		else if(warning_point[0].distance <= limit_distance && warning_point[0].distance >= 0)
 		{
 			if(warning_point[0].angle > 0)
@@ -132,6 +137,7 @@ void point_list::v_vector(float add)
 				out_point.angle = angle_max;
 		}
 	}
+	//ROS_INFO("add_angle=%.2f",out_point.angle);
 }
 
 
