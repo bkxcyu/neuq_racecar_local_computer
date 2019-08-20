@@ -61,6 +61,7 @@ namespace rsband_local_planner
         
         //Init variables
         Lfw = goalRadius = getL1Distance();//获取预瞄距离  期望速度越快 预瞄距离越大
+        goalRadius=1.5;
         foundForwardPt = false;//是否存在可行航迹点
         goal_received = false;//目标是否获取到（目标是否发布）
         goal_reached = false;//是否到达目标
@@ -448,12 +449,17 @@ namespace rsband_local_planner
             if(!goal_reached)
             {
                 /**********************/ 
-                if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,cmd.linear.x))
+                if(!useLastCmd)
                 {
-                    ROS_ERROR("Fuzzy controller failed to produce vel");
-                    return false;
+                    if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,cmd.linear.x))
+                    {
+                        ROS_ERROR("Fuzzy controller failed to produce vel");
+                        return false;
+                    }
+                    last_cmd_vel.linear.x=cmd.linear.x;
                 }
-
+                else
+                    cmd.linear.x=last_cmd_vel.linear.x;
                 // cmd.linear.x=map(cmd.linear.x,0,5,1550,baseSpeed);
                 // if(reset_flag)
                 // {
@@ -462,7 +468,7 @@ namespace rsband_local_planner
                 // }           
             }
         }
-    
+
         // cmd=pwm2vel(cmd);
         return true;
 

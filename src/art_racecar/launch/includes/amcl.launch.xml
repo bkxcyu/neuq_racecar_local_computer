@@ -16,9 +16,9 @@
         <param name="kld_z" value="0.99"/>
         <!-- translation std dev, m -->
         <param name="odom_alpha1" value="0.005"/><!--机器人的转角分量运动噪声  增大该值 在小车旋转时会出现扇形粒子云 -->
-        <param name="odom_alpha2" value="0.001"/><!-- 横向运动噪声 -->
-        <param name="odom_alpha3" value="0.05"/><!-- 纵向分量噪声 -->
-        <param name="odom_alpha4" value="0.01"/><!-- 斜向分量噪声 -->
+        <param name="odom_alpha2" value="0.005"/><!-- 横向运动噪声 -->
+        <param name="odom_alpha3" value="0.3"/><!-- 纵向分量噪声 -->
+        <param name="odom_alpha4" value="0.5"/><!-- 斜向分量噪声 -->
         <param name="laser_z_hit" value="0.5"/>
         <param name="laser_z_short" value="0.05"/>
         <param name="laser_z_max" value="0.05"/>

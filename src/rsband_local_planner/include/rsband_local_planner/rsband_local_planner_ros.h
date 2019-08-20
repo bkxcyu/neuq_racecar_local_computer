@@ -154,6 +154,7 @@ namespace rsband_local_planner
       double yawGoalTolerance_;
       //! dist threshold used when updating sub goal
       double updateSubGoalDistThreshold_;
+      double correctV;
 
       //! eband to reeds shepp band conversion strategy
       EbandToRSStrategy ebandToRSStrategy_;
