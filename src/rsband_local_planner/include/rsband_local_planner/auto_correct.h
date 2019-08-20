@@ -22,12 +22,13 @@ class point_list
 		void output();
 		void clearlist();
 		void sortlist(); 	
-		void v_vector(float add);
+		void v_vector();
     	struct Obs_point out_point;
     	vector<struct Obs_point> warning_point;
     	
 		double pi;
-		double gain_angle;
+		double gain_angle_add;
+		double gain_angle_sub;
 		double unit_distance;
 		double warning_distance;
 		double limit_distance; 

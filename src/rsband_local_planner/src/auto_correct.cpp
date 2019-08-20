@@ -6,7 +6,8 @@ namespace rsband_local_planner{
 point_list::point_list()
 {
 	pi=3.1415926;
-	gain_angle = 1;
+	gain_angle_add = 1;
+	gain_angle_sub = 1;
 	unit_distance = 100;
 	warning_distance = 1.0; 
 	limit_distance = 0.4;
@@ -100,9 +101,8 @@ void point_list::sortlist()
 
 
 
-void point_list::v_vector(float add)
+void point_list::v_vector()
 {
-	// ROS_INFO("add=%.2f",add);
 	out_point.distance =  unit_distance;
 	if(warning_point.empty())
 	{
@@ -113,10 +113,10 @@ void point_list::v_vector(float add)
 		if(warning_point[0].distance < warning_distance && warning_point[0].distance > limit_distance)
 		{
 			if(warning_point[0].angle > 0)
-				out_point.angle = (warning_point[0].angle-1.57)*add*signal_intensity_left;
+				out_point.angle = (warning_point[0].angle-1.57)*signal_intensity_left;
 
 			else if(warning_point[0].angle <= 0)
-				out_point.angle = (warning_point[0].angle+1.57)*add*signal_intensity_right;
+				out_point.angle = (warning_point[0].angle+1.57)*signal_intensity_right;
 
 			/*
 			if(warning_point[0].angle > 0)
