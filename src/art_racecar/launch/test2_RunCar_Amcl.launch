@@ -29,9 +29,7 @@
     <arg name="init_a" default="0.0" />
 
     <!-- Map server -->
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find art_racecar)/map/mymap.yaml"/>
-
-   
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find art_racecar)/map/mymap1.yaml"/>
 
     <!-- ODOMETRY -->
     <!--rf2o_Laser_Odometry 激光雷达信息估计小车运动状态  激光里程记  -->
@@ -40,10 +38,6 @@
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
         <rosparam command="load" file="$(find art_racecar)/param/ekf_params.yaml" />
     </node>
-
-    <!--<node pkg="robot_localization" type="ukf_localization_node" name="ukf_se" clear_params="true">
-        <rosparam command="load" file="$(find art_racecar)/param/ukf_params.yaml" />
-    </node>-->
 
     <!-- 电机反馈速度-->
     <include file="$(find ecoder)/launch/ecoder.launch"/>

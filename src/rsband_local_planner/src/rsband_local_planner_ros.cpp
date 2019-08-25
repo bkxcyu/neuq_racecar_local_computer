@@ -45,6 +45,7 @@ namespace rsband_local_planner
     obst_pub = _n_.advertise<visualization_msgs::Marker>("POINT", 1);
 
     L1_ = boost::shared_ptr<L1Controller>(new L1Controller(name));
+    ptc_ = boost::shared_ptr<FuzzyPTC>(new FuzzyPTC(name));
 
     angry_car=boost::shared_ptr<point_list>(new point_list);
     // create and initialize dynamic reconfigure
@@ -301,33 +302,42 @@ namespace rsband_local_planner
       return false;
     }
 
-    if (!L1_->computeVelocityCommands(cmd))
-    {
-      ROS_ERROR("Path tracking controller failed to produce command");
-      return false;
-    }
-    // ROS_INFO("l1:vcmd.x=%.2f",cmd.linear.x);
-    // cmd=getCmdFromKeyBored();
 
-    if(use_rectify)
-    {
-      double _rectified_angular;
-      _rectified_angular=rectifyAngularVel();
-       //ROS_INFO("origin:%.2f",cmd.angular.z);
-      if(!angry_car->warning_point.empty())
-      {
-        cmd.angular.z+=_rectified_angular;//*angry_car->gain_angle * (1/angry_car->warning_point[0].distance);////
-      }
-      else
-        cmd.angular.z+=0 ;////
-      //ROS_INFO("add:%.2f output=%.2f",_rectified_angular,cmd.angular.z);
-    }
+    getTargetDisAndAng();
+
+    // if (!ptc_->computeVelocityCommands(target_dis_,target_ang_,cmd))
+    // {
+    //   ROS_ERROR("Path tracking controller failed to produce command");
+    //   return false;
+    // }
+
+    cmd.angular.z=target_ang_+90;
+    // if(-10<target_ang_<10)
+    //   cmd.angular.z=90;
+    // if(-60<target_ang_<-10)
+    // cmd.angular.z=60;
+    // if(-90<target_ang_<-60)
+    // cmd.angular.z=30;
+    // if(target_ang_<-90)
+    //   cmd.angular.z=0;
+
+    // if(60>target_ang_>10)
+    // cmd.angular.z=120;
+    // if(90>target_ang_>60)
+    // cmd.angular.z=150;
+    // if(target_ang_>90)
+    //   cmd.angular.z=180;
+
+    if(target_dis_<1)
+      cmd.linear.x=0;
+    if(1<target_dis_<3)
+      cmd.linear.x=1;
+    if(3<target_dis_)
+      cmd.linear.x=2;
      
-    if(cmd.angular.z<0)
-      cmd.angular.z=0;
-    if(cmd.angular.z>180)
-      cmd.angular.z=180;
 
+
+      ROS_INFO("cmd.angular.z=%.2f",cmd.angular.z);
     return true;
   }
 
@@ -345,43 +355,21 @@ namespace rsband_local_planner
     else 
       return false;
 
-    // tf::Stamped<tf::Pose> robotPose;
-    // if (!costmapROS_->getRobotPose(robotPose))
-    // {
-    //   ROS_ERROR("Could not get robot pose!");
-    //   return false;
-    // }
-
-    // geometry_msgs::PoseStamped goal = globalPlan_.back();
-
-    // double dist = base_local_planner::getGoalPositionDistance(
-    //   robotPose, goal.pose.position.x, goal.pose.position.y);
-    // double yawDiff = base_local_planner::getGoalOrientationAngleDifference(
-    //   robotPose, tf::getYaw(goal.pose.orientation));
-
-    // if (dist < xyGoalTolerance_ && fabs(yawDiff) < yawGoalTolerance_)
-    // {
-    //   ROS_INFO("Goal Reached!");
-    //   return true;
-    // }
-
-    // return false;
   }
 
   float map(float value, float istart, float istop, float ostart, float ostop)
   {
 	  return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
   }
-  double RSBandPlannerROS::rectifyAngularVel()
+  void RSBandPlannerROS::getTargetDisAndAng()
   {
-      double rectified_angular;
       //get robot pose 
       PoseSE2 robot_pose_;
       tf::Stamped<tf::Pose> robot_pose;
       if (!costmapROS_->getRobotPose(robot_pose))
       {
         ROS_ERROR("Could not get robot pose!");
-        return false;
+        return;
       }
       robot_pose_ = PoseSE2(robot_pose);
       //get robot orientation vector
@@ -417,7 +405,8 @@ namespace rsband_local_planner
             dis=obs_dir.norm();
             // ROS_INFO("scan dis=%.2f,ang=%.2f",dis,ang);s
             
-            if(dis<angry_car->warning_distance && ( (ang>-0.6 && ang<-0.3)||(ang>0.3 && ang<0.6) ) )// && ang>-1.57 && ang<1.57
+
+            if(dis<angry_car->warning_distance)// && ang>-1.57 && ang<1.57
             {
               angry_car->append(dis,ang);
               addVizPoint(obs.coeffRef(0),obs.coeffRef(1));
@@ -428,8 +417,6 @@ namespace rsband_local_planner
         }
       }
       
-      
-
 
       if(angry_car->warning_point.empty())
        {
@@ -439,9 +426,9 @@ namespace rsband_local_planner
       else
       {
         angry_car->sortlist();
-        add_angle = base_angle * angry_car->gain_angle * (1/angry_car->warning_point[0].distance);
+        //add_angle = base_angle * angry_car->gain_angle * (1/angry_car->warning_point[0].distance);
         // ROS_INFO("add_angle=%.2f",add_angle);
-        angry_car->v_vector(add_angle);
+        angry_car->v_vector();
       }
 
 
@@ -461,15 +448,9 @@ namespace rsband_local_planner
       show_obst();
       points.points.clear();
 
-      //ROS_INFO("in dis=%.2f,ang=%.2f",angry_car->warning_point[0].distance,angry_car->warning_point[0].angle);
-      //ROS_INFO("output angle=%.2f",angry_car->out_point.angle);
-      float out_ang=angry_car->out_point.angle;
-      rectified_angular=map(out_ang,angry_car->angle_min,angry_car->angle_max,-180,180);
-      
-      
-
-      return rectified_angular;
-      
+      target_dis_=angry_car->out_point.distance;
+      target_ang_=map(angry_car->out_point.angle,-3.14,3.14,-180,180);
+      ROS_INFO("target_dis_=%.2f  target_ang_=%.2f",target_dis_,target_ang_);
   }
 
 }  // namespace rsband_local_planner

@@ -383,87 +383,88 @@ namespace rsband_local_planner
 
     bool L1Controller::computeVelocityCommands(geometry_msgs::Twist& cmd)
     {
-        geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
-        geometry_msgs::Twist carVel = odom.twist.twist;//速度
-        cmd.linear.x = 1500;
-        cmd.angular.z = baseAngle;
-        double steeringAngle=baseAngle;
-        double eta;
+        // geometry_msgs::Pose carPose = odom.pose.pose;//话题消息重映射 位置
+        // geometry_msgs::Twist carVel = odom.twist.twist;//速度
+        // cmd.linear.x = 1500;
+        // cmd.angular.z = baseAngle;
+        // double steeringAngle=baseAngle;
+        // double eta;
 
-        /**********************/
-        float currant_vel =  getCurrantVel();//FromEcoder
-        /**********************/
-        if (!ptc_->computeVelocityCommands(currant_vel, Lfw))
-        {
-            ROS_ERROR("Fuzzy controller failed to produce Lfw");
-            return false;
-        }
-        // Lfw=2;
-        /**********************/
-        eta=getEta(carPose);
-        while(!foundForwardPt&&Lfw>0)
-        {
-            // ROS_WARN("can't get eta,maybe Lfw is too long,now cut it and compute eta again");
-            Lfw-=0.1;
-            eta=getEta(carPose);
-        }            
-        if(Lfw<=0)
-        {
-            // ROS_ERROR("can't fint wayPt foward,now use last cmd");
-            useLastCmd=true;
-        }
-        else
-        {
-            useLastCmd=false;
-        }
-        /**********************/
-        if(!useLastCmd)
-        {
-            steeringAngle=getSteeringAngle(eta);
-            err_sum=err_sum+baseAngle;
-            cmd.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error);
-            last_error=steeringAngle; 
-            last_cmd_vel.angular.z=cmd.angular.z;
-        }
-        else
-        {
-            cmd.angular.z=(last_cmd_vel.angular.z-baseAngle)*2+baseAngle;
-        }
-        if(cmd.angular.z>180)
-            cmd.angular.z=180;
-        if(cmd.angular.z<0)
-            cmd.angular.z=0;
-        /**********************/
-        double errofangle = GetErrOfAngle(carPose);
-        double orientationErr=errofangle;   
-        // ROS_INFO("orientationErr=%.2f",orientationErr) ;           
-        /**********************/
-        std_msgs::Float64 IntegralErr_;
-        IntegralErr_=computeIntegralErr();
-        double IntegralErr=IntegralErr_.data;
-        // ROS_INFO("IntegralErr=%.2f",IntegralErr) ; 
+        // /**********************/
+        // float currant_vel =  getCurrantVel();//FromEcoder
+        // /**********************/
+        // if (!ptc_->computeVelocityCommands(currant_vel, Lfw))
+        // {
+        //     ROS_ERROR("Fuzzy controller failed to produce Lfw");
+        //     return false;
+        // }
+        // // Lfw=2;
+        // /**********************/
+        // eta=getEta(carPose);
+        // while(!foundForwardPt&&Lfw>0)
+        // {
+        //     // ROS_WARN("can't get eta,maybe Lfw is too long,now cut it and compute eta again");
+        //     Lfw-=0.1;
+        //     eta=getEta(carPose);
+        // }            
+        // if(Lfw<=0)
+        // {
+        //     // ROS_ERROR("can't fint wayPt foward,now use last cmd");
+        //     useLastCmd=true;
+        // }
+        // else
+        // {
+        //     useLastCmd=false;
+        // }
+        // /**********************/
+        // if(!useLastCmd)
+        // {
+        //     steeringAngle=getSteeringAngle(eta);
+        //     err_sum=err_sum+baseAngle;
+        //     cmd.angular.z = baseAngle + KP*steeringAngle+KD*(steeringAngle-last_error);
+        //     last_error=steeringAngle; 
+        //     last_cmd_vel.angular.z=cmd.angular.z;
+        // }
+        // else
+        // {
+        //     cmd.angular.z=(last_cmd_vel.angular.z-baseAngle)*2+baseAngle;
+        // }
+        // if(cmd.angular.z>180)
+        //     cmd.angular.z=180;
+        // if(cmd.angular.z<0)
+        //     cmd.angular.z=0;
+        // /**********************/
+        // double errofangle = GetErrOfAngle(carPose);
+        // double orientationErr=errofangle;   
+        // // ROS_INFO("orientationErr=%.2f",orientationErr) ;           
+        // /**********************/
+        // std_msgs::Float64 IntegralErr_;
+        // IntegralErr_=computeIntegralErr();
+        // double IntegralErr=IntegralErr_.data;
+        // // ROS_INFO("IntegralErr=%.2f",IntegralErr) ; 
         
-        if(foundForwardPt)
-        {   
-            if(!goal_reached)
-            {
-                /**********************/ 
-                if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,cmd.linear.x))
-                {
-                    ROS_ERROR("Fuzzy controller failed to produce vel");
-                    return false;
-                }
+        // if(foundForwardPt)
+        // {   
+        //     if(!goa  return false;
+        //         }l_reached)
+        //     {
+        //         /**********************/ 
+        //         if (!ptc_->computeVelocityCommands(steeringAngle,orientationErr,IntegralErr,cmd.linear.x))
+        //         {
+        //             ROS_ERROR("Fuzzy controller failed to produce vel");
+        //             return false;
+        //         }
 
-                // cmd.linear.x=map(cmd.linear.x,0,5,1550,baseSpeed);
-                // if(reset_flag)
-                // {
-                //     cmd.linear.x = 1500;
-                //     ROS_WARN("CAR IS STOPED MANUALY");
-                // }           
-            }
-        }
+        //         // cmd.linear.x=map(cmd.linear.x,0,5,1550,baseSpeed);
+        //         // if(reset_flag)
+        //         // {
+        //         //     cmd.linear.x = 1500;
+        //         //     ROS_WARN("CAR IS STOPED MANUALY");
+        //         // }           
+        //     }
+        // }
     
-        // cmd=pwm2vel(cmd);
+        // // cmd=pwm2vel(cmd);
         return true;
 
     }        

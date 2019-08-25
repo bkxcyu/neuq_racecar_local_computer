@@ -84,9 +84,9 @@ namespace rsband_local_planner
        * @param cmd: The command that will be returned by the controller
        * @return true if a command was produced successfully
        */
-      bool computeVelocityCommands(
-      const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,
-      double& output_vel);
+        bool computeVelocityCommands(
+        const double& target_dis_,const double& target_ang_,
+        geometry_msgs::Twist& cmd);
 
       bool computeVelocityCommands(
       const double& CURRANT_SPEED,

@@ -22,7 +22,7 @@ class point_list
 		void output();
 		void clearlist();
 		void sortlist(); 	
-		void v_vector(float add);
+		void v_vector();
     	struct Obs_point out_point;
     	vector<struct Obs_point> warning_point;
     	
@@ -33,8 +33,14 @@ class point_list
 		double limit_distance; 
 		double angle_max;
 		double angle_min; 
-		float signal_intensity_left;
-		float signal_intensity_right;	
+		int signal_front=0;
+		int signal_left=0;
+		int signal_right=0;
+		int signal_back=0;
+		int left_count =0;
+    int right_count=0;
+	int front_count=0;
+	int back_count=0;
 		
 	private:
 };
