@@ -188,12 +188,12 @@ ROS_INFO("-----------   3  ------------");
     angularDeviationError_->setEnabled(true);
     angularDeviationError_->setName("AngleErr");
     angularDeviationError_->setRange(-90, 90);
-    angularDeviationError_->addTerm(new fl::Trapezoid("LHigh_a",   -90.0, -90.0, -64.0, -44.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("LMedium_a", -64.0, -44.0, -28.0, -20.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("LLow_a",    -28.0, -20.0,   0.0,   0.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("RLow_a",     0.0,    0.0,  20.0,  28.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("RMedium_a",  20.0,  28.0,  44.0,  64.0));
-    angularDeviationError_->addTerm(new fl::Trapezoid("RHigh_a",    44.0,  64.0,  90.0,  90.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("LHigh_a",   -180.0, -90.0, -60.0, -40.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("LMedium_a", -60.0, -40.0, -30.0, -20.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("LLow_a",    -30.0, -20.0,   0.0,   0.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("RLow_a",     0.0,    0.0,  20.0,  30.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("RMedium_a",  20.0,  30.0,  40.0,  60.0));
+    angularDeviationError_->addTerm(new fl::Trapezoid("RHigh_a",    40.0,  60.0,  90.0,  180.0));
     engine_->addInputVariable(angularDeviationError_);
 ROS_INFO("-----------   4  ------------");
     orientationError__ = new fl::InputVariable;
@@ -223,9 +223,9 @@ ROS_INFO("-----------   6  ------------");
     integrallError_->setEnabled(true);
     integrallError_->setName("IntegrallErr");
     integrallError_->setRange(0, 100.0);
-    integrallError_->addTerm(new fl::Trapezoid("Low_i",    0.0, 0.0, 3.0, 4.0));
-    integrallError_->addTerm(new fl::Trapezoid("Medium_i", 3.0, 4.0,  10,  20));
-    integrallError_->addTerm(new fl::Trapezoid("High_i",    10, 20, 100, 100));
+    integrallError_->addTerm(new fl::Trapezoid("Low_i",    0.0, 0.0, 0.5, 1.0));
+    integrallError_->addTerm(new fl::Trapezoid("Medium_i", 0.5, 1.0, 1.5, 2.0));
+    integrallError_->addTerm(new fl::Trapezoid("High_i",   1.5, 2.0, 2.5, 10.0));
     engine_->addInputVariable(integrallError_);
 ROS_INFO("-----------   7  ------------");
     // currantSpeed_ error input variable initialization
@@ -255,15 +255,15 @@ ROS_INFO("-----------   8  ------------");
     steeringAngle_->setDefaultValue(baseAngle);
     steeringAngle_->setLockPreviousValue(true);
     steeringAngle_->setLockValueInRange(false);
-    steeringAngle_->addTerm(new fl::Constant("RHH", baseAngle-60.0));
-    steeringAngle_->addTerm(new fl::Constant("RH",  baseAngle-30.0));
-    steeringAngle_->addTerm(new fl::Constant("RM",  baseAngle-14.0));
-    steeringAngle_->addTerm(new fl::Constant("RL",  baseAngle-7.0));
+    steeringAngle_->addTerm(new fl::Constant("RHH", baseAngle-90.0));
+    steeringAngle_->addTerm(new fl::Constant("RH",  baseAngle-60.0));
+    steeringAngle_->addTerm(new fl::Constant("RM",  baseAngle-30.0));
+    steeringAngle_->addTerm(new fl::Constant("RL",  baseAngle-10.0));
     steeringAngle_->addTerm(new fl::Constant("Z",   baseAngle));
-    steeringAngle_->addTerm(new fl::Constant("LL",  baseAngle+7.0));
-    steeringAngle_->addTerm(new fl::Constant("LM",  baseAngle+14.0));
-    steeringAngle_->addTerm(new fl::Constant("LH",  baseAngle+30.0));
-    steeringAngle_->addTerm(new fl::Constant("LHH", baseAngle+60.0));
+    steeringAngle_->addTerm(new fl::Constant("LL",  baseAngle+10.0));
+    steeringAngle_->addTerm(new fl::Constant("LM",  baseAngle+30.0));
+    steeringAngle_->addTerm(new fl::Constant("LH",  baseAngle+60.0));
+    steeringAngle_->addTerm(new fl::Constant("LHH", baseAngle+90.0));
     engine_->addOutputVariable(steeringAngle_);
 ROS_INFO("-----------   9  ------------");
     // rear steering angle output variable initialization
@@ -292,13 +292,9 @@ ROS_INFO("-----------   10  ------------");
     speed_->setRange(0.0, topSpeed_);
     speed_->fuzzyOutput()->setAggregation(fl::null);
     speed_->setDefuzzifier(new fl::WeightedAverage("TakagiSugeno"));
-    speed_->addTerm(new fl::Constant("LLLow",    (topSpeed_-buttomSpeed_) / 7+buttomSpeed_));
-    speed_->addTerm(new fl::Constant("LLow",   2*(topSpeed_-buttomSpeed_) / 7+buttomSpeed_));
-    speed_->addTerm(new fl::Constant("Low",    3*(topSpeed_-buttomSpeed_) / 7+buttomSpeed_));
-    speed_->addTerm(new fl::Constant("Medium", 4*(topSpeed_-buttomSpeed_) / 7+buttomSpeed_));
-    speed_->addTerm(new fl::Constant("Fast",   5*(topSpeed_-buttomSpeed_) / 7+buttomSpeed_));
-    speed_->addTerm(new fl::Constant("FFast",  6*(topSpeed_-buttomSpeed_) / 7+buttomSpeed_));
-    speed_->addTerm(new fl::Constant("FFFast",       topSpeed_));
+    speed_->addTerm(new fl::Constant("Low",    1*(topSpeed_-buttomSpeed_) / 3+buttomSpeed_));
+    speed_->addTerm(new fl::Constant("Medium", 2*(topSpeed_-buttomSpeed_) / 3+buttomSpeed_));
+    speed_->addTerm(new fl::Constant("Fast",   topSpeed_));
     engine_->addOutputVariable(speed_);
 
 
@@ -347,49 +343,16 @@ ROS_INFO("-----------   16  ------------");
   }
 
   bool FuzzyPTC::computeVelocityCommands(
-    const double& ANGULAR_ERR,const double& ORIENTATION_ERR,const double& INTEGRALL_ERR,
-    double& output_vel)
+    const double& target_dis_,const double& target_ang_,
+    geometry_msgs::Twist& cmd)
   {   
+    angularDeviationError_->setValue(target_ang_);
+    integrallError_->setValue(fabs(target_dis_));
 
-    // smoothness_->setValue(SMOOTHNESS);
-    angularDeviationError_->setValue(ANGULAR_ERR);
-    orientationError_->setValue(fabs(ORIENTATION_ERR));
-    orientationError__->setValue(ORIENTATION_ERR);
-    integrallError_->setValue(fabs(INTEGRALL_ERR));
-    // currantSpeed_->setValue(CURRANT_SPEED);
-
-    // ROS_INFO("input/nANGULAR_ERR=%.2f  ORIENTATION_ERR=%.2f INTEGRALL_ERR=%.2f   CURRANT_SPEED=%.2f",ANGULAR_ERR,ORIENTATION_ERR,INTEGRALL_ERR,CURRANT_SPEED);
-   
     engine_->process();
 
-    output_vel= speed_->getValue();  
-    // double output_angle = steeringAngle_->getValue(); 
-    // output_Lfw = Lfw_->getValue();  
-
-    // ROS_INFO("output_vel=%.2f  output_angle=%.2f output_lfw=%.2f",output_vel,output_angle,output_Lfw);
-   
-
-    
-    // if (std::isnan(cmd.linear.x) or std::isnan(cmd.linear.y))
-    // {
-    //   ROS_ERROR("Speed=Nan. Something went wrong!");
-    //   cmd.linear.x = 0.0;
-    //   cmd.linear.y = 0.0;
-    //   return false;
-    // }
-    // if (std::isnan(cmd.angular.z))
-    // {
-    //   ROS_ERROR("RotVel=Nan. Something went wrong!");
-    //   cmd.angular.z = 0.0;
-    //   return false;
-    // }
-
-    // if (stop_)
-    // {
-    //   cmd.linear.x = 0.0;
-    //   cmd.linear.y = 0.0;
-    //   cmd.angular.z = 0.0;
-    // }
+    cmd.linear.x= speed_->getValue();  
+    cmd.angular.z= steeringAngle_->getValue();
 
     return true;
   }

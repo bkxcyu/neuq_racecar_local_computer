@@ -12,8 +12,11 @@ point_list::point_list()
 	limit_distance = 0.4;
 	angle_max = 3.14;
 	angle_min = -3.14;
-	signal_intensity_left=0;
-	signal_intensity_right=0; 	
+
+	signal_front=0;
+	signal_left=0;
+	signal_right=0;
+	signal_back=0; 	
 }
 
 
@@ -48,8 +51,15 @@ void point_list::clearlist()
 {
 	warning_point.clear();
 	//clear data
-	signal_intensity_left=0;
-	signal_intensity_right=0;
+	signal_front=0;
+	signal_left=0;
+	signal_right=0;
+	signal_back=0;
+
+	left_count =0;
+    right_count=0;
+	front_count=0;
+	back_count=0;
 }
 
 
@@ -77,22 +87,34 @@ void point_list::sortlist()
     	}
 
 
-		int left_count =0;
-		int right_count=0;
+		
+
 		if(count>0)
         {
           for(int m=0;m<count;m++)
           {
-            if(warning_point[m].angle>0)
-              left_count++;
-            else if(warning_point[m].angle<0)
+            if(warning_point[m].angle>=-1.57 && warning_point[m].angle<-0.52)
               right_count++;
+            else if(warning_point[m].angle>=-0.52 && warning_point[m].angle<0.52)
+              front_count++;
+			else if(warning_point[m].angle>=0.52 && warning_point[m].angle<1.57)
+              left_count++;
+			else if((warning_point[m].angle>=1.57&&warning_point[m].angle<3.14)||
+					(warning_point[m].angle>=-3.14&&warning_point[m].angle<-1.57))
+              back_count++;
           }
 
-          signal_intensity_left = (float)left_count/(float)count;
-          signal_intensity_right= (float)right_count/(float)count;
+		  if(front_count>=left_count && front_count>=right_count && front_count>=back_count)
+		  	signal_front=1;
+		  else if(left_count>=right_count && left_count>=front_count && left_count>=back_count)
+		  	signal_left=1;
+		  else if(right_count>=front_count && right_count>=left_count && right_count>=back_count)
+		  	signal_right=1;
+		  else if(back_count>=front_count && back_count>=left_count && back_count>=right_count)
+		  	signal_back=1;
+		  
 
-		  //ROS_INFO("left_intensity:%.4f | right_intensity:%.4f",signal_intensity_left,signal_intensity_right);
+		  ROS_INFO("front:%d | left:%d | right:%d | back:%d",front_count,left_count,right_count,back_count);
         }	
 	} 
 }
@@ -100,38 +122,78 @@ void point_list::sortlist()
 
 
 
-void point_list::v_vector(float add)
+void point_list::v_vector()
 {
-	// ROS_INFO("add=%.2f",add);
-	out_point.distance =  unit_distance;
+	float sum_dis=0;
+	float sum_ang=0;
+	out_point.distance =  warning_point[0].distance;
+	int point_count = warning_point.size();
 	if(warning_point.empty())
 	{
 		out_point.angle=0;
+		out_point.distance=100;
 	}
 	else
 	{
-		if(warning_point[0].distance < warning_distance && warning_point[0].distance > limit_distance)
+		if(signal_front=1)
 		{
-			if(warning_point[0].angle > 0)
-				out_point.angle = warning_point[0].angle - add*signal_intensity_left;
-			else if(warning_point[0].angle <= 0)
-				out_point.angle = warning_point[0].angle + add*signal_intensity_right;
-			
-			if(out_point.angle > angle_max)
-				out_point.angle = angle_max;
-			else if(out_point.angle <= angle_min)
-				out_point.angle = angle_min;
-		} 
-		
+			for(int i=0;i<front_count;i++)
+			{
+				if(warning_point[i].angle>=-0.52 && warning_point[i].angle<0.52)
+				{
+					sum_dis += warning_point[i].distance;
+					sum_ang += warning_point[i].angle;
+				}
+			}
+			out_point.angle=(float)sum_ang/(float)front_count;
+			out_point.distance=(float)sum_dis/(float)front_count;
+		}
 
-		else if(warning_point[0].distance <= limit_distance && warning_point[0].distance >= 0)
+		else if(signal_left=1)
 		{
-			if(warning_point[0].angle > 0)
-				out_point.angle = angle_min;
-			else if(warning_point[0].angle <= 0)
-				out_point.angle = angle_max;
+			for(int i=0;i<left_count;i++)
+			{
+				if(warning_point[i].angle>=0.52 && warning_point[i].angle<1.57)
+				{
+					sum_dis += warning_point[i].distance;
+					sum_ang += warning_point[i].angle;
+				}
+			}
+			out_point.angle=(float)sum_ang/(float)left_count;
+			out_point.distance=(float)sum_dis/(float)left_count;
+		}
+
+		else if(signal_right=1)
+		{
+			for(int i=0;i<right_count;i++)
+			{
+				if(warning_point[i].angle>=-1.57 && warning_point[i].angle<-0.52)
+				{
+					sum_dis += warning_point[i].distance;
+					sum_ang += warning_point[i].angle;
+				}
+			}
+			out_point.angle=(float)sum_ang/(float)right_count;
+			out_point.distance=(float)sum_dis/(float)right_count;
+		}
+
+		
+		else if(signal_back=1)
+		{
+			for(int i=0;i<back_count;i++)
+			{
+				if((warning_point[i].angle>=1.57&&warning_point[i].angle<3.14)||
+					(warning_point[i].angle>=-3.14&&warning_point[i].angle<-1.57))
+				{
+					sum_dis += warning_point[i].distance;
+					sum_ang += warning_point[i].angle;
+				}
+			}
+			out_point.angle=(float)sum_ang/(float)back_count;
+			out_point.distance=(float)sum_dis/(float)back_count;
 		}
 	}
+
 }
 
 

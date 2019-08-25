@@ -201,7 +201,9 @@ namespace rsband_local_planner
 
       bool initialized_;
 
-      double rectifyAngularVel();
+      void getTargetDisAndAng();
+      double target_dis_;
+      double target_ang_;
       
 
       costmap_2d::Costmap2D* costmap_;
@@ -220,6 +222,8 @@ namespace rsband_local_planner
 
       ros::Subscriber sub_keybored;
       bool use_rectify;
+
+      boost::shared_ptr<FuzzyPTC> ptc_;
       
   };
 
