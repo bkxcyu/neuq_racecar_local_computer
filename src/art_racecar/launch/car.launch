@@ -11,8 +11,5 @@
   
     <include file="$(find ecoder)/launch/ecoder.launch"/>
 	
-      <!-- Rviz -->
-    <!--node pkg="rviz" type="rviz" name="rviz" args="-d $(find art_racecar)/launch/rviz/gmapping.rviz" if="$(arg use_rviz)"/-->
-
 </launch>
 

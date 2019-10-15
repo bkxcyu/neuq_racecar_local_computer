@@ -13,6 +13,8 @@
 	
     <!-- load ODOMETRY -->
 
-    <!-- gmapping -->
+    <!-- load Map  -->
+
+    <!-- Navstack -->
 
 </launch>
